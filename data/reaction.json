@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "name": "Messi",
+        "avatar": "https://cafebiz.cafebizcdn.vn/162123310254002176/2022/12/19/worldcupmessi-16714134707591286548462-1671414492850-1671414494903186357457-1671421675279-16714216754791661468257.jpeg",
+        "type": 1
+    },
+    {
+        "id": 2,
+        "name": "Neymar",
+        "avatar": "https://i.pinimg.com/736x/28/8d/b1/288db1e44fa6a5d865f8d9a1bb8d8197.jpg",
+        "type": 2
+    },
+    {
+        "id": 3,
+        "name": "Halland",
+        "avatar": "https://static-images.vnncdn.net/files/publish/2022/7/11/haaland-man-city-ra-mat-149.jpg",
+        "type": 1
+    },
+    {
+        "id": 4,
+        "name": "Bellingham",
+        "avatar": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcRHdZkRtwgqrI6eI_GKheJshNVbWh6ndIgttxyB3c2vH6UvIwyU92pjyAhHaD0JCPuKG3nR_525BbcXu9M",
+        "type": 3
+    },
+    {
+        "id": 5,
+        "name": "Jamal Musiala",
+        "avatar": "https://img.fcbayern.com/image/upload/t_cms-portrait/f_auto/w_660%2Cc_fill/q_auto/v1627304019/cms/public/images/fcbayern-com/players/spielerportraits/ganzkoerper/jamal_musiala.png",
+        "type": 4
+    },
+    {
+        "id": 6,
+        "name": "Nguyễn Đức",
+        "avatar": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTuCcdDYvwj1UNqcgsmP8R05fVvdfXyz8N_1ee_GZe1O-mgl4bl",
+        "type": 5
+    },    
+    {
+        "id": 7,
+        "name": "Thị Xuân",
+        "avatar": "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSmAsETpGTX3SY67kft0nQU2-R0r_lCRRxayFEF9EjTcm2gxXpkyicNUE3FyIkfUsoJ3jizBsHx1QBCMs8",
+        "type": 6
+    }
+]

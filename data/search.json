@@ -1,0 +1,24 @@
+[
+    {
+        "id": 1,
+        "avatar": "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/30cd75ad-273b-4e5e-8ec1-d3c1683fe4f6/d9z55sy-14fd6764-1b5d-4149-80f2-8ecdd73ad97f.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzMwY2Q3NWFkLTI3M2ItNGU1ZS04ZWMxLWQzYzE2ODNmZTRmNlwvZDl6NTVzeS0xNGZkNjc2NC0xYjVkLTQxNDktODBmMi04ZWNkZDczYWQ5N2YucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.NTiSy3xW3fK1dt6dAOUsPYM-xLOBcfZXjHRBB9P9aM8",
+        "name": "Messi",
+        "type": "Bạn bè"
+    },
+    {
+        "id": 2,
+        "avatar": "https://file3.qdnd.vn/data/images/0/2023/08/14/huutruong/neymar.jpg",
+        "name": "Neymar",
+        "type": "Bạn bè"
+    },
+    {
+        "id": 3,
+        "avatar": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSPIkRjeVy11-ckQdrnDIp2lY2hszW_I0tnbtsHfHpiD-6XvUoIi6kxyS8qefkaZJ8IgMzg-ODpnl7Evs2unK2y8j36QcHvzhTrWdJbs_ayLWznMXGhcgv6zxw-r8o6hhQtjrjwzIrI",
+        "name": "Bellingham"
+    },
+    {
+        "id": 4,
+        "avatar": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTrDNuJpXuaVrHyANwcmCwy3-j733wSJzrjUGlvu7Xsccnk91Y7ORuQZGs-msBr0a0AMxAe",
+        "name": "Musiala"
+    }
+]
