@@ -95,7 +95,9 @@ export default function HomeScreen({ navigation }) {
                   borderBottomWidth: 4,
                 }}
               >
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                  navigation.navigate('Profile')
+                }}>
                   <Image
                     source={require('../assets/messi.jpg')}
                     style={{ width: 40, height: 40, borderRadius: 100 }}

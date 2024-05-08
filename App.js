@@ -15,6 +15,7 @@ import CommentScreen from './screens/CommentScreen';
 import ReactionScreen from './screens/ReactionScreen';
 import SearchScreen from './screens/SearchScreen';
 import CreatePostScreen from './screens/CreatePostScreen';
+import ProfileScreen from './screens/ProfileScreen';
 //
 
 const Stack = createStackNavigator();
@@ -82,6 +83,14 @@ export default function App() {
               // gestureDirection: 'vertical',
               title: 'Reactions',
               cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+            }}
+          />
+          <Stack.Screen
+            name='Profile'
+            component={ProfileScreen}
+            options={{
+              headerTitleAlign:"center",
+              title: "Nguyễn Đông",
             }}
           />
         </Stack.Group>
