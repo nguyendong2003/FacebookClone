@@ -15,7 +15,7 @@ import { useState } from "react";
 
 export default function ProfileScreen({navigation}){
     // stranger, waitAccept, realFriend, personalPage
-    const [isFriend, setIsFriend] = useState("personalPage")
+    const [isFriend, setIsFriend] = useState("")
     const renderStateFriend = () => {
         switch(isFriend){
             case "stranger":
@@ -61,7 +61,8 @@ export default function ProfileScreen({navigation}){
                         </TouchableOpacity>
                     </View>
                 )
-            case "personalPage":
+
+            default: 
                 return(
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
@@ -72,7 +73,6 @@ export default function ProfileScreen({navigation}){
                         </TouchableOpacity>
                     </View>
                 )
-            default: 
                 break;
         }
     }
@@ -195,19 +195,6 @@ export default function ProfileScreen({navigation}){
                         </View>
                     )}
                 />
-                    {/* <View style={styles.listFriendContainer}>
-                        {listFriend && listFriend.length > 0 ? (
-                            listFriend.slice(0,6).map((item) => {
-                                return (
-                                    <View style={styles.itemContainer} key={item.id}>
-                                        <FriendProfile item={item}/>
-                                    </View>
-                                );
-                            })
-                        ) : (
-                            <Text style={{fontWeight: "bold", fontSize: 19, textAlign:"center", justifyContent: "center", flex: 1}}>No friend found</Text>
-                        )}
-                    </View> */}
                     <TouchableOpacity style={[styles.Button, {margin:13 }]}>
                         <Text style={{fontSize: 15}}>All Friend</Text>
                     </TouchableOpacity>
