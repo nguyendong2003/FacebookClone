@@ -34,7 +34,15 @@ export default function NotificationScreen({ navigation }) {
   return (
     <View style={styles.container}>
       
-      <Text>Notification</Text>
+      <FlatList
+      data={notificationList}
+      renderItem={({item})=>(
+        <Notification navigation={navigation} item={item} key={item.id}/>
+      )}
+      ListHeaderComponent={()=>(
+        <Text style={{fontSize: 18, fontWeight: "bold", margin: 9}}>Notifications</Text>
+      )}
+      />
     </View>
   );
 }
