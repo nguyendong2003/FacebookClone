@@ -15,7 +15,7 @@ import { useState } from "react";
 
 export default function ProfileScreen({navigation}){
     // stranger, waitAccept, realFriend, personalPage
-    const [isFriend, setIsFriend] = useState("")
+    const [isFriend, setIsFriend] = useState("stranger")
     const renderStateFriend = () => {
         switch(isFriend){
             case "stranger":

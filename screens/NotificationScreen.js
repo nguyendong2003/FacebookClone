@@ -28,19 +28,17 @@ import { useState, useEffect } from 'react';
 import notificationList from '../data/notification.json'
 // import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import Notification from '../components/Notification';
+// import { useState } from 'react';
 
 export default function NotificationScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      
+      <Text style={{fontSize: 24, fontWeight: "bold", margin: 9}}>Notifications</Text>
       <FlatList
       data={notificationList}
       renderItem={({item})=>(
         <Notification navigation={navigation} item={item} key={item.id}/>
-      )}
-      ListHeaderComponent={()=>(
-        <Text style={{fontSize: 18, fontWeight: "bold", margin: 9}}>Notifications</Text>
       )}
       />
     </View>
