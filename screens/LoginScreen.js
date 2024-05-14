@@ -13,35 +13,42 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-} from 'react-native';
+} from "react-native";
 
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from "react";
 
 //
+import { Context as AuthContext } from "../context/AuthContext";
+
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
+  const { signIn } = useContext(AuthContext);
+
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    checkLoggedIn();
+  }, []);
+  
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
   });
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       // Reset state when screen gets focused again
-      setEmail('');
-      setPassword('');
+      setEmail("");
+      setPassword("");
       setShowPassword(false);
       setErrors({});
     });
@@ -53,8 +60,6 @@ export default function LoginScreen({ navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
-  // console.log({ windowWidth, windowHeight });
-
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -64,12 +69,12 @@ export default function LoginScreen({ navigation }) {
 
     // Kiểm tra email
     if (!email) {
-      newErrors['emailError'] = 'Email address cannot be empty';
+      newErrors["emailError"] = "Email address cannot be empty";
     }
 
     // Kiểm tra mật khẩu
     if (!password) {
-      newErrors['passwordEmptyError'] = 'Password cannot be empty';
+      newErrors["passwordEmptyError"] = "Password cannot be empty";
     }
 
     // Nếu có lỗi, hiển thị chúng
@@ -78,7 +83,7 @@ export default function LoginScreen({ navigation }) {
     } else {
       // Nếu không có lỗi, xóa tất cả các lỗi hiện tại
       setErrors({});
-      navigation.navigate('TabNavigationHome');
+      signIn({ email, password }, navigation);
     }
   };
 
@@ -98,12 +103,12 @@ export default function LoginScreen({ navigation }) {
             style={{
               marginTop: 100,
               height: 100,
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <Image
-              source={require('../assets/facebook-logo.png')}
+              source={require("../assets/facebook-logo.png")}
               style={styles.imageFruit}
               alt="Facebook logo"
             />
@@ -120,14 +125,14 @@ export default function LoginScreen({ navigation }) {
               onChangeText={(text) => {
                 setEmail(text);
                 // Xóa thông báo lỗi khi người dùng thay đổi nội dung
-                if (errors['emailError']) {
+                if (errors["emailError"]) {
                   setErrors({ ...errors, emailError: null });
                 }
               }}
               placeholder="Enter your email address"
             />
-            {errors['emailError'] ? (
-              <Text style={styles.errorText}>{errors['emailError']}</Text>
+            {errors["emailError"] ? (
+              <Text style={styles.errorText}>{errors["emailError"]}</Text>
             ) : null}
 
             <Text style={styles.labelForm}>Password</Text>
@@ -140,14 +145,14 @@ export default function LoginScreen({ navigation }) {
                 onChangeText={(text) => {
                   setPassword(text);
                   // Xóa thông báo lỗi khi người dùng thay đổi nội dung
-                  if (errors['passwordEmptyError']) {
+                  if (errors["passwordEmptyError"]) {
                     setErrors({ ...errors, passwordEmptyError: null });
                   }
                 }}
                 placeholder="Enter your password"
               />
               <MaterialCommunityIcons
-                name={showPassword ? 'eye-off' : 'eye'}
+                name={showPassword ? "eye-off" : "eye"}
                 size={24}
                 color="#aaa"
                 style={styles.icon}
@@ -155,13 +160,13 @@ export default function LoginScreen({ navigation }) {
               />
             </View>
 
-            {errors['passwordEmptyError'] ? (
+            {errors["passwordEmptyError"] ? (
               <Text style={styles.errorText}>
-                {errors['passwordEmptyError']}
+                {errors["passwordEmptyError"]}
               </Text>
             ) : null}
 
-            <TouchableOpacity onPress={() => Alert.alert('hello')}>
+            <TouchableOpacity onPress={() => Alert.alert("hello")}>
               <Text style={styles.forgotPassword}>Forgot password?</Text>
             </TouchableOpacity>
 
@@ -174,7 +179,7 @@ export default function LoginScreen({ navigation }) {
 
             <TouchableOpacity
               style={{ marginTop: 16 }}
-              onPress={() => navigation.navigate('Register')}
+              onPress={() => navigation.navigate("Register")}
             >
               <Text style={styles.createAccount}>
                 Do you have any account yet?
@@ -191,32 +196,32 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 16,
   },
   imageFruit: {
     width: 50,
     height: 50,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     // alignSelf: 'center',
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   textTitle: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   form: {
-    maxWidth: '100%',
-    minWidth: '100%',
-    backgroundColor: 'white',
+    maxWidth: "100%",
+    minWidth: "100%",
+    backgroundColor: "white",
     padding: 20,
     // borderRadius: 10,
     // shadowColor: 'black',
@@ -231,12 +236,12 @@ const styles = StyleSheet.create({
   labelForm: {
     fontSize: 16,
     marginBottom: 5,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 15,
   },
   inputEmail: {
     height: 50,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderWidth: 1,
     // marginBottom: 15,
     paddingHorizontal: 16,
@@ -244,16 +249,16 @@ const styles = StyleSheet.create({
   },
 
   inputPassword: {
-    maxWidth: '90%',
+    maxWidth: "90%",
   },
 
   passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
 
     height: 50,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderWidth: 1,
     // marginBottom: 15,
     // padding: 10,
@@ -261,36 +266,36 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   forgotPassword: {
-    textAlign: 'right',
-    color: '#0866ff',
-    fontWeight: 'bold',
+    textAlign: "right",
+    color: "#0866ff",
+    fontWeight: "bold",
     padding: 10,
     marginBottom: 10,
   },
   createAccount: {
-    textAlign: 'center',
-    color: '#0866ff',
-    fontWeight: 'bold',
+    textAlign: "center",
+    color: "#0866ff",
+    fontWeight: "bold",
   },
   btnSignIn: {
     borderRadius: 20,
   },
 
   button: {
-    backgroundColor: '#0866ff',
+    backgroundColor: "#0866ff",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
     marginTop: 20,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   errorText: {
     marginTop: 8,
-    color: 'red',
+    color: "red",
   },
 });

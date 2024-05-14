@@ -7,9 +7,16 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
+import { Context as AuthContext } from '../context/AuthContext';
 
 export default function PrevHomeScreen({ navigation }) {
+  const { checkLoggedIn } = useContext(AuthContext);
+
+  useEffect(() => {
+    checkLoggedIn();
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.navigate('Login');
