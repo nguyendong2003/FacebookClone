@@ -15,7 +15,7 @@ const authReducer = (state, action) => {
 };
 
 const signIn = (dispatch) => {
-  return async ({ email, password }, navigation) => {
+  return async ({ email, password }) => {
 
     try {
       const response = await SpringServer.post("/auth/login", {
@@ -24,7 +24,6 @@ const signIn = (dispatch) => {
       });
       dispatch({ type: "SIGN_IN", payload: response.data.token });
       await AsyncStorage.setItem("token", response.data.token);
-      // navigation.navigate("TabNavigationHome");
     } catch (error) {
       dispatch({
         type: "ERROR",

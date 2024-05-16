@@ -29,7 +29,7 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 
 import postList from '../data/post.json';
@@ -39,6 +39,8 @@ import Comment from './Comment';
 
 // // Upload image
 import * as ImagePicker from 'expo-image-picker';
+
+import { Context as FriendContext } from '../context/FriendContext';
 
 export default function FriendRequest({
   item,
@@ -63,6 +65,19 @@ export default function FriendRequest({
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
+
+  const { acceptFriendRequest, getFriendRequests, rejectFriendRequest } = useContext(FriendContext);
+  const acceptClickHandler = () => {
+    acceptFriendRequest(item?.id).then(() => {
+      getFriendRequests();
+    });
+  }
+
+  const rejectClickHandler = () => {
+    rejectFriendRequest(item?.id).then(() => {
+      getFriendRequests();
+    }
+  )};
 
   return (
     <TouchableOpacity
@@ -96,7 +111,7 @@ export default function FriendRequest({
           }}
         >
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{item?.name}</Text>
-          <Text>37 weeks</Text>
+          <Text>{item?.time}</Text>
         </View>
 
         <View>
@@ -117,6 +132,7 @@ export default function FriendRequest({
               padding: 6,
               borderRadius: 8,
             }}
+            onPress={acceptClickHandler}
           >
             <Text
               style={{
@@ -137,6 +153,7 @@ export default function FriendRequest({
               borderRadius: 8,
               marginLeft: 8,
             }}
+            onPress={rejectClickHandler}
           >
             <Text
               style={{

@@ -34,10 +34,6 @@ export default function LoginScreen({ navigation }) {
   const { signIn } = useContext(AuthContext);
 
   useEffect(() => {
-    checkLoggedIn();
-  }, []);
-  
-  useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });

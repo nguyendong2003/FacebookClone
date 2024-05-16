@@ -21,6 +21,8 @@ import {
   Provider as AuthProvider,
   Context as AuthContext,
 } from "./context/AuthContext.js";
+
+import { Provider as FriendProvider } from "./context/FriendContext.js";
 import { useContext } from "react";
 
 const Stack = createStackNavigator();
@@ -28,91 +30,91 @@ const Stack = createStackNavigator();
 export default function Navigation() {
   const { state } = useContext(AuthContext);
 
-  
-
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="PrevHome">
-        {state.token != null ? (
-          <>
-            <Stack.Screen
-              name="TabNavigationHome"
-              component={TabNavigationHome}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Search"
-              component={SearchScreen}
-              options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-              name="CreatePost"
-              component={CreatePostScreen}
-              options={{
-                headerTitle: "Create post",
-                headerStyle: {
-                  borderBottomColor: "#e2e4e7",
-                  borderBottomWidth: 1,
-                },
-              }}
-            />
-
-            <Stack.Group
-              screenOptions={{
-                presentation: "modal",
-
-                // gestureDirection: 'vertical',
-              }}
-            >
+    <FriendProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="PrevHome">
+          {state.token != null ? (
+            <>
               <Stack.Screen
-                name="Comment"
-                component={CommentScreen}
-                options={{
-                  headerShown: false,
-                }}
+                name="TabNavigationHome"
+                component={TabNavigationHome}
+                options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="Reaction"
-                component={ReactionScreen}
+                name="Search"
+                component={SearchScreen}
+                options={{ headerShown: false }}
+              />
+
+              <Stack.Screen
+                name="CreatePost"
+                component={CreatePostScreen}
                 options={{
+                  headerTitle: "Create post",
+                  headerStyle: {
+                    borderBottomColor: "#e2e4e7",
+                    borderBottomWidth: 1,
+                  },
+                }}
+              />
+
+              <Stack.Group
+                screenOptions={{
+                  presentation: "modal",
+
                   // gestureDirection: 'vertical',
-                  title: "Reactions",
-                  cardStyleInterpolator:
-                    CardStyleInterpolators.forFadeFromCenter,
                 }}
+              >
+                <Stack.Screen
+                  name="Comment"
+                  component={CommentScreen}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Reaction"
+                  component={ReactionScreen}
+                  options={{
+                    // gestureDirection: 'vertical',
+                    title: "Reactions",
+                    cardStyleInterpolator:
+                      CardStyleInterpolators.forFadeFromCenter,
+                  }}
+                />
+                <Stack.Screen
+                  name="Profile"
+                  component={ProfileScreen}
+                  options={{
+                    headerTitleAlign: "center",
+                    title: "Nguyễn Đông",
+                  }}
+                />
+              </Stack.Group>
+            </>
+          ) : (
+            <>
+              <Stack.Screen
+                name="PrevHome"
+                component={PrevHomeScreen}
+                options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="Profile"
-                component={ProfileScreen}
-                options={{
-                  headerTitleAlign: "center",
-                  title: "Nguyễn Đông",
-                }}
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
               />
-            </Stack.Group>
-          </>
-        ) : (
-          <>
-            <Stack.Screen
-              name="PrevHome"
-              component={PrevHomeScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+              <Stack.Screen
+                name="Register"
+                component={RegisterScreen}
+                options={{ headerShown: false }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </FriendProvider>
   );
 }
 
