@@ -13,12 +13,36 @@ import { useState } from "react";
 // const listFriend =[]
 
 
-export default function ProfileScreen({navigation}){
+export default function ProfileScreen({navigation, route}){
+    const {isPersonalPage} = route.params
     // stranger, waitAccept, realFriend, personalPage
-    const [isFriend, setIsFriend] = useState("stranger")
+    const [isFriend, setIsFriend] = useState("")
+    const [isVisible, setIsVisible] = useState(isPersonalPage)
+    const renderCreatePost =() => {
+        return isVisible ? (
+        <TouchableOpacity 
+        style={styles.headerPost}
+        onPress={() => navigation.navigate('CreatePost')}
+        >
+            <Image 
+                source={require("../assets/messi.jpg")}
+                style={[styles.avatar, {margin: 10 ,width: 40, height: 40, borderWidth: 1}]}
+            />
+            <Text style={{marginLeft: 10}}>What are you thinking?</Text>
+            <View style={{
+                    flex:1,
+                    justifyContent:"flex-end",
+                    alignItems:"flex-end",
+                    marginRight: 15
+                    }}>
+                <FontAwesome5 name="images" size={24} color="green" />
+            </View>
+        </TouchableOpacity>) : null
+    }
     const renderStateFriend = () => {
         switch(isFriend){
             case "stranger":
+                // setIsVisible(false)
                 return(
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
@@ -31,6 +55,7 @@ export default function ProfileScreen({navigation}){
                     </View>
                 )
             case "waitAccept":
+                // setIsVisible(false)
                 return(
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
@@ -51,6 +76,7 @@ export default function ProfileScreen({navigation}){
                     </View>
                 )
             case "realFriend":
+                // setIsVisible(true)
                 return(
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
@@ -63,6 +89,7 @@ export default function ProfileScreen({navigation}){
                 )
 
             default: 
+                // setIsVisible(true)
                 return(
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
@@ -119,107 +146,90 @@ export default function ProfileScreen({navigation}){
                             {/* Avatar */}
                             <View style={styles.avatarContainer}>
                                 <Image style={styles.avatar} source={require('../assets/messi.jpg')}/>
-                            <View style={[styles.cameraContainer, {bottom: "3%", right:"3%"}]}>
-                            <Ionicons style={styles.camera} name="camera" size={20} color="black" />
-                            {/* Avatar */}
-                            </View>                 
-                        </View>
+                                <View style={[styles.cameraContainer, {bottom: "3%", right:"3%"}]}>
+                                    <Ionicons style={styles.camera} name="camera" size={20} color="black" />
+                                {/* Avatar */}
+                                </View>                 
+                            </View>
                     
 
-                        {/* name */}
-                        <View style={[styles.nameContainer,{}]}>
-                            <Text style={styles.name}>Nguyễn Trung Đông</Text>
-                        </View> 
-                        {/* name */}
+                            {/* name */}
+                            <View style={[styles.nameContainer,{}]}>
+                                <Text style={styles.name}>Nguyễn Trung Đông</Text>
+                            </View> 
+                            {/* name */}
 
-                        {/* total friend */}
-                        <View style={styles.totalFriendContainer}>
-                            <Text style={{fontWeight:'bold'}}>3,3K</Text><Text> friends</Text>
+                            {/* total friend */}
+                            <View style={styles.totalFriendContainer}>
+                                <Text style={{fontWeight:'bold'}}>3,3K</Text><Text> friends</Text>
+                            </View>
+                            {/* total friend */}
+
+                            {/* description */}
+                            <View style={styles.descriptionContainer}>
+                                <Text style={{fontSize: 15}}>What's up bro? This is just normal description</Text>
+                            </View>
+                            {/* description */}
                         </View>
-                        {/* total friend */}
 
-                        {/* description */}
-                        <View style={styles.descriptionContainer}>
-                            <Text style={{fontSize: 15}}>What's up nigger? This is just fking normal description</Text>
-                        </View>
-                        {/* description */}
-                    </View>
+                        {/* Button modify */}
+                        {renderStateFriend()}
+                        {/* Button modify */}
 
-                    {/* Button modify */}
-                    {renderStateFriend()}
-                    {/* Button modify */}
-
-                    {/* View seperate */}
-                    <View style={styles.seperate}/>
-                    {/* View seperate */}
+                        {/* View seperate */}
+                        <View style={styles.seperate}/>
+                        {/* View seperate */}
                     
-                    {/* Information */}
-                    <View style={styles.informationContainer}>
-                        <Text style={{fontWeight: "bold", fontSize: 18, margin: 10}}>Details</Text>
-                        <View style={styles.rowInformation}>
-                            <Ionicons name="location-sharp" size={20} color="black" />
-                            <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                                Lived at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Đà Nẵng</Text>
-                            </Text>
+                        {/* Information */}
+                        <View style={styles.informationContainer}>
+                            <Text style={{fontWeight: "bold", fontSize: 18, margin: 10}}>Details</Text>
+                            <View style={styles.rowInformation}>
+                                <Ionicons name="location-sharp" size={20} color="black" />
+                                <Text style={[styles.textInformation, {marginLeft: 10}]}>
+                                    Lived at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Đà Nẵng</Text>
+                                </Text>
+                            </View>
+                            <View style={styles.rowInformation}>
+                                <FontAwesome name="home" size={20} color="black" />
+                                <Text style={[styles.textInformation, {marginLeft: 10}]}>
+                                    Home at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Quảng Nam</Text>
+                                </Text>
+                            </View>
+                            <View style={styles.rowInformation}>
+                                <FontAwesome name="birthday-cake" size={20} color="black" />
+                                <Text style={[styles.textInformation, {marginLeft: 10}]}>
+                                    Birthday on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>29/08</Text>
+                                </Text>
+                            </View>
+                            <View style={styles.rowInformation}>
+                                <FontAwesome5 name="clock" size={20} color="black" />
+                                <Text style={[styles.textInformation, {marginLeft: 10}]}>
+                                    Participate on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>16/2/2017</Text>
+                                </Text>
+                            </View>
                         </View>
-                        <View style={styles.rowInformation}>
-                            <FontAwesome name="home" size={20} color="black" />
-                            <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                                Home at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Quảng Nam</Text>
-                            </Text>
-                        </View>
-                        <View style={styles.rowInformation}>
-                            <FontAwesome name="birthday-cake" size={20} color="black" />
-                            <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                                Birthday on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>29/08</Text>
-                            </Text>
-                        </View>
-                        <View style={styles.rowInformation}>
-                            <FontAwesome5 name="clock" size={20} color="black" />
-                            <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                                Participate on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>16/2/2017</Text>
-                            </Text>
-                        </View>
-                    </View>
                     {/* Information */}
                     <Text style={{fontWeight: "bold", fontSize: 18, marginTop: 10, marginLeft: 10}}>Friend</Text>
                     <Text style={{marginLeft: 10, fontSize: 13}}>3.363 friends</Text>
 
-                <FlatList
-                    style={{marginTop: 10}}
-                    data={listFriend.slice(0,6)}
-                    numColumns={3}
-                    renderItem={({item})=> (
-                        <View style={styles.itemContainer} key={item.id}>
-                            <FriendProfile item={item}/>
-                        </View>
-                    )}
-                />
+                    <FlatList
+                        style={{marginTop: 10}}
+                        data={listFriend.slice(0,6)}
+                        numColumns={3}
+                        renderItem={({item})=> (
+                            <View style={styles.itemContainer} key={item.id}>
+                                <FriendProfile item={item}/>
+                            </View>
+                        )}
+                    />  
                     <TouchableOpacity style={[styles.Button, {margin:13 }]}>
                         <Text style={{fontSize: 15}}>All Friend</Text>
                     </TouchableOpacity>
 
                     <View style={styles.seperate}/>
 
-                    <Text style={{fontWeight: "bold", fontSize: 18, marginTop: 10, marginLeft: 10}}>Post</Text>
-                    <TouchableOpacity 
-                    style={styles.headerPost}
-                    onPress={() => navigation.navigate('CreatePost')}
-                    >
-                        <Image 
-                            source={require("../assets/messi.jpg")}
-                            style={[styles.avatar, {margin: 10 ,width: 40, height: 40, borderWidth: 1}]}
-                        />
-                        <Text style={{marginLeft: 10}}>What are you thinking?</Text>
-                        <View style={{
-                                flex:1,
-                                justifyContent:"flex-end",
-                                alignItems:"flex-end",
-                                marginRight: 15
-                                }}>
-                            <FontAwesome5 name="images" size={24} color="green" />
-                        </View>
-                    </TouchableOpacity>
+                    <Text style={{fontWeight: "bold", fontSize: 18, margin: 5, marginLeft: 10}}>Post</Text>
+                    {renderCreatePost()}
                     <View style={styles.seperate}></View>
                 </View>
                 }

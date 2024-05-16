@@ -1,5 +1,6 @@
 import { Image ,View, Text, StyleSheet, TouchableOpacity } from "react-native"
 import { useState } from "react";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Notification(
     {navigation, item}
@@ -8,15 +9,21 @@ export default function Notification(
     const [isRead, setIsRead] = useState(false)
 
     return(
-        <View style={[styles.container, {backgroundColor : isRead? "white": "#CAE5E8"}]}>
+        <View style={[styles.container, {backgroundColor : isRead? "white": "#e9f2f7"}]}>
             <TouchableOpacity 
             style={styles.notifyContainer}
             onPress={()=> setIsRead(true)}
             >
-                <Image
-                    style={styles.avartarNotify}
-                    source={{uri: item?.avatar}}
-                />
+                <View>
+                    <Image
+                        style={styles.avartarNotify}
+                        source={{uri: item?.avatar}}
+                    />
+                    <View style={styles.commentIconContainer}>
+                        <MaterialCommunityIcons name="message" size={14} color="white" />
+                    </View>
+                    
+                </View>
                 <View style={styles.contentContainer}>
                     <Text numberOfLines={3} style={styles.titleNotification}>{item.title}</Text>
                     <Text style={styles.dateNotfication}>{item.date}</Text>                    
@@ -28,6 +35,17 @@ export default function Notification(
 }
 
 const styles = StyleSheet.create({
+    commentIconContainer:{
+        backgroundColor: "green",
+        width: 24,
+        height: 24,
+        justifyContent:"center",
+        alignItems:"center",
+        borderRadius:20,
+        position: "absolute",
+        bottom: 0,
+        right: 0
+    },
     container: {
         flex: 1,
         justifyContent:"center"

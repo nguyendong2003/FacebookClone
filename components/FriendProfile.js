@@ -1,4 +1,4 @@
-import {Image, View, Text, StyleSheet,TouchableOpacity } from "react-native";
+import {Image, View, Text, StyleSheet,TouchableOpacity, Pressable } from "react-native";
 import listFriendProfile from '../data/listFriendProfile.json'
 
 
@@ -9,7 +9,7 @@ export default function FriendProfile({
 
     return (
 
-        <TouchableOpacity 
+        <Pressable
         style={styles.friendContainer}
         onPress={() => alert(`Ouch!! you touch ${item.name}'s pumpkin :<`)}
         >
@@ -18,7 +18,7 @@ export default function FriendProfile({
                 source={{uri: item?.avatar}}
             />
             <Text style={styles.friendName}>{item.name}</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         
     )
