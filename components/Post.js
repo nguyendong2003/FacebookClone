@@ -123,7 +123,14 @@ export default function Post({ item, navigation }) {
   return (
     <View>
       <View style={styles.card} key={item.id}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 12,
+            paddingBottom: 0,
+          }}
+        >
           <TouchableOpacity>
             <Image
               source={{ uri: item?.avatar }}
@@ -168,6 +175,9 @@ export default function Post({ item, navigation }) {
               marginTop: 8,
               fontSize: 17,
               fontWeight: '400',
+
+              paddingHorizontal: 12,
+              paddingVertical: 0,
             }}
           >
             {item?.description}
@@ -188,9 +198,10 @@ export default function Post({ item, navigation }) {
                 style={{
                   marginLeft: 8,
                   marginTop: 8,
+                  borderRadius: 20,
                 }}
-                width={windowWidth / 2 - 30}
-                height={windowWidth / 2 - 30}
+                width={windowWidth / 2 - 12}
+                height={windowWidth / 2 - 12}
                 resizeMode="cover"
               />
             ))}
@@ -202,7 +213,9 @@ export default function Post({ item, navigation }) {
             justifyContent: 'space-between',
             borderBottomColor: '#ccc',
             borderBottomWidth: 1,
-            padding: 4,
+            // padding: 4,
+            paddingVertical: 4,
+            paddingHorizontal: 12,
           }}
         >
           <TouchableOpacity
@@ -267,7 +280,9 @@ export default function Post({ item, navigation }) {
             justifyContent: 'space-around',
             alignItems: 'center',
             marginTop: 8,
-            paddingVertical: 4,
+            paddingTop: 2,
+            paddingBottom: 10,
+            paddingHorizontal: 4,
           }}
         >
           <TouchableOpacity
@@ -442,7 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: 'white',
-    // marginTop: StatusBar.currentHeight,
+    paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -460,7 +475,7 @@ const styles = StyleSheet.create({
   //
   card: {
     backgroundColor: 'white',
-    padding: 12,
+    // padding: 12,
     borderRadius: 8,
     // marginTop: 4,
 

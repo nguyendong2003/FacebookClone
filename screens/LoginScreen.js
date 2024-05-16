@@ -21,6 +21,23 @@ import { useState, useEffect } from 'react';
 
 //
 export default function LoginScreen({ navigation }) {
+  // const login = async () => {
+  //   try {
+  //     await fetch('http://192.168.0.103:8080/auth/login', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ username: 'test', password: '123456' }),
+  //     })
+  //       .then((response) => response.json())
+
+  //       .then((token) => {
+  //         Alert.alert('Token: ', JSON.stringify(token)); // Chuyển đổi token thành chuỗi trước khi truyền vào Alert.alert()
+  //       });
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -78,6 +95,7 @@ export default function LoginScreen({ navigation }) {
     } else {
       // Nếu không có lỗi, xóa tất cả các lỗi hiện tại
       setErrors({});
+      // login();
       navigation.navigate('TabNavigationHome');
     }
   };
