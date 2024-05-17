@@ -116,7 +116,7 @@ export default function SearchScreen({ navigation }) {
                   padding: 8,
                 }}
                 onPress={() => {
-                  navigation.navigate('Profile', {isPersonalPage: false, StatusFriend: "stranger"})
+                  navigation.navigate('Profile', {isPersonalPage: false, statusFriend: "stranger", listFriend: []})
                 }}
               >
                 <Image
