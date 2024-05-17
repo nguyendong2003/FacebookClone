@@ -5,7 +5,6 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { FontAwesome } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 
-import listFriend from '../data/listFriendProfile.json'
 import listPost from '../data/postProfile.json'
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
@@ -14,9 +13,9 @@ import { useState } from "react";
 
 
 export default function ProfileScreen({navigation, route}){
-    const {isPersonalPage, StatusFriend} = route.params
+    const {isPersonalPage, statusFriend, listFriend} = route.params
     // stranger, waitAccept, realFriend, personalPage
-    const [isFriend, setIsFriend] = useState(StatusFriend)
+    const [isFriend, setIsFriend] = useState(statusFriend)
     const [isVisible, setIsVisible] = useState(isPersonalPage)
     const renderCreatePost =() => {
         return isVisible ? (
@@ -226,7 +225,7 @@ export default function ProfileScreen({navigation, route}){
 
                     <FlatList
                         style={{marginTop: 10}}
-                        data={listFriend.slice(0,6)}
+                        data={listFriend.length>0 ? listFriend.slice(0,6) : []}
                         numColumns={3}
                         renderItem={({item})=> (
                             <View style={styles.itemContainer} key={item.id}>

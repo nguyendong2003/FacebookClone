@@ -14,8 +14,8 @@ export default function FriendProfile({
         <Pressable
         style={styles.friendContainer}
         onPress={() => {
-            navigation.navigate('Profile', {isPersonalPage: false})
-            console.log("aaa")
+            navigation.push('Profile', {isPersonalPage: false, statusFriend: "realFriend", listFriend: []})
+            // console.log("aaa")
         }}
         >
             <Image 

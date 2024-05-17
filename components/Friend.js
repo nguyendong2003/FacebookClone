@@ -16,7 +16,6 @@ export default function Friend(
                 <View style={styles.nameContainer}>
                     <Text style={styles.name}>{item.name}</Text>
                 </View>
-                
             </TouchableOpacity>
         </View>
     )

@@ -34,6 +34,7 @@ import moment from 'moment';
 
 import postList from '../data/post.json';
 import commentList from '../data/comment.json';
+import listFriend from '../data/listFriendProfile.json'
 
 import Comment from '../components/Comment';
 import Post from '../components/Post';
@@ -96,7 +97,7 @@ export default function HomeScreen({ navigation }) {
                 }}
               >
                 <TouchableOpacity onPress={() => {
-                  navigation.navigate('Profile',{isPersonalPage: true})
+                  navigation.navigate('Profile',{isPersonalPage: true, statusFriend: "personalPage", listFriend: listFriend})
                 }}>
                   <Image
                     source={require('../assets/messi.jpg')}
