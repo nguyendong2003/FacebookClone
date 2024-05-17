@@ -86,11 +86,11 @@ export default function Navigation() {
             }}
           />
           <Stack.Screen
-            name='Profile'
+            name="Profile"
             component={ProfileScreen}
             options={{
-              headerTitleAlign:"center",
-              title: "Nguyễn Đông",
+              headerTitleAlign: 'center',
+              title: 'Nguyễn Đông',
             }}
           />
         </Stack.Group>

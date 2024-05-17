@@ -1,5 +1,7 @@
 import React from 'react';
 import Navigation from './Navigation.js';
-export default App = () => {
+const App = () => {
   return <Navigation />;
 };
+
+export default App;

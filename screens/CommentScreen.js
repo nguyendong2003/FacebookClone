@@ -53,18 +53,32 @@ export default function CommentScreen({ route, navigation }) {
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
 
+  // useEffect(() => {
+  //   if (commentIdReplying) {
+  //     if (commentInputRef.current) {
+  //       commentInputRef.current.focus();
+  //       console.log('========');
+
+  //       console.log(isReplying);
+  //       console.log(commentIdReplying);
+  //     }
+  //   }
+  // }, [commentIdReplying]);
+
   useEffect(() => {
     if (isReplying || isCommentTextFocus) {
       // Kiểm tra xem ref có tồn tại không trước khi gọi focus()
       if (commentInputRef.current) {
         commentInputRef.current.focus();
+      } else {
+        commentInputRef.current.blur();
       }
     }
   }, [isReplying, isCommentTextFocus]);
 
   useEffect(() => {
-    console.log(commentIdReplying);
-    console.log(isReplying);
+    // console.log(commentIdReplying);
+    // console.log(isReplying);
   }, [commentIdReplying, isReplying]);
 
   // image
@@ -77,12 +91,14 @@ export default function CommentScreen({ route, navigation }) {
       quality: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     if (!result.canceled) {
       setCommentImage(result.assets[0].uri);
     }
+    console.log(commentImage);
   };
+
   useEffect(() => {
     if (isSelectImage) {
       pickImage();
@@ -96,6 +112,18 @@ export default function CommentScreen({ route, navigation }) {
       setIsCommentValid(false);
     }
   }, [commentText, commentImage]);
+
+  // Scroll to comment when reply
+  const [coords, setCoords] = useState({});
+  const flatListRef = useRef(null);
+  const scrollToComment = (commentId) => {
+    flatListRef?.current?.scrollToOffset({
+      offset: coords[commentId] + 22,
+      animated: true,
+    });
+    // console.log(coords[commentId]);
+  };
+
   //
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
@@ -114,13 +142,10 @@ export default function CommentScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        behavior="padding"
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         {/* <View style={styles.scrollContainer}> */}
         <FlatList
+          ref={flatListRef}
           keyboardShouldPersistTaps="handled"
           stickyHeaderIndices={[0]}
           showsVerticalScrollIndicator={false}
@@ -130,12 +155,16 @@ export default function CommentScreen({ route, navigation }) {
             minWidth: '100%',
           }}
           data={commentList}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <Comment
               item={item}
               setIsReplying={setIsReplying}
+              commentIdReplying={commentIdReplying}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
+              scrollToComment={scrollToComment}
+              coords={coords}
+              setCoords={setCoords}
             />
           )}
           keyExtractor={(item, index) => item.id.toString()}
@@ -160,7 +189,7 @@ export default function CommentScreen({ route, navigation }) {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingVertical: 8,
+                paddingVertical: 12,
                 paddingHorizontal: 12,
                 marginBottom: 16,
                 backgroundColor: 'white',
@@ -168,6 +197,7 @@ export default function CommentScreen({ route, navigation }) {
             >
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center' }}
+                activeOpacity={0.7}
                 onPress={() => navigation.navigate('Reaction')}
               >
                 <Image
@@ -266,7 +296,12 @@ export default function CommentScreen({ route, navigation }) {
               setCommentText(text);
             }}
             onFocus={() => setIsCommentTextFocus(true)}
-            onBlur={() => setIsCommentTextFocus(false)}
+            onBlur={() => {
+              setIsCommentTextFocus(false);
+
+              // setIsReplying(false);
+              // setCommentIdReplying(null);
+            }}
             ref={commentInputRef}
             autoFocus={route?.params?.initialCommentFocus}
           />
@@ -294,7 +329,12 @@ export default function CommentScreen({ route, navigation }) {
                 <View>
                   <Image
                     source={{ uri: commentImage }}
-                    style={{ width: 100, height: 100, resizeMode: 'cover' }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      resizeMode: 'cover',
+                      borderRadius: 20,
+                    }}
                   />
                   <Entypo
                     style={{ position: 'absolute', left: '100%' }}
