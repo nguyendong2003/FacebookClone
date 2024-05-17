@@ -5,7 +5,6 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { FontAwesome } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 
-import listFriend from '../data/listFriendProfile.json'
 import listPost from '../data/postProfile.json'
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
@@ -14,9 +13,9 @@ import { useState } from "react";
 
 
 export default function ProfileScreen({navigation, route}){
-    const {isPersonalPage} = route.params
+    const {isPersonalPage, statusFriend, listFriend} = route.params
     // stranger, waitAccept, realFriend, personalPage
-    const [isFriend, setIsFriend] = useState("")
+    const [isFriend, setIsFriend] = useState(statusFriend)
     const [isVisible, setIsVisible] = useState(isPersonalPage)
     const renderCreatePost =() => {
         return isVisible ? (
@@ -102,6 +101,18 @@ export default function ProfileScreen({navigation, route}){
                 )
                 break;
         }
+    }
+    const renderAllFriend = () => {
+        return listFriend.length > 0? (
+            <TouchableOpacity
+            style={[styles.Button, {margin:13 }]}
+            onPress={()=> {
+                navigation.navigate('ListAllFriend')
+            }}
+            >
+                <Text style={{fontSize: 15}}>All Friend</Text>
+            </TouchableOpacity>
+        ) :null
     }
     return(
         <SafeAreaView style={styles.container}>
@@ -214,17 +225,16 @@ export default function ProfileScreen({navigation, route}){
 
                     <FlatList
                         style={{marginTop: 10}}
-                        data={listFriend.slice(0,6)}
+                        data={listFriend.length>0 ? listFriend.slice(0,6) : []}
                         numColumns={3}
                         renderItem={({item})=> (
                             <View style={styles.itemContainer} key={item.id}>
-                                <FriendProfile item={item}/>
+                                <FriendProfile navigation={navigation} item={item}/>
                             </View>
                         )}
+                        ListEmptyComponent={()=>(<Text style={{margin:10,fontSize: 20, textAlign:"center"}}>No friend found</Text>)}
                     />  
-                    <TouchableOpacity style={[styles.Button, {margin:13 }]}>
-                        <Text style={{fontSize: 15}}>All Friend</Text>
-                    </TouchableOpacity>
+                    {renderAllFriend()}
 
                     <View style={styles.seperate}/>
 
