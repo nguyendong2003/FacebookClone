@@ -1,17 +1,22 @@
 import {Image, View, Text, StyleSheet,TouchableOpacity, Pressable } from "react-native";
 import listFriendProfile from '../data/listFriendProfile.json'
+import { useNavigation } from "@react-navigation/native";
 
 
 export default function FriendProfile({
-    item
+    item,
+    navigation
 })
 {
-
+    // const navigation = useNavigation()
     return (
 
         <Pressable
         style={styles.friendContainer}
-        onPress={() => alert(`Ouch!! you touch ${item.name}'s pumpkin :<`)}
+        onPress={() => {
+            navigation.navigate('Profile', {isPersonalPage: false})
+            console.log("aaa")
+        }}
         >
             <Image 
                 style={styles.friendAvatar}

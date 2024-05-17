@@ -16,6 +16,8 @@ import ReactionScreen from './screens/ReactionScreen';
 import SearchScreen from './screens/SearchScreen';
 import CreatePostScreen from './screens/CreatePostScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import ListAllFriendScreen from './screens/ListAllFriendScreen';
+
 //
 
 const Stack = createStackNavigator();
@@ -92,6 +94,16 @@ export default function Navigation() {
               headerTitleAlign:"center",
               title: "Nguyễn Đông",
             }}
+          />
+          <Stack.Screen
+          name='ListAllFriend'
+          component={ListAllFriendScreen}
+          options={{
+            title:"Đông",
+          }}
+          headerStyle={{
+            elevation: 10
+          }}
           />
         </Stack.Group>
       </Stack.Navigator>

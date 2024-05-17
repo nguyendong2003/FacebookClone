@@ -124,7 +124,9 @@ export default function Post({ item, navigation }) {
     <View>
       <View style={styles.card} key={item.id}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity>
+          <TouchableOpacity
+          onPress={() => {navigation.navigate('Profile', {isPersonalPage: false, StatusFriend: "realFriend"})}}
+          >
             <Image
               source={{ uri: item?.avatar }}
               style={{
