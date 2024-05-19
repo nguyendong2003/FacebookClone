@@ -16,7 +16,7 @@ import {
   Modal,
   Dimensions,
   FlatList,
-} from 'react-native';
+} from "react-native";
 
 import {
   MaterialCommunityIcons,
@@ -27,20 +27,22 @@ import {
   Ionicons,
   Fontisto,
   Entypo,
-} from '@expo/vector-icons';
+} from "@expo/vector-icons";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from "react";
 
-import Comment from '../components/Comment';
+import Comment from "../components/Comment";
 
-import commentList from '../data/comment.json';
-
+// import commentList from '../data/comment.json';
+import { getCommentsByPostId, createComment } from "../service/CommentService";
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as PostContext } from "../context/PostContext";
 // Upload image
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 
 export default function CommentScreen({ route, navigation }) {
   //
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
   const [isSelectImage, setIsSelectImage] = useState(false);
@@ -48,11 +50,12 @@ export default function CommentScreen({ route, navigation }) {
   //
   const [isReplying, setIsReplying] = useState(false);
   const [commentIdReplying, setCommentIdReplying] = useState(null);
-  const [nameReplying, setNameReplying] = useState('');
-
+  const [nameReplying, setNameReplying] = useState("");
+  const [commentList, setCommentList] = useState([]);
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
-
+  const { state } = useContext(AccountContext);
+  const { getPosts } = useContext(PostContext);
   // useEffect(() => {
   //   if (commentIdReplying) {
   //     if (commentInputRef.current) {
@@ -81,6 +84,14 @@ export default function CommentScreen({ route, navigation }) {
     // console.log(isReplying);
   }, [commentIdReplying, isReplying]);
 
+  const fetchComments = async () => {
+    const response = await getCommentsByPostId(route?.params?.postId);
+    setCommentList(response);
+  };
+
+  useEffect(() => {
+    fetchComments();
+  }, []);
   // image
   const pickImage = async () => {
     // no permissions request is necessary for launching the image library
@@ -96,7 +107,6 @@ export default function CommentScreen({ route, navigation }) {
     if (!result.canceled) {
       setCommentImage(result.assets[0].uri);
     }
-    console.log(commentImage);
   };
 
   useEffect(() => {
@@ -126,11 +136,11 @@ export default function CommentScreen({ route, navigation }) {
 
   //
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
@@ -140,6 +150,42 @@ export default function CommentScreen({ route, navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  const submitComment = async () => {
+    if (isCommentValid) {
+      console.log(state.account.id);
+      console.log(route?.params?.postId);
+      console.log(commentText);
+      console.log(commentImage);
+
+      formData = new FormData();
+
+      formData.append("id_account", state.account.id);
+      if (commentIdReplying) {
+        formData.append("account_tag", 1);
+        formData.append("to_comment_id", commentIdReplying);
+      } 
+      else 
+        formData.append("id_post", route?.params?.postId);
+
+      formData.append("content", commentText);
+
+      if (commentImage) {
+        formData.append("image", {
+          name: "image.jpg",
+          type: "image/jpeg",
+          uri: commentImage,
+        });
+      }
+
+      await createComment(formData);
+      setCommentText("");
+      setCommentImage(null);
+      getPosts();
+      fetchComments();
+    } else {
+      alert("Invalid comment");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
@@ -149,10 +195,10 @@ export default function CommentScreen({ route, navigation }) {
           keyboardShouldPersistTaps="handled"
           stickyHeaderIndices={[0]}
           showsVerticalScrollIndicator={false}
-          ListFooterComponentStyle={{ flex: 1, justifyContent: 'flex-end' }}
+          ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end" }}
           style={{
-            alignSelf: 'flex-start',
-            minWidth: '100%',
+            alignSelf: "flex-start",
+            minWidth: "100%",
           }}
           data={commentList}
           renderItem={({ item, index }) => (
@@ -174,10 +220,10 @@ export default function CommentScreen({ route, navigation }) {
           ListEmptyComponent={
             <Text
               style={{
-                color: 'red',
+                color: "red",
                 fontSize: 24,
                 flex: 1,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               No comment found
@@ -186,30 +232,30 @@ export default function CommentScreen({ route, navigation }) {
           ListHeaderComponent={
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
                 paddingVertical: 12,
                 paddingHorizontal: 12,
                 marginBottom: 16,
-                backgroundColor: 'white',
+                backgroundColor: "white",
               }}
             >
               <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center' }}
+                style={{ flexDirection: "row", alignItems: "center" }}
                 activeOpacity={0.7}
-                onPress={() => navigation.navigate('Reaction')}
+                onPress={() => navigation.navigate("Reaction")}
               >
                 <Image
-                  source={require('../assets/facebook-like.png')}
+                  source={require("../assets/facebook-like.png")}
                   style={{ width: 24, height: 24 }}
                 />
                 <Image
-                  source={require('../assets/facebook-haha.png')}
+                  source={require("../assets/facebook-haha.png")}
                   style={{ width: 24, height: 24 }}
                 />
                 <Image
-                  source={require('../assets/facebook-heart.jpg')}
+                  source={require("../assets/facebook-heart.jpg")}
                   style={{ width: 24, height: 24 }}
                 />
                 <Text numberOfLines={1} style={{ width: 200 }}>
@@ -230,30 +276,30 @@ export default function CommentScreen({ route, navigation }) {
         />
         <View
           style={{
-            backgroundColor: 'white',
+            backgroundColor: "white",
             paddingVertical: 4,
             paddingHorizontal: 12,
-            borderTopColor: '#ccc',
+            borderTopColor: "#ccc",
             borderTopWidth: 1,
           }}
         >
           {isReplying && (
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: "row",
                 paddingHorizontal: 8,
                 paddingVertical: 4,
-                alignItems: 'center',
+                alignItems: "center",
               }}
             >
-              <Text style={{ color: '#65676B', fontSize: 15 }}>Replying</Text>
+              <Text style={{ color: "#65676B", fontSize: 15 }}>Replying</Text>
 
               <TouchableOpacity>
                 <Text
                   style={{
                     marginLeft: 4,
-                    color: '#65676B',
-                    fontWeight: '500',
+                    color: "#65676B",
+                    fontWeight: "500",
                     fontSize: 15,
                   }}
                 >
@@ -270,8 +316,8 @@ export default function CommentScreen({ route, navigation }) {
                 <Text
                   style={{
                     marginLeft: 16,
-                    fontWeight: 'bold',
-                    color: '#65676B',
+                    fontWeight: "bold",
+                    color: "#65676B",
                     fontSize: 15,
                   }}
                 >
@@ -285,9 +331,9 @@ export default function CommentScreen({ route, navigation }) {
             style={{
               paddingVertical: 8,
               paddingHorizontal: 12,
-              backgroundColor: '#f0f2f5',
+              backgroundColor: "#f0f2f5",
               borderRadius: 24,
-              color: '#050505',
+              color: "#050505",
               fontSize: 16,
             }}
             placeholder="Enter your comment"
@@ -308,17 +354,17 @@ export default function CommentScreen({ route, navigation }) {
           {isCommentTextFocus && (
             <View
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
                 padding: 4,
               }}
             >
               {!commentImage && (
                 <Ionicons
-                  name={isSelectImage ? 'camera' : 'camera-outline'}
+                  name={isSelectImage ? "camera" : "camera-outline"}
                   size={24}
-                  color={isSelectImage ? 'black' : '#65676B'}
+                  color={isSelectImage ? "black" : "#65676B"}
                   onPress={() => {
                     setIsSelectImage(!isSelectImage);
                   }}
@@ -332,12 +378,12 @@ export default function CommentScreen({ route, navigation }) {
                     style={{
                       width: 100,
                       height: 100,
-                      resizeMode: 'cover',
+                      resizeMode: "cover",
                       borderRadius: 20,
                     }}
                   />
                   <Entypo
-                    style={{ position: 'absolute', left: '100%' }}
+                    style={{ position: "absolute", left: "100%" }}
                     name="circle-with-cross"
                     size={24}
                     color="#ccc"
@@ -350,15 +396,11 @@ export default function CommentScreen({ route, navigation }) {
               )}
 
               <FontAwesome
-                name={isCommentValid ? 'send' : 'send-o'}
+                name={isCommentValid ? "send" : "send-o"}
                 size={24}
-                color={isCommentValid ? '#0866ff' : '#65676B'}
+                color={isCommentValid ? "#0866ff" : "#65676B"}
                 onPress={() => {
-                  if (isCommentValid) {
-                    alert('Valid comment');
-                  } else {
-                    alert('Invalid comment');
-                  }
+                  submitComment();
                 }}
               />
             </View>
@@ -373,26 +415,26 @@ export default function CommentScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     paddingTop: StatusBar.currentHeight,
     // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   //
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
@@ -402,22 +444,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: '90%',
+    width: "90%",
   },
 
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     height: 40,
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -428,7 +470,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: 'gray',
+    borderBottomColor: "gray",
     borderBottomWidth: 0.5,
   },
   icon: {

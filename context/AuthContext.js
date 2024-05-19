@@ -16,14 +16,15 @@ const authReducer = (state, action) => {
 
 const signIn = (dispatch) => {
   return async ({ email, password }) => {
-
     try {
       const response = await SpringServer.post("/auth/login", {
         username: email,
         password,
       });
-      dispatch({ type: "SIGN_IN", payload: response.data.token });
       await AsyncStorage.setItem("token", response.data.token);
+
+
+      dispatch({ type: "SIGN_IN", payload: response.data.token });
     } catch (error) {
       dispatch({
         type: "ERROR",
@@ -36,6 +37,7 @@ const signIn = (dispatch) => {
 
 const checkLoggedIn = (dispatch) => {
   return async () => {
+    await AsyncStorage.removeItem("token");
     const token = await AsyncStorage.getItem("token");
     if (token) {
       dispatch({ type: "SIGN_IN", payload: token });

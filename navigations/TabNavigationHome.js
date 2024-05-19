@@ -28,7 +28,7 @@ import {
   Fontisto,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Badge } from 'react-native-elements';
 
 // Tab Navigation
@@ -39,6 +39,11 @@ import HomeScreen from '../screens/HomeScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import MoreScreen from '../screens/MoreScreen';
 import FriendScreen from '../screens/FriendScreen';
+import { Context as PostContext } from '../context/PostContext';
+import { Context as AccountContext } from '../context/AccountContext';
+import { Context as FriendContext } from '../context/FriendContext';
+
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -46,6 +51,10 @@ export default function TabNavigationHome({ navigation }) {
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
+
+  const { getPosts } = useContext(PostContext);
+  const { getAccount } = useContext(AccountContext);
+  const { getFriends } = useContext(FriendContext);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -59,6 +68,12 @@ export default function TabNavigationHome({ navigation }) {
   const windowHeight = window.height;
 
   // console.log({ windowWidth, windowHeight });
+
+  useEffect(() => {
+    getPosts()
+    getAccount()
+    getFriends()
+  }, [])
 
   return (
     <View

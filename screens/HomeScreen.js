@@ -29,7 +29,7 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 
 import postList from '../data/post.json';
@@ -40,7 +40,10 @@ import Post from '../components/Post';
 // Upload image
 import * as ImagePicker from 'expo-image-picker';
 
+import { Context as AccountContext } from '../context/AccountContext'
+
 export default function HomeScreen({ navigation }) {
+  const { state: accountState } = useContext(AccountContext);
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
@@ -65,7 +68,7 @@ export default function HomeScreen({ navigation }) {
               alignSelf: 'flex-start',
               minWidth: '100%',
             }}
-            data={postList}
+            data={[]}
             renderItem={({ item }) => (
               <Post item={item} navigation={navigation} />
             )}
@@ -96,7 +99,7 @@ export default function HomeScreen({ navigation }) {
                 }}
               >
                 <TouchableOpacity onPress={() => {
-                  navigation.navigate('Profile')
+                  navigation.navigate('Profile',  {accountId: accountState.account.id})
                 }}>
                   <Image
                     source={require('../assets/messi.jpg')}

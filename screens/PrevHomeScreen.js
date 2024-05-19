@@ -13,9 +13,9 @@ import { Context as AuthContext } from '../context/AuthContext';
 export default function PrevHomeScreen({ navigation }) {
   const { checkLoggedIn } = useContext(AuthContext);
 
-  // useEffect(() => {
-  //   checkLoggedIn();
-  // }, []);
+  useEffect(() => {
+    checkLoggedIn();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
