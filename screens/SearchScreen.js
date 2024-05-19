@@ -36,16 +36,18 @@ import searchList from "../data/search.json";
 import { Context as FriendContext } from "../context/FriendContext";
 // Upload image
 import * as ImagePicker from "expo-image-picker";
+import { searchUser } from "../service/FriendService";
 
 export default function SearchScreen({ navigation }) {
-  const { searchUser, state } = useContext(FriendContext);
   const [searchValue, setSearchValue] = useState("");
-  const [filteredData, setFilteredData] = useState(state.searchResult);
   const [isSearch, setIsSearch] = useState(false);
+  const [searchList, setSearchList] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+
   const searchHandler = async (text) => {
-
-
     await searchUser(text).then((result) => {
+      console.log(result);
+      setSearchList(result);
       if (text != "") 
         setIsSearch(true);
       else 
@@ -121,7 +123,7 @@ export default function SearchScreen({ navigation }) {
               alignSelf: "flex-start",
               minWidth: "100%",
             }}
-            data={!isSearch ? [] : state.searchResult}
+            data={!isSearch ? [] : searchList}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={{
@@ -130,7 +132,7 @@ export default function SearchScreen({ navigation }) {
                   padding: 8,
                 }}
                 onPress={() => {
-                  navigation.navigate('Profile', {isPersonalPage: false, statusFriend: "stranger", listFriend: []})
+                  navigation.navigate('Profile', {accountId: item.id, isPersonalPage: false, statusFriend: "stranger", listFriend: []})
                 }}
               >
                 <Image
