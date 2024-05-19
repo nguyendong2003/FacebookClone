@@ -29,18 +29,25 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Comment({
   item,
   setIsReplying,
+  commentIdReplying,
   setCommentIdReplying,
   setNameReplying,
+  scrollToComment,
+  coords,
+  setCoords,
 }) {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState('#65676B');
+
+  // Scroll to comment when reply
+  const scrollView = useRef(null);
 
   useEffect(() => {
     // Xác định màu dựa trên giá trị reaction
@@ -101,9 +108,25 @@ export default function Comment({
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  const ref = useRef();
+
   return (
     <View>
       <View
+        ref={ref}
+        onLayout={(event) => {
+          const { x, y, width, height } = event.nativeEvent.layout;
+          // console.log(x, y, width, height);
+          if (Object.keys(coords).length === 0) {
+            coords[item.id] = y;
+          } else {
+            const previousKey =
+              Object.keys(coords)[Object.keys(coords).length - 1];
+            const previousValue = coords[previousKey];
+            coords[item.id] = previousValue + height;
+          }
+          console.log(coords);
+        }}
         style={{
           flexDirection: 'row',
           padding: 8,
@@ -124,7 +147,8 @@ export default function Comment({
               marginLeft: 8,
               borderRadius: 20,
               padding: 8,
-              backgroundColor: '#f0f2f5',
+              backgroundColor:
+                item.id === commentIdReplying ? '#ccc' : '#f0f2f5',
             }}
           >
             <TouchableOpacity>
@@ -142,46 +166,33 @@ export default function Comment({
             <Text style={{ fontSize: 15, color: '#050505' }}>
               {item?.comment}
             </Text>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                justifyContent: 'flex-start',
-                marginTop: 4,
-                paddingBottom: 12,
-              }}
-            >
-              {item?.image && (
-                <Image
-                  source={{ uri: item?.image }}
-                  style={{
-                    marginLeft: 8,
-                    // width: 200,
-                    height: 200,
-                    width: '45%',
-                    aspectRatio: 1,
-                    resizeMode: 'cover',
-                    marginTop: 8,
-                  }}
-                />
-              )}
-              {/* {item?.images.map((image, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: image }}
-                  style={{
-                    marginLeft: 8,
-                    // width: 200,
-                    height: 200,
-                    width: '45%',
-                    aspectRatio: 1,
-                    resizeMode: 'cover',
-                    marginTop: 8,
-                  }}
-                />
-              ))} */}
-            </View>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              marginTop: 4,
+              // paddingBottom: 12,
+            }}
+          >
+            {item?.image && (
+              <Image
+                source={{ uri: item?.image }}
+                style={{
+                  marginLeft: 8,
+                  borderRadius: 20,
+                  // width: 200,
+                  height: 200,
+                  width: '60%',
+                  aspectRatio: 1,
+                  resizeMode: 'cover',
+                  // marginTop: 8,
+                  marginBottom: 6,
+                }}
+              />
+            )}
           </View>
           <View
             style={{
@@ -340,7 +351,7 @@ export default function Comment({
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
                   setNameReplying(item?.name);
-                  // alert('Reply');
+                  scrollToComment(item?.id);
                 }}
               >
                 <Text
@@ -396,17 +407,19 @@ export default function Comment({
       </View>
 
       <View style={{ marginLeft: 30 }}>
-        {item?.reply?.map((reply) => {
-          return (
-            <Comment
-              key={reply.id}
-              item={reply}
-              setIsReplying={setIsReplying}
-              setCommentIdReplying={setCommentIdReplying}
-              setNameReplying={setNameReplying}
-            />
-          );
-        })}
+        {item?.reply?.map((reply) => (
+          <Comment
+            key={reply.id}
+            item={reply}
+            setIsReplying={setIsReplying}
+            commentIdReplying={commentIdReplying}
+            setCommentIdReplying={setCommentIdReplying}
+            setNameReplying={setNameReplying}
+            scrollToComment={scrollToComment}
+            coords={coords}
+            setCoords={setCoords}
+          />
+        ))}
       </View>
     </View>
   );

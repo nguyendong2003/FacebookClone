@@ -11,13 +11,13 @@ export default function FriendProfile({
 
         <TouchableOpacity 
         style={styles.friendContainer}
-        onPress={() => alert(`Ouch!! you touch ${item.name}'s pumpkin :<`)}
+        onPress={() => alert(`Ouch!! you touch ${item.profile_name}'s pumpkin :<`)}
         >
             <Image 
                 style={styles.friendAvatar}
                 source={{uri: item?.avatar}}
             />
-            <Text style={styles.friendName}>{item.name}</Text>
+            <Text style={styles.friendName}>{item.profile_name}</Text>
         </TouchableOpacity>
 
         

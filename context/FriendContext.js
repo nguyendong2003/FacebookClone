@@ -1,5 +1,6 @@
 import createDataContext from "./createDataContext";
 import SpringServer from "../api/SpringServer";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const friendReducer = (state, action) => {
   switch (action.type) {
@@ -48,6 +49,7 @@ const acceptFriendRequest = (dispatch) => {
   return async (friendId) => {
     try {
       await SpringServer.post(`/friend/acceptFriend/${friendId}`);
+      await getFriends(dispatch)();
     } catch (error) {
       dispatch({
         type: "ERROR",
