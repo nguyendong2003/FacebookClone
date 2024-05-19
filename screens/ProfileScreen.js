@@ -14,22 +14,39 @@ import { FontAwesome } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 
-import listFriend from "../data/listFriendProfile.json";
 import listPost from "../data/postProfile.json";
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
+// const listFriend =[]
+
 import { useState, useContext, useEffect } from "react";
 
-import { Context as AccountContext } from "../context/AccountContext";
 import { Context as FriendContext } from "../context/FriendContext";
 
 import { getUserPosts, getPostById } from "../service/PostService";
-export default function ProfileScreen({ navigation, route}) {
-  const { state: accountState } = useContext(AccountContext);
+import { getAccountById } from "../service/AccountService";
+import { getFriendsByAccountId } from "../service/FriendService";
+
+export default function ProfileScreen({ navigation, route }) {
+  // stranger, waitAccept, realFriend, personalPage
+  const { isPersonalPage, statusFriend, listFriend } = route.params;
+
   const { state: friendState } = useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
+  const [isFriend, setIsFriend] = useState(statusFriend);
+  const [isVisible, setIsVisible] = useState(isPersonalPage);
+  const [user, setUser] = useState({});
+  const [friendList, setFriendList] = useState([]);
 
   useEffect(() => {
+    getAccountById(route.params.accountId).then((data) => {
+      setUser(data);
+    });
+
+    getFriendsByAccountId(route.params.accountId).then((data) => {
+      setFriendList(data);
+    });
+
     getUserPosts(route.params.accountId).then((data) => {
       setUserPost(data);
     });
@@ -37,12 +54,38 @@ export default function ProfileScreen({ navigation, route}) {
 
   const updatePostById = async (postId) => {
     const update_post = await getPostById(postId);
-    
-    setUserPost(userPost.map(post => post.id === postId ? update_post : post));
-  }
+    setUserPost(
+      userPost.map((post) => (post.id === postId ? update_post : post))
+    );
+  };
 
-  // stranger, waitAccept, realFriend, personalPage
-  const [isFriend, setIsFriend] = useState("");
+  const renderCreatePost = () => {
+    return isVisible ? (
+      <TouchableOpacity
+        style={styles.headerPost}
+        onPress={() => navigation.navigate("CreatePost")}
+      >
+        <Image
+          source={require("../assets/messi.jpg")}
+          style={[
+            styles.avatar,
+            { margin: 10, width: 40, height: 40, borderWidth: 1 },
+          ]}
+        />
+        <Text style={{ marginLeft: 10 }}>What are you thinking?</Text>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+            marginRight: 15,
+          }}
+        >
+          <FontAwesome5 name="images" size={24} color="green" />
+        </View>
+      </TouchableOpacity>
+    ) : null;
+  };
   const renderStateFriend = () => {
     switch (isFriend) {
       case "stranger":
@@ -71,7 +114,6 @@ export default function ProfileScreen({ navigation, route}) {
                 Accept
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
               onPress={() => setIsFriend("stranger")}
@@ -96,7 +138,6 @@ export default function ProfileScreen({ navigation, route}) {
             </TouchableOpacity>
           </View>
         );
-
       default:
         return (
           <View style={styles.buttonContainer}>
@@ -116,6 +157,20 @@ export default function ProfileScreen({ navigation, route}) {
         break;
     }
   };
+
+  const renderAllFriend = () => {
+    return listFriend.length > 0 ? (
+      <TouchableOpacity
+        style={[styles.Button, { margin: 13 }]}
+        onPress={() => {
+          navigation.navigate("ListAllFriend");
+        }}
+      >
+        <Text style={{ fontSize: 15 }}>All Friend</Text>
+      </TouchableOpacity>
+    ) : null;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -124,7 +179,13 @@ export default function ProfileScreen({ navigation, route}) {
           minWidth: "100%",
         }}
         data={userPost}
-        renderItem={({ item }) => <Post item={item} navigation={navigation} onUpdatePost={updatePostById}/>}
+        renderItem={({ item }) => (
+          <Post
+            item={item}
+            navigation={navigation}
+            onUpdatePost={updatePostById}
+          />
+        )}
         keyExtractor={(item, index) => item.id.toString()}
         ItemSeparatorComponent={
           <View style={{ height: 4, backgroundColor: "#ccc" }}></View>
@@ -170,10 +231,7 @@ export default function ProfileScreen({ navigation, route}) {
             >
               {/* Avatar */}
               <View style={styles.avatarContainer}>
-                <Image
-                  style={styles.avatar}
-                  source={{ uri: accountState.account.avatar }}
-                />
+                <Image style={styles.avatar} source={{ uri: user.avatar }} />
                 <View
                   style={[
                     styles.cameraContainer,
@@ -192,9 +250,7 @@ export default function ProfileScreen({ navigation, route}) {
 
               {/* name */}
               <View style={[styles.nameContainer, {}]}>
-                <Text style={styles.name}>
-                  {accountState.account.profile_name}
-                </Text>
+                <Text style={styles.name}>{user.profile_name}</Text>
               </View>
               {/* name */}
 
@@ -207,9 +263,7 @@ export default function ProfileScreen({ navigation, route}) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>
-                  {accountState.account.description}
-                </Text>
+                <Text style={{ fontSize: 15 }}>{user.description}</Text>
               </View>
               {/* description */}
             </View>
@@ -234,7 +288,7 @@ export default function ProfileScreen({ navigation, route}) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {accountState.account.live_at}
+                    {user.live_at}
                   </Text>
                 </Text>
               </View>
@@ -245,7 +299,7 @@ export default function ProfileScreen({ navigation, route}) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {accountState.account.come_from}
+                    {user.come_from}
                   </Text>
                 </Text>
               </View>
@@ -256,10 +310,7 @@ export default function ProfileScreen({ navigation, route}) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(
-                      accountState.account.brithdate,
-                      "YYYY-MM-DD "
-                    ).format("DD/MM/yyyy")}
+                    {moment(user.brithdate, "YYYY-MM-DD ").format("DD/MM/yyyy")}
                   </Text>
                 </Text>
               </View>
@@ -270,10 +321,9 @@ export default function ProfileScreen({ navigation, route}) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(
-                      accountState.account.create_time,
-                      "YYYY-MM-DD "
-                    ).format("DD/MM/yyyy")}
+                    {moment(user.create_time, "YYYY-MM-DD ").format(
+                      "DD/MM/yyyy"
+                    )}
                   </Text>
                 </Text>
               </View>
@@ -293,11 +343,11 @@ export default function ProfileScreen({ navigation, route}) {
 
             <FlatList
               style={{ marginTop: 10 }}
-              data={friendState.friends.slice(0, 6)}
+              data={friendList.slice(0, 6)}
               numColumns={3}
               renderItem={({ item }) => (
                 <View style={styles.itemContainer} key={item.id}>
-                  <FriendProfile item={item} />
+                  <FriendProfile navigation={navigation} item={item} />
                 </View>
               )}
             />
@@ -311,35 +361,13 @@ export default function ProfileScreen({ navigation, route}) {
               style={{
                 fontWeight: "bold",
                 fontSize: 18,
-                marginTop: 10,
+                margin: 5,
                 marginLeft: 10,
               }}
             >
               Post
             </Text>
-            <TouchableOpacity
-              style={styles.headerPost}
-              onPress={() => navigation.navigate("CreatePost")}
-            >
-              <Image
-                source={require("../assets/messi.jpg")}
-                style={[
-                  styles.avatar,
-                  { margin: 10, width: 40, height: 40, borderWidth: 1 },
-                ]}
-              />
-              <Text style={{ marginLeft: 10 }}>What are you thinking?</Text>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  alignItems: "flex-end",
-                  marginRight: 15,
-                }}
-              >
-                <FontAwesome5 name="images" size={24} color="green" />
-              </View>
-            </TouchableOpacity>
+            {renderCreatePost()}
             <View style={styles.seperate}></View>
           </View>
         }

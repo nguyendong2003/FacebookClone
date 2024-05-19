@@ -41,7 +41,6 @@ import MoreScreen from '../screens/MoreScreen';
 import FriendScreen from '../screens/FriendScreen';
 import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
-import { Context as FriendContext } from '../context/FriendContext';
 
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
@@ -54,7 +53,6 @@ export default function TabNavigationHome({ navigation }) {
 
   const { getPosts } = useContext(PostContext);
   const { getAccount } = useContext(AccountContext);
-  const { getFriends } = useContext(FriendContext);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -72,7 +70,6 @@ export default function TabNavigationHome({ navigation }) {
   useEffect(() => {
     getPosts()
     getAccount()
-    getFriends()
   }, [])
 
   return (
@@ -171,7 +168,15 @@ export default function TabNavigationHome({ navigation }) {
             headerShown: false,
             tabBarLabel: 'Home',
             tabBarIcon: ({ color }) => (
-              <Ionicons name="notifications" size={24} color={color} />
+              <View>
+                <Ionicons name="notifications" size={24} color={color} />
+                <Badge
+                status='error'
+                value="11"
+                containerStyle={{position: "absolute", top:-8, right:-8}}
+                />
+              </View>
+              
             ),
             tabBarLabelStyle: {
               fontSize: 14,
@@ -179,6 +184,7 @@ export default function TabNavigationHome({ navigation }) {
             },
             tabBarActiveTintColor: '#0866ff',
             unmountOnBlur: true,
+            
           }}
         />
         <Tab.Screen

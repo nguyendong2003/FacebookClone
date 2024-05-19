@@ -4,8 +4,6 @@ import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const friendReducer = (state, action) => {
   switch (action.type) {
-    case "GET_FRIENDS":
-      return { ...state, friends: action.payload };
     case "GET_FRIEND_REQUESTS":
       return { ...state, friendRequests: action.payload };
     case "SEARCH_USER":
@@ -16,21 +14,6 @@ const friendReducer = (state, action) => {
       return state;
   }
 };
-
-const getFriends = (dispatch) => {
-  return async () => {
-    try {
-      const response = await SpringServer.get("/friend/friendList");
-      dispatch({ type: "GET_FRIENDS", payload: response.data });
-    } catch (error) {
-      dispatch({
-        type: "ERROR",
-        payload: "Something went wrong with getting friends",
-      });
-    }
-  };
-};
-
 const getFriendRequests = (dispatch) => {
   return async () => {
     try {
@@ -90,6 +73,6 @@ const searchUser = (dispatch) => {
 
 export const { Context, Provider } = createDataContext(
   friendReducer,
-  { getFriendRequests, getFriends, acceptFriendRequest, rejectFriendRequest, searchUser },
-  { friends: [], friendRequests: [], searchResult: [], errorMessage: ""}
+  { getFriendRequests, acceptFriendRequest, rejectFriendRequest, searchUser },
+  { friendRequests: [], searchResult: [], errorMessage: ""}
 );

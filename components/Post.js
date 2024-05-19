@@ -192,7 +192,9 @@ export default function Post({ item, navigation, onUpdatePost }) {
             paddingBottom: 0,
           }}
         >
-          <TouchableOpacity>
+          <TouchableOpacity
+          onPress={() => {navigation.navigate('Profile', {isPersonalPage: false, statusFriend: "realFriend", listFriend: []})}}
+          >
             <Image
               source={{ uri: user.avatar }}
               style={{
