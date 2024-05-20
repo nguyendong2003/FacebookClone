@@ -53,8 +53,33 @@ const rejectFriendRequest = (dispatch) => {
   };
 };
 
+const cancelFriendRequest = (dispatch) => {
+  return async (friendId) => {
+    try {
+      await SpringServer.delete(`/friend/cancelRequest/${friendId}`);
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with cancelling friend request",
+      });
+    }
+  };
+};
+const sendRequest = (dispatch) => {
+  return async (friendId) => {
+    try {
+      await SpringServer.post(`/friend/addFriend/${friendId}`);
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with sending friend request",
+      });
+    }
+  };
+};
+
 export const { Context, Provider } = createDataContext(
   friendReducer,
-  { getFriendRequests, acceptFriendRequest, rejectFriendRequest },
+  { getFriendRequests, acceptFriendRequest, rejectFriendRequest, sendRequest, cancelFriendRequest },
   { friendRequests: [], errorMessage: ""}
 );

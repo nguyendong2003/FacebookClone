@@ -11,3 +11,8 @@ export const searchUser = async (search) => {
   });
   return response.data;
 };
+
+export const getProfileStatus = async (id) => {
+  const response = await SpringServer.get(`/friend/profileStatus/${id}`);
+  return response.data;
+}

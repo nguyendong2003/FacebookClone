@@ -17,14 +17,21 @@ export default function FriendProfile({ item, navigation }) {
       onPress={() => {
         navigation.push("Profile", {
           isPersonalPage: false,
-          statusFriend: "realFriend",
+          statusFriend: "IS_FRIEND",
           listFriend: [],
           accountId: item.id,
         });
         // console.log("aaa")
       }}
     >
-      <Image style={styles.friendAvatar} source={{ uri: item?.avatar }} />
+      <Image
+        style={styles.friendAvatar}
+        source={
+          item?.avatar == null
+            ? require("../assets/defaultProfilePicture.jpg")
+            : { uri: item.avatar }
+        }
+      />
       <Text style={styles.friendName}>{item.profile_name}</Text>
     </Pressable>
   );
@@ -45,6 +52,7 @@ const styles = StyleSheet.create({
     // width: "30%"
   },
   friendName: {
+    textAlign: "center",
     fontSize: 15,
   },
 });

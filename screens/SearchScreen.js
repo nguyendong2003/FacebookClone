@@ -46,8 +46,8 @@ export default function SearchScreen({ navigation }) {
 
   const searchHandler = async (text) => {
     await searchUser(text).then((result) => {
-      console.log(result);
       setSearchList(result);
+      
       if (text != "") 
         setIsSearch(true);
       else 
@@ -132,18 +132,18 @@ export default function SearchScreen({ navigation }) {
                   padding: 8,
                 }}
                 onPress={() => {
-                  navigation.navigate('Profile', {accountId: item.id, isPersonalPage: false, statusFriend: "stranger", listFriend: []})
+                  navigation.navigate('Profile', {accountId: item.id, isPersonalPage: false, statusFriend: item.status, listFriend: []})
                 }}
               >
                 <Image
-                  source={{ uri: item?.avatar }}
+                  source={item?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: item.avatar }}
                   style={{ width: 50, height: 50, borderRadius: 100 }}
                 />
                 <View style={{ marginLeft: 16 }}>
                   <Text style={{ fontSize: 18, fontWeight: "bold" }}>
                     {item?.name}
                   </Text>
-                  {item?.friend != null && (
+                  {item?.status != null && (
                     <Text
                       style={{
                         color: "#65676b",
@@ -151,7 +151,7 @@ export default function SearchScreen({ navigation }) {
                         fontWeight: "500",
                       }}
                     >
-                      {item?.friend ? "Friend" : ""}
+                      {item?.status == "IS_FRIEND" ? "Friend" : ""}
                     </Text>
                   )}
                 </View>
