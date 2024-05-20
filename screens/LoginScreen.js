@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation }) {
 
     // Kiểm tra email
     if (!email) {
-      newErrors["emailError"] = "Email address cannot be empty";
+      newErrors["emailError"] = "Username cannot be empty";
     }
 
     // Kiểm tra mật khẩu
@@ -113,7 +113,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.form}>
             <Text style={styles.textTitle}>Login</Text>
 
-            <Text style={styles.labelForm}>Email address</Text>
+            <Text style={styles.labelForm}>Username</Text>
             <TextInput
               style={styles.inputEmail}
               value={email}
@@ -125,7 +125,7 @@ export default function LoginScreen({ navigation }) {
                   setErrors({ ...errors, emailError: null });
                 }
               }}
-              placeholder="Enter your email address"
+              placeholder="Enter your username"
             />
             {errors["emailError"] ? (
               <Text style={styles.errorText}>{errors["emailError"]}</Text>

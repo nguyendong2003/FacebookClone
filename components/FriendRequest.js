@@ -93,7 +93,7 @@ export default function FriendRequest({
       }}
     >
       <Image
-        source={{ uri: item?.avatar }}
+        source={item?.avatar == null ? require('../assets/defaultProfilePicture.jpg') : { uri: item?.avatar }}
         style={{ width: 80, height: 80, borderRadius: 100 }}
       />
       <View
@@ -114,9 +114,9 @@ export default function FriendRequest({
           <Text>{item?.time}</Text>
         </View>
 
-        <View>
+        {/* <View>
           <Text style={{ color: '#65676b', padding: 2 }}>14 join friend</Text>
-        </View>
+        </View> */}
 
         <View
           style={{

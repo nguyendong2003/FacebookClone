@@ -6,8 +6,6 @@ const friendReducer = (state, action) => {
   switch (action.type) {
     case "GET_FRIEND_REQUESTS":
       return { ...state, friendRequests: action.payload };
-    case "SEARCH_USER":
-      return { ...state, searchResult: action.payload };
     case "ERROR":
       return { ...state, errorMessage: action.payload };
     default:
@@ -55,17 +53,26 @@ const rejectFriendRequest = (dispatch) => {
   };
 };
 
-const searchUser = (dispatch) => {
-  return async (search) => {
+const cancelFriendRequest = (dispatch) => {
+  return async (friendId) => {
     try {
-      const response = await SpringServer.get(`/friend/searchUser`, {
-        params: { name: search },
-      });
-      dispatch({ type: "SEARCH_USER", payload: response.data });
+      await SpringServer.delete(`/friend/cancelRequest/${friendId}`);
     } catch (error) {
       dispatch({
         type: "ERROR",
-        payload: "Something went wrong with searching user",
+        payload: "Something went wrong with cancelling friend request",
+      });
+    }
+  };
+};
+const sendRequest = (dispatch) => {
+  return async (friendId) => {
+    try {
+      await SpringServer.post(`/friend/addFriend/${friendId}`);
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with sending friend request",
       });
     }
   };
@@ -73,6 +80,6 @@ const searchUser = (dispatch) => {
 
 export const { Context, Provider } = createDataContext(
   friendReducer,
-  { getFriendRequests, acceptFriendRequest, rejectFriendRequest, searchUser },
-  { friendRequests: [], searchResult: [], errorMessage: ""}
+  { getFriendRequests, acceptFriendRequest, rejectFriendRequest, sendRequest, cancelFriendRequest },
+  { friendRequests: [], errorMessage: ""}
 );

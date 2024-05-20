@@ -25,31 +25,49 @@ import { Context as FriendContext } from "../context/FriendContext";
 
 import { getUserPosts, getPostById } from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
-import { getFriendsByAccountId } from "../service/FriendService";
+import {
+  getFriendsByAccountId,
+  getProfileStatus,
+} from "../service/FriendService";
 
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
 
-  const { state: friendState } = useContext(FriendContext);
+  const { sendRequest, cancelFriendRequest, acceptFriendRequest } =
+    useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
   const [isFriend, setIsFriend] = useState(statusFriend);
   const [isVisible, setIsVisible] = useState(isPersonalPage);
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
+  const [status, setStatus] = useState(null);
+
+  const fetchUserPost = async () => {
+    const data = await getUserPosts(route.params.accountId);
+    setUserPost(data);
+  };
+
+  const fetchProfileStatus = async () => {
+    const data = await getProfileStatus(route.params.accountId);
+
+    if (data == "PERSONAL") {
+      setIsVisible(true);
+    }
+    setStatus(data);
+  };
 
   useEffect(() => {
     getAccountById(route.params.accountId).then((data) => {
       setUser(data);
     });
+    fetchProfileStatus();
 
     getFriendsByAccountId(route.params.accountId).then((data) => {
       setFriendList(data);
     });
 
-    getUserPosts(route.params.accountId).then((data) => {
-      setUserPost(data);
-    });
+    fetchUserPost();
   }, []);
 
   const updatePostById = async (postId) => {
@@ -59,14 +77,35 @@ export default function ProfileScreen({ navigation, route }) {
     );
   };
 
+  const sendRequestHandler = async () => {
+    await sendRequest(route.params.accountId);
+
+    getProfileStatus(route.params.accountId).then((data) => {
+      setStatus(data);
+    });
+  };
+
+  const cancelRequestHandler = async () => {
+    await cancelFriendRequest(route.params.accountId);
+
+    fetchProfileStatus();
+  };
+
+  const acceptRequestHandler = async () => {
+    await acceptFriendRequest(route.params.accountId);
+
+    fetchProfileStatus();
+  };
   const renderCreatePost = () => {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() => navigation.navigate("CreatePost")}
+        onPress={() =>
+          navigation.navigate("CreatePost", { onFetchPost: fetchUserPost })
+        }
       >
         <Image
-          source={require("../assets/messi.jpg")}
+          source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar }}
           style={[
             styles.avatar,
             { margin: 10, width: 40, height: 40, borderWidth: 1 },
@@ -86,14 +125,15 @@ export default function ProfileScreen({ navigation, route }) {
       </TouchableOpacity>
     ) : null;
   };
+
   const renderStateFriend = () => {
-    switch (isFriend) {
-      case "stranger":
+    switch (status) {
+      case "STRANGER":
         return (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#3366CC", flex: 1 }]}
-              onPress={() => setIsFriend("waitAccept")}
+              onPress={() => sendRequestHandler()}
             >
               <Ionicons name="person-add" size={20} color="white" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "white" }}>
@@ -102,12 +142,13 @@ export default function ProfileScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         );
-      case "waitAccept":
+        break;
+      case "IN_REQUEST_RECEIVER":
         return (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#3366CC", flex: 1 }]}
-              onPress={() => setIsFriend("realFriend")}
+              onPress={acceptRequestHandler}
             >
               <AntDesign name="check" size={13} color="white" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "white" }}>
@@ -125,7 +166,23 @@ export default function ProfileScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         );
-      case "realFriend":
+        break;
+      case "IN_REQUEST_SENDER":
+        return (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.Button, { backgroundColor: "#3366CC", flex: 1 }]}
+              onPress={() => cancelRequestHandler()}
+            >
+              <AntDesign name="check" size={13} color="white" />
+              <Text style={{ marginLeft: 10, fontSize: 15, color: "white" }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        );
+        break;
+      case "IS_FRIEND":
         return (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -138,6 +195,7 @@ export default function ProfileScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         );
+        break;
       default:
         return (
           <View style={styles.buttonContainer}>
@@ -159,11 +217,11 @@ export default function ProfileScreen({ navigation, route }) {
   };
 
   const renderAllFriend = () => {
-    return listFriend.length > 0 ? (
+    return friendList.length > 0 ? (
       <TouchableOpacity
         style={[styles.Button, { margin: 13 }]}
         onPress={() => {
-          navigation.navigate("ListAllFriend");
+          navigation.navigate("ListAllFriend", { listFriend: friendList });
         }}
       >
         <Text style={{ fontSize: 15 }}>All Friend</Text>
@@ -231,7 +289,14 @@ export default function ProfileScreen({ navigation, route }) {
             >
               {/* Avatar */}
               <View style={styles.avatarContainer}>
-                <Image style={styles.avatar} source={{ uri: user.avatar }} />
+                <Image
+                  style={styles.avatar}
+                  source={
+                    user?.avatar == null
+                      ? require("../assets/defaultProfilePicture.jpg")
+                      : { uri: user.avatar }
+                  }
+                />
                 <View
                   style={[
                     styles.cameraContainer,
@@ -256,7 +321,7 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* total friend */}
               <View style={styles.totalFriendContainer}>
-                <Text style={{ fontWeight: "bold" }}>3,3K</Text>
+                <Text style={{ fontWeight: "bold" }}>{user.total_friend}</Text>
                 <Text> friends</Text>
               </View>
               {/* total friend */}
@@ -310,7 +375,7 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(user.brithdate, "YYYY-MM-DD ").format("DD/MM/yyyy")}
+                    {moment(user.birth_date, "YYYY-MM-DD ").format("DD/MM/yyyy")}
                   </Text>
                 </Text>
               </View>
@@ -339,7 +404,7 @@ export default function ProfileScreen({ navigation, route }) {
             >
               Friend
             </Text>
-            <Text style={{ marginLeft: 10, fontSize: 13 }}>3.363 friends</Text>
+            <Text style={{ marginLeft: 10, fontSize: 13 }}>{user.total_friend + " friends"}</Text>
 
             <FlatList
               style={{ marginTop: 10 }}
@@ -351,9 +416,7 @@ export default function ProfileScreen({ navigation, route }) {
                 </View>
               )}
             />
-            <TouchableOpacity style={[styles.Button, { margin: 13 }]}>
-              <Text style={{ fontSize: 15 }}>All Friend</Text>
-            </TouchableOpacity>
+            {renderAllFriend()}
 
             <View style={styles.seperate} />
 

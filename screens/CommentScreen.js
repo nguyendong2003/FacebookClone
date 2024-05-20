@@ -39,6 +39,7 @@ import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
 // Upload image
 import * as ImagePicker from "expo-image-picker";
+import { LogBox } from 'react-native';
 
 export default function CommentScreen({ route, navigation }) {
   //
@@ -56,17 +57,6 @@ export default function CommentScreen({ route, navigation }) {
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
-  // useEffect(() => {
-  //   if (commentIdReplying) {
-  //     if (commentInputRef.current) {
-  //       commentInputRef.current.focus();
-  //       console.log('========');
-
-  //       console.log(isReplying);
-  //       console.log(commentIdReplying);
-  //     }
-  //   }
-  // }, [commentIdReplying]);
 
   useEffect(() => {
     if (isReplying || isCommentTextFocus) {
@@ -146,17 +136,16 @@ export default function CommentScreen({ route, navigation }) {
     return () => subscription?.remove();
   });
 
+  LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);
+
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
 
   const submitComment = async () => {
     if (isCommentValid) {
-      console.log(state.account.id);
-      console.log(route?.params?.postId);
-      console.log(commentText);
-      console.log(commentImage);
-
       formData = new FormData();
 
       formData.append("id_account", state.account.id);
@@ -182,6 +171,7 @@ export default function CommentScreen({ route, navigation }) {
       setCommentImage(null);
       getPosts();
       fetchComments();
+      route?.params?.onUpdatePost(route?.params?.postId);
     } else {
       alert("Invalid comment");
     }
