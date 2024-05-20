@@ -47,7 +47,7 @@ export default function Comment({
   const [colorReaction, setColorReaction] = useState('#65676B');
 
   // Scroll to comment when reply
-  const scrollView = useRef(null);
+  // const scrollView = useRef(null);
 
   useEffect(() => {
     // Xác định màu dựa trên giá trị reaction
@@ -125,7 +125,7 @@ export default function Comment({
             const previousValue = coords[previousKey];
             coords[item.id] = previousValue + height;
           }
-          console.log(coords);
+          // console.log(coords);
         }}
         style={{
           flexDirection: 'row',
@@ -144,7 +144,7 @@ export default function Comment({
           <View
             style={{
               flex: 1,
-              marginLeft: 8,
+              marginHorizontal: 8,
               borderRadius: 20,
               padding: 8,
               backgroundColor:

@@ -56,6 +56,10 @@ export default function CreatePostScreen({ navigation }) {
     { label: 'Private', value: '2' },
   ];
 
+  // useEffect(() => {
+  //   console.log(value);
+  // }, [value]);
+
   // pick multiple image
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -95,19 +99,14 @@ export default function CreatePostScreen({ navigation }) {
     }
   };
 
-  const removePhoto = () => {
-    setPhoto(null);
-    setIsSubmit(false);
-  };
-
   //
   useEffect(() => {
-    if (textPost.trim().length > 0 || imagePostList?.length > 0 || photo) {
+    if (textPost.trim().length > 0 || imagePostList?.length > 0) {
       setIsSubmit(true);
     } else {
       setIsSubmit(false);
     }
-  }, [textPost, imagePostList, photo]);
+  }, [textPost, imagePostList]);
 
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
@@ -124,7 +123,6 @@ export default function CreatePostScreen({ navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
   // Camera
-  const [photo, setPhoto] = useState(null);
   let cameraRef = useRef();
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -160,10 +158,12 @@ export default function CreatePostScreen({ navigation }) {
 
     let newPhoto = await cameraRef.current.takePictureAsync(options);
     setShowCamera(false);
-    setPhoto(newPhoto.uri);
+    if (imagePostList === null) {
+      setImagePostList([newPhoto.uri]);
+    } else {
+      setImagePostList((prevImageList) => [...prevImageList, newPhoto.uri]);
+    }
     setIsSubmit(true);
-    console.log(newPhoto.uri);
-    // setImage(null);
   };
   let openCamera = async () => {
     // const cameraPermission = await Camera.requestCameraPermissionsAsync();
@@ -199,17 +199,9 @@ export default function CreatePostScreen({ navigation }) {
                 alignItems: 'center',
                 backgroundColor: 'transparent',
               }}
-              // onPress={()=>this.pickImage()}
+              onPress={() => setShowCamera(false)}
             >
-              {/* <Ionicons
-                name="ios-photos"
-                style={{ color: '#fff', fontSize: 40 }}
-              /> */}
-              <MaterialIcons
-                name="add-photo-alternate"
-                size={40}
-                color="#fff"
-              />
+              <AntDesign name="back" size={40} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
               style={{
@@ -358,55 +350,49 @@ export default function CreatePostScreen({ navigation }) {
               alignItems: 'center',
             }}
           >
-            {photo && (
-              <View>
-                <Image
-                  // source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
-                  source={{ uri: photo }}
-                  style={{
-                    width: windowWidth,
-                    height: windowWidth,
-                    alignContent: 'center',
-                  }}
-                  resizeMode="cover"
-                />
-                <Entypo
-                  style={{ position: 'absolute', left: '88%', top: 10 }}
-                  name="circle-with-cross"
-                  size={36}
-                  color="#ccc"
-                  onPress={() => {
-                    removePhoto();
-                  }}
-                />
-              </View>
-            )}
             {imagePostList &&
-              imagePostList.map((image, index) => (
-                <View key={index}>
-                  <Image
-                    // key={index}
-                    source={{ uri: image }}
-                    style={{
-                      // marginLeft: 8,
-                      marginTop: 4,
-                      borderRadius: 20,
-                    }}
-                    width={windowWidth / 2}
-                    height={windowWidth / 2}
-                    resizeMode="cover"
-                  />
-                  <Entypo
-                    style={{ position: 'absolute', left: '80%', top: 8 }}
-                    name="circle-with-cross"
-                    size={36}
-                    color="#ccc"
-                    onPress={() => {
-                      removeImage(index);
-                    }}
-                  />
-                </View>
-              ))}
+              imagePostList.map((image, index) => {
+                return (
+                  <View key={index}>
+                    <Image
+                      // key={index}
+                      source={{ uri: image }}
+                      style={{
+                        marginHorizontal: 2,
+                        marginTop: 4,
+                        borderRadius: 20,
+                      }}
+                      width={
+                        imagePostList.length % 2 === 1 && index === 0
+                          ? windowWidth - 4
+                          : windowWidth / 2 - 4
+                      }
+                      height={
+                        imagePostList.length % 2 === 1 && index === 0
+                          ? windowWidth - 4
+                          : windowWidth / 2 - 4
+                      }
+                      resizeMode="cover"
+                    />
+                    <Entypo
+                      style={{
+                        position: 'absolute',
+                        left:
+                          imagePostList.length % 2 === 1 && index === 0
+                            ? '90%'
+                            : '80%',
+                        top: 8,
+                      }}
+                      name="circle-with-cross"
+                      size={36}
+                      color="#ccc"
+                      onPress={() => {
+                        removeImage(index);
+                      }}
+                    />
+                  </View>
+                );
+              })}
           </View>
           <View>
             <TouchableOpacity
@@ -418,6 +404,7 @@ export default function CreatePostScreen({ navigation }) {
               <FontAwesome6 name="image" size={24} color="#45bd62" />
               <Text style={styles.textOptionButton}>Image</Text>
             </TouchableOpacity>
+            {/*
             <TouchableOpacity
               style={styles.optionButtonContainer}
               onPress={() => {}}
@@ -439,6 +426,8 @@ export default function CreatePostScreen({ navigation }) {
               <Ionicons name="text" size={24} color="#2abba7" />
               <Text style={styles.textOptionButton}>Background Color</Text>
             </TouchableOpacity>
+            */}
+
             <TouchableOpacity
               style={styles.optionButtonContainer}
               onPress={() => openCamera()}
