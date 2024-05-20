@@ -43,6 +43,12 @@ export default function Navigation() {
               {state.token != null ? (
                 <>
                   <Stack.Screen
+                    name="LoginLoading"
+                    component={PrevHomeScreen}
+                    options={{ headerShown: false }}
+                  />
+
+                  <Stack.Screen
                     name="TabNavigationHome"
                     component={TabNavigationHome}
                     options={{ headerShown: false }}
@@ -94,14 +100,13 @@ export default function Navigation() {
                       component={ProfileScreen}
                       options={{
                         headerTitleAlign: "center",
-                        title: "Nguyễn Đông",
                       }}
                     />
                     <Stack.Screen
                       name="ListAllFriend"
                       component={ListAllFriendScreen}
                       options={{
-                        title: "Đông",
+                        title: "All Friends",
                       }}
                       headerStyle={{
                         elevation: 10,

@@ -144,12 +144,12 @@ export default function Comment({
       >
         <TouchableOpacity>
           <Image
-            source={{ uri: account?.avatar }}
+            source={account?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: account?.avatar }}
             style={{ width: 40, height: 40, borderRadius: 100 }}
           />
         </TouchableOpacity>
 
-        <View style={{ flex: 1 }}>
+        <View style={{ width: 'fit-content' }}>
           <View
             style={{
               flex: 1,

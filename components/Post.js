@@ -53,6 +53,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [sourceReaction, setSourceReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
+  const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
 
   const { state } = useContext(AccountContext);
@@ -137,6 +138,10 @@ export default function Post({ item, navigation, onUpdatePost }) {
     }
   };
 
+  const updatePostHandler = async (postId) => {
+    onUpdatePost(postId);
+  }
+
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
@@ -171,7 +176,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
 
       const response = await reaction({ id_account: state.account.id , postId, reaction_type});
       setValueReaction(convertReactionValue(response.type));
-      onUpdatePost(postId);
+      updatePostHandler(postId);
     } catch (error) {
       console.log(error);
     }
@@ -312,10 +317,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
             <TouchableOpacity
               style={{ padding: 4 }}
               onPress={() => {
-                navigation.navigate("Comment", { postId: item?.id });
-                // navigation.navigate('Comment', {
-                //   setValueReaction: setValueReaction,
-                // });
+                navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
@@ -490,19 +492,20 @@ export default function Post({ item, navigation, onUpdatePost }) {
               navigation.navigate("Comment", {
                 initialCommentFocus: true,
                 postId: item?.id,
+                 onUpdatePost: updatePostHandler
               });
             }}
           >
             <FontAwesome5 name="comment" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Comment</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.buttonBottomPost}
             onPress={() => alert("send")}
           >
             <Feather name="send" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Send</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.buttonBottomPost}
             onPress={() => alert("share")}

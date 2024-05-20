@@ -44,8 +44,9 @@ import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Context as PostContext } from "../context/PostContext";
 import { Context as AccountContext } from "../context/AccountContext";
+import { LogBox } from 'react-native';
 
-export default function CreatePostScreen({ navigation }) {
+export default function CreatePostScreen({ navigation, route }) {
   const [textPost, setTextPost] = useState("");
   const [imagePostList, setImagePostList] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
@@ -60,13 +61,20 @@ export default function CreatePostScreen({ navigation }) {
     { label: "Private", value: "2" },
   ];
 
-  const submitPost = () => {
+  LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);
+  
+  const submitPost = async () => {
     if (textPost.trim().length > 0 || imagePostList?.length > 0) {
-      createPost({
+      await createPost({
         content: textPost,
         images: imagePostList,
         view_mode: value,
       });
+      if (route?.params?.onFetchPost)
+        route.params.onFetchPost();
+
       setTextPost("");
       setImagePostList(null);
       setPhoto(null);
@@ -281,7 +289,7 @@ export default function CreatePostScreen({ navigation }) {
           >
             <View style={{ flexDirection: "row" }}>
               <Image
-                source={{ uri: state.account.avatar }}
+                source={state.account.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: state.account.avatar }}
                 style={{ width: 60, height: 60, borderRadius: 100 }}
               />
               <View style={{ marginLeft: 8 }}>
@@ -441,11 +449,11 @@ export default function CreatePostScreen({ navigation }) {
               <FontAwesome6 name="image" size={24} color="#45bd62" />
               <Text style={styles.textOptionButton}>Image</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.optionButtonContainer}
               onPress={() => {}}
-            >
-              <Ionicons name="person-add" size={24} color="#0866ff" />
+            > */}
+              {/* <Ionicons name="person-add" size={24} color="#0866ff" />
               <Text style={styles.textOptionButton}>Tag other people</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -468,7 +476,7 @@ export default function CreatePostScreen({ navigation }) {
             >
               <Entypo name="camera" size={24} color="#0866ff" />
               <Text style={styles.textOptionButton}>Camera</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

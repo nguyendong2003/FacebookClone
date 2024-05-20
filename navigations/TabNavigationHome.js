@@ -51,7 +51,6 @@ export default function TabNavigationHome({ navigation }) {
     window: Dimensions.get('window'),
   });
 
-  const { getPosts } = useContext(PostContext);
   const { getAccount } = useContext(AccountContext);
 
   useEffect(() => {
@@ -68,7 +67,6 @@ export default function TabNavigationHome({ navigation }) {
   // console.log({ windowWidth, windowHeight });
 
   useEffect(() => {
-    getPosts()
     getAccount()
   }, [])
 
@@ -100,7 +98,7 @@ export default function TabNavigationHome({ navigation }) {
             color="#050505"
             onPress={() => navigation.navigate('Search')}
           />
-          <View>
+          {/* <View>
             <FontAwesome5
               style={{ marginLeft: 16 }}
               name="facebook-messenger"
@@ -112,7 +110,7 @@ export default function TabNavigationHome({ navigation }) {
               value="99+"
               containerStyle={{ position: 'absolute', top: -8, right: -8 }}
             />
-          </View>
+          </View> */}
         </View>
       </View>
       <Tab.Navigator
