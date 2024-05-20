@@ -19,13 +19,14 @@ import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { RadioButton } from 'react-native-paper';
-
-import { useState, useEffect } from 'react';
+import { Context as AuthContext } from '../context/AuthContext';
+import { useState, useEffect, useContext } from 'react';
 
 export default function RegisterScreen({ navigation }) {
+  const { register } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-
+  const [username, setUsername] = useState('');
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -92,7 +93,9 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     let newErrors = {};
-
+    if (!username) {
+      newErrors['usernameError'] = 'Username cannot be empty';
+    }
     // Kiểm tra email
     if (!email) {
       newErrors['emailError'] = 'Email address cannot be empty';
@@ -142,7 +145,7 @@ export default function RegisterScreen({ navigation }) {
     } else {
       // Nếu không có lỗi, xóa tất cả các lỗi hiện tại
       setErrors({});
-      alert('Register successfully');
+      register({ email, username, password, dateOfBirth, gender, fullName });
       navigation.navigate('Login');
     }
   };
@@ -175,6 +178,24 @@ export default function RegisterScreen({ navigation }) {
           </View>
           <View style={styles.form}>
             <Text style={styles.textTitle}>Create an account</Text>
+            
+            <Text style={styles.labelForm}>Username</Text>
+            <TextInput
+              style={styles.inputEmail}
+              value={username}
+              //   onChangeText={setEmail}
+              onChangeText={(text) => {
+                setUsername(text);
+                // Xóa thông báo lỗi khi người dùng thay đổi nội dung
+                if (errors['usernameError']) {
+                  setErrors({ ...errors, usernameError: null });
+                }
+              }}
+              placeholder="Enter your username"
+            />
+            {errors['usernameError'] ? (
+              <Text style={styles.errorText}>{errors['usernameError']}</Text>
+            ) : null}
 
             <Text style={styles.labelForm}>Email address</Text>
             <TextInput

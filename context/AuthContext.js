@@ -23,7 +23,6 @@ const signIn = (dispatch) => {
       });
       await AsyncStorage.setItem("token", response.data.token);
 
-
       dispatch({ type: "SIGN_IN", payload: response.data.token });
     } catch (error) {
       dispatch({
@@ -45,8 +44,29 @@ const checkLoggedIn = (dispatch) => {
   };
 };
 
+const register = (dispatch) => {
+  return async ({ email, username, password, dateOfBirth, gender, fullName }) => {
+    try {
+      gender = gender == 'male' ? true : false
+      const response = await SpringServer.post("/auth/register", {
+        username,
+        password,
+        email,
+        date_of_birth: dateOfBirth,
+        gender,
+        full_name: fullName,
+      });
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with sign up",
+      });
+      Alert.alert("Error", "Something went wrong with up");
+    }
+  };
+};
 export const { Context, Provider } = createDataContext(
   authReducer,
-  { signIn, checkLoggedIn },
+  { signIn, checkLoggedIn, register },
   { token: null, errorMessage: "" }
 );
