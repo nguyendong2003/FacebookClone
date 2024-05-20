@@ -4,6 +4,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { FontAwesome } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import listPost from '../data/postProfile.json'
 import FriendProfile from "../components/FriendProfile";
@@ -14,7 +15,7 @@ import { useState } from "react";
 
 export default function ProfileScreen({navigation, route}){
     const {isPersonalPage, statusFriend, listFriend} = route.params
-    // stranger, waitAccept, realFriend, personalPage
+    // stranger, waitAccept, realFriend, personalPage, isSended
     const [isFriend, setIsFriend] = useState(statusFriend)
     const [isVisible, setIsVisible] = useState(isPersonalPage)
     const renderCreatePost =() => {
@@ -46,7 +47,7 @@ export default function ProfileScreen({navigation, route}){
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
                         style={[styles.Button, {backgroundColor: "#3366CC", flex:1}]}
-                        onPress={() => setIsFriend("waitAccept")}
+                        onPress={() => setIsFriend("isSended")}
                         >
                             <Ionicons name="person-add" size={20} color="white" />
                             <Text style={{marginLeft: 10,fontSize: 15,color: "white"}}>Add friend</Text>
@@ -86,7 +87,18 @@ export default function ProfileScreen({navigation, route}){
                         </TouchableOpacity>
                     </View>
                 )
-
+            case "isSended":
+                return (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity 
+                        style={[styles.Button, {backgroundColor: "#CFECEC", flex:1}]}
+                        >
+                            <MaterialIcons name="person-add-disabled" size={24} color="black" />
+                            <Text style={{marginLeft: 10,fontSize: 15,color: "black"}}>Cancel Request</Text>
+                        </TouchableOpacity>
+                    </View>
+                )
+                
             default: 
                 // setIsVisible(true)
                 return(

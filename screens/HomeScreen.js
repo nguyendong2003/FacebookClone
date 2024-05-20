@@ -97,7 +97,7 @@ export default function HomeScreen({ navigation }) {
                 }}
               >
                 <TouchableOpacity onPress={() => {
-                  navigation.navigate('Profile',{isPersonalPage: true, statusFriend: "personalPage", listFriend: listFriend})
+                  navigation.navigate('Profile',{isPersonalPage: true, statusFriend: "isSended", listFriend: listFriend})
                 }}>
                   <Image
                     source={require('../assets/messi.jpg')}
