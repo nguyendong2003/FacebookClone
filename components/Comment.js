@@ -38,6 +38,7 @@ export default function Comment({
   commentIdReplying,
   setCommentIdReplying,
   setNameReplying,
+  setCommentText,
   scrollToComment,
   coords,
   setCoords,
@@ -149,13 +150,15 @@ export default function Comment({
           />
         </TouchableOpacity>
 
-        <View style={{ width: 'fit-content' }}>
+        <View style={{maxWidth: '80%'}}>
           <View
             style={{
               flex: 1,
               marginLeft: 8,
               borderRadius: 20,
               padding: 8,
+              paddingLeft: 12,
+              paddingRight: 12,
               backgroundColor:
                 item.id === commentIdReplying ? "#ccc" : "#f0f2f5",
             }}
@@ -194,7 +197,7 @@ export default function Comment({
                   borderRadius: 20,
                   // width: 200,
                   height: 200,
-                  width: "60%",
+                  width: "80%",
                   aspectRatio: 1,
                   resizeMode: "cover",
                   // marginTop: 8,
@@ -359,7 +362,8 @@ export default function Comment({
                 onPress={() => {
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
-                  setNameReplying(item?.name);
+                  setNameReplying(account.profile_name);
+                  setCommentText(`${account.profile_name} `);
                   scrollToComment(item?.id);
                 }}
               >
@@ -421,6 +425,7 @@ export default function Comment({
             key={reply.id}
             item={reply}
             setIsReplying={setIsReplying}
+            setCommentText={setCommentText}
             commentIdReplying={commentIdReplying}
             setCommentIdReplying={setCommentIdReplying}
             setNameReplying={setNameReplying}

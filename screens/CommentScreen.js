@@ -150,7 +150,6 @@ export default function CommentScreen({ route, navigation }) {
 
       formData.append("id_account", state.account.id);
       if (commentIdReplying) {
-        formData.append("account_tag", 1);
         formData.append("to_comment_id", commentIdReplying);
       } 
       else 
@@ -168,10 +167,11 @@ export default function CommentScreen({ route, navigation }) {
 
       await createComment(formData);
       setCommentText("");
+      setIsReplying(false);
       setCommentImage(null);
       getPosts();
       fetchComments();
-      route?.params?.onUpdatePost(route?.params?.postId);
+      await route?.params?.onUpdatePost(route?.params?.postId);
     } else {
       alert("Invalid comment");
     }
@@ -195,6 +195,7 @@ export default function CommentScreen({ route, navigation }) {
             <Comment
               item={item}
               setIsReplying={setIsReplying}
+              setCommentText={setCommentText}
               commentIdReplying={commentIdReplying}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}

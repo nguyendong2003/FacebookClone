@@ -153,7 +153,6 @@ export default function Post({ item, navigation, onUpdatePost }) {
     const fetchReaction = async () => {
       const response = await getReactionToPost(item?.id);
       setValueReaction(convertReactionValue(response.type));
-      
     };
     fetchReaction();
   }, []);
@@ -176,11 +175,19 @@ export default function Post({ item, navigation, onUpdatePost }) {
 
       const response = await reaction({ id_account: state.account.id , postId, reaction_type});
       setValueReaction(convertReactionValue(response.type));
-      updatePostHandler(postId);
+      await onUpdatePost(postId);
+
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setReactionCount(item?.reaction_quantity);
+      setCommentCount(item?.comment_quantity);
+    }, 800);
+  }, [item]);
 
   const { window } = dimensions;
   const windowWidth = window.width;
@@ -201,7 +208,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
           onPress={() => {navigation.navigate('Profile', {isPersonalPage: false, statusFriend: "realFriend", listFriend: []})}}
           >
             <Image
-              source={{ uri: user.avatar }}
+              source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar}}
               style={{
                 width: 40,
                 height: 40,
@@ -310,7 +317,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 color: "#65676B",
               }}
             >
-              {reactionCount}
+              {item?.reaction_quantity}
             </Text>
           </TouchableOpacity>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
