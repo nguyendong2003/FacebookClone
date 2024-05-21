@@ -28,7 +28,7 @@ import {
   Fontisto,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Badge } from 'react-native-elements';
 
 // Tab Navigation
@@ -39,6 +39,10 @@ import HomeScreen from '../screens/HomeScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import MoreScreen from '../screens/MoreScreen';
 import FriendScreen from '../screens/FriendScreen';
+import { Context as PostContext } from '../context/PostContext';
+import { Context as AccountContext } from '../context/AccountContext';
+
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -46,6 +50,8 @@ export default function TabNavigationHome({ navigation }) {
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
+
+  const { getAccount } = useContext(AccountContext);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -59,6 +65,10 @@ export default function TabNavigationHome({ navigation }) {
   const windowHeight = window.height;
 
   // console.log({ windowWidth, windowHeight });
+
+  useEffect(() => {
+    getAccount()
+  }, [])
 
   return (
     <View
@@ -88,7 +98,7 @@ export default function TabNavigationHome({ navigation }) {
             color="#050505"
             onPress={() => navigation.navigate('Search')}
           />
-          <View>
+          {/* <View>
             <FontAwesome5
               style={{ marginLeft: 16 }}
               name="facebook-messenger"
@@ -100,7 +110,7 @@ export default function TabNavigationHome({ navigation }) {
               value="99+"
               containerStyle={{ position: 'absolute', top: -8, right: -8 }}
             />
-          </View>
+          </View> */}
         </View>
       </View>
       <Tab.Navigator

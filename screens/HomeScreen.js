@@ -16,7 +16,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
-} from 'react-native';
+} from "react-native";
 
 import {
   MaterialCommunityIcons,
@@ -27,27 +27,30 @@ import {
   Ionicons,
   Fontisto,
   Entypo,
-} from '@expo/vector-icons';
+} from "@expo/vector-icons";
 
-import { useState, useEffect } from 'react';
-import moment from 'moment';
+import { useState, useEffect, useContext } from "react";
+import moment from "moment";
 
-import postList from '../data/post.json';
-import commentList from '../data/comment.json';
-import listFriend from '../data/listFriendProfile.json'
+import postList from "../data/post.json";
+import commentList from "../data/comment.json";
+import listFriend from "../data/listFriendProfile.json";
 
-import Comment from '../components/Comment';
-import Post from '../components/Post';
+import Comment from "../components/Comment";
+import Post from "../components/Post";
 // Upload image
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
+
+import { Context as AccountContext } from "../context/AccountContext";
 
 export default function HomeScreen({ navigation }) {
+  const { state: accountState, getAccount } = useContext(AccountContext);
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
@@ -63,24 +66,24 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.scrollContainer}>
           <FlatList
             style={{
-              alignSelf: 'flex-start',
-              minWidth: '100%',
+              alignSelf: "flex-start",
+              minWidth: "100%",
             }}
-            data={postList}
+            data={[]}
             renderItem={({ item }) => (
               <Post item={item} navigation={navigation} />
             )}
             keyExtractor={(item, index) => item.id.toString()}
             ItemSeparatorComponent={
-              <View style={{ height: 4, backgroundColor: '#ccc' }}></View>
+              <View style={{ height: 4, backgroundColor: "#ccc" }}></View>
             }
             ListEmptyComponent={
               <Text
                 style={{
-                  color: 'red',
+                  color: "red",
                   fontSize: 24,
                   flex: 1,
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 No post found
@@ -89,18 +92,25 @@ export default function HomeScreen({ navigation }) {
             ListHeaderComponent={
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
                   padding: 8,
-                  borderBottomColor: '#ccc',
+                  borderBottomColor: "#ccc",
                   borderBottomWidth: 4,
                 }}
               >
-                <TouchableOpacity onPress={() => {
-                  navigation.navigate('Profile',{isPersonalPage: true, statusFriend: "personalPage", listFriend: listFriend})
-                }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("Profile", {
+                      accountId: accountState.account.id,
+                      isPersonalPage: true,
+                      statusFriend: "personalPage",
+                      listFriend: listFriend,
+                    });
+                  }}
+                >
                   <Image
-                    source={require('../assets/messi.jpg')}
+                    source={accountState.account.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: accountState.account.avatar }}
                     style={{ width: 40, height: 40, borderRadius: 100 }}
                   />
                 </TouchableOpacity>
@@ -110,16 +120,16 @@ export default function HomeScreen({ navigation }) {
                     flex: 1,
                     paddingVertical: 8,
                     paddingHorizontal: 16,
-                    borderColor: '#65676B',
+                    borderColor: "#65676B",
                     borderRadius: 20,
                     borderWidth: 1,
                     marginLeft: 16,
                   }}
                   onPress={() => {
-                    navigation.navigate('CreatePost');
+                    navigation.navigate("CreatePost");
                   }}
                 >
-                  <Text style={{ color: '#65676B' }}>
+                  <Text style={{ color: "#65676B" }}>
                     What are you thinking?
                   </Text>
                 </TouchableOpacity>
@@ -143,26 +153,26 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     // padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   //
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 12,
     borderRadius: 8,
     // marginTop: 4,
@@ -175,22 +185,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: '90%',
+    width: "90%",
   },
 
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     height: 40,
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -201,7 +211,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: 'gray',
+    borderBottomColor: "gray",
     borderBottomWidth: 0.5,
   },
   icon: {
@@ -223,15 +233,15 @@ const styles = StyleSheet.create({
   },
   //button bottom post
   buttonBottomPost: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     // padding: 4,
   },
   textBottomPost: {
     fontSize: 12,
     marginLeft: 8,
-    fontWeight: '500',
-    color: '#65676B',
+    fontWeight: "500",
+    color: "#65676B",
   },
 });

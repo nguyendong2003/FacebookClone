@@ -16,7 +16,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
-} from 'react-native';
+} from "react-native";
 
 import {
   MaterialCommunityIcons,
@@ -27,94 +27,167 @@ import {
   Ionicons,
   Fontisto,
   Entypo,
-} from '@expo/vector-icons';
+} from "@expo/vector-icons";
 
-import { useState, useEffect } from 'react';
-import moment from 'moment';
+import { useState, useEffect, useContext } from "react";
+import moment from "moment";
 
-import postList from '../data/post.json';
-import commentList from '../data/comment.json';
+import postList from "../data/post.json";
+import commentList from "../data/comment.json";
 
-import Comment from './Comment';
+import Comment from "./Comment";
 
 // // Upload image
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
+import { getReactionToPost, reaction, getPostById } from "../service/PostService";
+import { getAccountById } from "../service/AccountService";
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as PostContext } from "../context/PostContext";
 
-export default function Post({ item, navigation }) {
+export default function Post({ item, navigation, onUpdatePost }) {
   // Reaction
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [sizeReaction, setSizeReaction] = useState(null);
   const [sourceReaction, setSourceReaction] = useState(null);
-  const [colorReaction, setColorReaction] = useState('#65676B');
-  //
+  const [colorReaction, setColorReaction] = useState("#65676B");
+  const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
+  const [commentCount, setCommentCount] = useState(item?.comment_quantity);
+  const [user, setUser] = useState({});
 
+  const { state } = useContext(AccountContext);
+  //
   useEffect(() => {
     // console.log(valueReaction);
     // Xác định màu dựa trên giá trị reaction
     switch (valueReaction) {
       case 1:
-        setColorReaction('#0866FF');
-        setNameReaction('Like');
+        setColorReaction("#0866FF");
+        setNameReaction("Like");
         setSizeReaction(44 - 16);
-        setSourceReaction(require('../assets/facebook-like.png'));
+        setSourceReaction(require("../assets/facebook-like.png"));
 
         break;
       case 2:
-        setColorReaction('#F33E58');
-        setNameReaction('Love');
+        setColorReaction("#F33E58");
+        setNameReaction("Love");
         setSizeReaction(40 - 16);
-        setSourceReaction(require('../assets/facebook-heart.jpg'));
+        setSourceReaction(require("../assets/facebook-heart.jpg"));
         break;
       case 3:
-        setColorReaction('#F7B125');
-        setNameReaction('Care');
+        setColorReaction("#F7B125");
+        setNameReaction("Care");
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-care2.jpg'));
+        setSourceReaction(require("../assets/facebook-care2.jpg"));
         break;
       case 4:
-        setColorReaction('#F7B125');
-        setNameReaction('Haha');
+        setColorReaction("#F7B125");
+        setNameReaction("Haha");
         setSizeReaction(48 - 20);
-        setSourceReaction(require('../assets/facebook-haha.png'));
+        setSourceReaction(require("../assets/facebook-haha.png"));
         break;
       case 5:
-        setColorReaction('#F7B125');
-        setNameReaction('Wow');
+        setColorReaction("#F7B125");
+        setNameReaction("Wow");
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-wow.png'));
+        setSourceReaction(require("../assets/facebook-wow.png"));
         break;
       case 6:
-        setColorReaction('#E9710F');
-        setNameReaction('Sad');
+        setColorReaction("#E9710F");
+        setNameReaction("Sad");
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-sad.jpg'));
+        setSourceReaction(require("../assets/facebook-sad.jpg"));
         break;
       case 7:
-        setColorReaction('#E9710F');
-        setNameReaction('Angry');
+        setColorReaction("#E9710F");
+        setNameReaction("Angry");
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-angry.png'));
+        setSourceReaction(require("../assets/facebook-angry.png"));
         break;
 
       default:
-        setColorReaction('#65676B'); // Màu mặc định
-        setNameReaction('Like');
+        setColorReaction("#65676B"); // Màu mặc định
+        setNameReaction("Like");
         setSourceReaction(null);
     }
   }, [valueReaction]);
 
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
+  const convertReactionValue = (value) => {
+    switch (value) {
+      case "LIKE":
+        return 1;
+      case "LOVE":
+        return 2;
+      case "CARE":
+        return 3;
+      case "HAHA":
+        return 4;
+      case "WOW":
+        return 5;
+      case "SAD":
+        return 6;
+      case "ANGRY":
+        return 7;
+      default:
+        return 0;
+    }
+  };
+
+  const updatePostHandler = async (postId) => {
+    onUpdatePost(postId);
+  }
+
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
   });
+
+  useEffect(() => {
+    const fetchReaction = async () => {
+      const response = await getReactionToPost(item?.id);
+      setValueReaction(convertReactionValue(response.type));
+    };
+    fetchReaction();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getAccountById(item?.user_id);
+      setUser(response);
+    };
+    fetchUser();
+  }, []);
+
+  const reactionHandler = async (postId, reaction_type) => {
+    try {
+      if (reaction_type === 'NONE') {
+        setReactionCount(reactionCount - 1);
+      }
+      else 
+        setReactionCount(reactionCount + 1);
+
+      const response = await reaction({ id_account: state.account.id , postId, reaction_type});
+      setValueReaction(convertReactionValue(response.type));
+      await onUpdatePost(postId);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setReactionCount(item?.reaction_quantity);
+      setCommentCount(item?.comment_quantity);
+    }, 800);
+  }, [item]);
 
   const { window } = dimensions;
   const windowWidth = window.width;
@@ -125,8 +198,8 @@ export default function Post({ item, navigation }) {
       <View style={styles.card} key={item.id}>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: "row",
+            alignItems: "center",
             padding: 12,
             paddingBottom: 0,
           }}
@@ -141,7 +214,7 @@ export default function Post({ item, navigation }) {
             }}
           >
             <Image
-              source={{ uri: item?.avatar }}
+              source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar}}
               style={{
                 width: 40,
                 height: 40,
@@ -155,25 +228,23 @@ export default function Post({ item, navigation }) {
             <TouchableOpacity>
               <Text
                 style={{
-                  color: '#050505',
+                  color: "#050505",
                   fontSize: 15,
-                  fontWeight: '600',
+                  fontWeight: "600",
                 }}
               >
-                {item?.name}
+                {user.profile_name}
               </Text>
             </TouchableOpacity>
 
             <Text
               style={{
-                color: '#65676B',
+                color: "#65676B",
                 fontSize: 13,
                 fontWeight: 400,
               }}
             >
-              {moment(item?.time, 'YYYY-MM-DD HH:mm:ss').format(
-                'DD/MM/yyyy hh:mm:ss'
-              )}
+              {moment(item.create_time, "YYYY-MM-DD ").format("DD/MM/yyyy")}
             </Text>
           </View>
         </View>
@@ -182,27 +253,27 @@ export default function Post({ item, navigation }) {
             style={{
               marginTop: 8,
               fontSize: 17,
-              fontWeight: '400',
+              fontWeight: "400",
 
               paddingHorizontal: 12,
               paddingVertical: 0,
             }}
           >
-            {item?.description}
+            {item?.content}
           </Text>
           <View
             style={{
               marginTop: 8,
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "flex-start",
+              alignItems: "center",
             }}
           >
-            {item?.images.map((image, index) => (
+            {item?.postImages.map((image, index) => (
               <Image
                 key={index}
-                source={{ uri: image }}
+                source={{ uri: image.image }}
                 style={{
                   marginHorizontal: 2,
                   marginTop: 4,
@@ -225,9 +296,9 @@ export default function Post({ item, navigation }) {
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            borderBottomColor: '#ccc',
+            flexDirection: "row",
+            justifyContent: "space-between",
+            borderBottomColor: "#ccc",
             borderBottomWidth: 1,
             // padding: 4,
             paddingVertical: 4,
@@ -236,65 +307,62 @@ export default function Post({ item, navigation }) {
         >
           <TouchableOpacity
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
+              flexDirection: "row",
+              alignItems: "center",
             }}
-            onPress={() => alert('Reactions')}
+            onPress={() => alert("Reactions")}
           >
             <Image
-              source={require('../assets/facebook-like.png')}
+              source={require("../assets/facebook-like.png")}
               style={{ width: 24, height: 24 }}
             />
             <Image
-              source={require('../assets/facebook-haha.png')}
+              source={require("../assets/facebook-haha.png")}
               style={{ width: 24, height: 24 }}
             />
             <Image
-              source={require('../assets/facebook-heart.jpg')}
+              source={require("../assets/facebook-heart.jpg")}
               style={{ width: 24, height: 24, marginLeft: 2 }}
             />
             <Text
               style={{
                 marginLeft: 3,
                 fontSize: 12,
-                color: '#65676B',
+                color: "#65676B",
               }}
             >
-              20.500
+              {item?.reaction_quantity}
             </Text>
           </TouchableOpacity>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity
               style={{ padding: 4 }}
               onPress={() => {
-                navigation.navigate('Comment');
-                // navigation.navigate('Comment', {
-                //   setValueReaction: setValueReaction,
-                // });
+                navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                44.000 comments
+                {item?.comment_quantity + " comments"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={{ marginLeft: 4, padding: 4 }}
               onPress={() => {
-                navigation.navigate('Comment');
+                navigation.navigate("Comment");
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                220.000 shares
+                {item?.share_quantity + " shares"}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'center',
+            flexDirection: "row",
+            justifyContent: "space-around",
+            alignItems: "center",
             marginTop: 8,
             paddingTop: 2,
             paddingBottom: 10,
@@ -306,9 +374,9 @@ export default function Post({ item, navigation }) {
             onPress={() => {
               setIsPressingLike(false);
               if (valueReaction > 0) {
-                setValueReaction(0);
+                reactionHandler(item?.id, 'NONE');
               } else {
-                setValueReaction(1);
+                reactionHandler(item?.id, 'LIKE');
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -331,22 +399,22 @@ export default function Post({ item, navigation }) {
             {/* <Text style={styles.textBottomPost}>Like</Text> */}
             <Text style={[styles.textBottomPost, { color: colorReaction }]}>
               {/* Like */}
-              {nameReaction ? nameReaction : 'Like'}
+              {nameReaction ? nameReaction : "Like"}
             </Text>
 
             {isPressingLike && (
               <View
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: -84,
                   left: -14,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: 'white',
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "white",
                   padding: 8,
                   borderRadius: 50,
 
-                  shadowColor: 'black',
+                  shadowColor: "black",
                   shadowOffset: {
                     width: 0,
                     height: 2,
@@ -359,55 +427,55 @@ export default function Post({ item, navigation }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(1);
+                    reactionHandler(item?.id, 'LIKE');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-like.png')}
+                    source={require("../assets/facebook-like.png")}
                     style={{ width: 44, height: 44, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(2);
+                    reactionHandler(item?.id, 'LOVE');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-heart.jpg')}
+                    source={require("../assets/facebook-heart.jpg")}
                     style={{ width: 40, height: 40 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(3);
+                    reactionHandler(item?.id, 'CARE');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-care2.jpg')}
+                    source={require("../assets/facebook-care2.jpg")}
                     style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(4);
+                    reactionHandler(item?.id, 'HAHA');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-haha.png')}
+                    source={require("../assets/facebook-haha.png")}
                     style={{ width: 48, height: 48 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(5);
+                    reactionHandler(item?.id, 'WOW');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-wow.png')}
+                    source={require("../assets/facebook-wow.png")}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -415,11 +483,11 @@ export default function Post({ item, navigation }) {
                   style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(6);
+                    reactionHandler(item?.id, 'SAD');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-sad.jpg')}
+                    source={require("../assets/facebook-sad.jpg")}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -427,11 +495,11 @@ export default function Post({ item, navigation }) {
                   style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
-                    setValueReaction(7);
+                    reactionHandler(item?.id, 'ANGRY');
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-angry.png')}
+                    source={require("../assets/facebook-angry.png")}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -442,22 +510,26 @@ export default function Post({ item, navigation }) {
           <TouchableOpacity
             style={styles.buttonBottomPost}
             onPress={() => {
-              navigation.navigate('Comment', { initialCommentFocus: true });
+              navigation.navigate("Comment", {
+                initialCommentFocus: true,
+                postId: item?.id,
+                 onUpdatePost: updatePostHandler
+              });
             }}
           >
             <FontAwesome5 name="comment" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Comment</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.buttonBottomPost}
-            onPress={() => alert('send')}
+            onPress={() => alert("send")}
           >
             <Feather name="send" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Send</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.buttonBottomPost}
-            onPress={() => alert('share')}
+            onPress={() => alert("share")}
           >
             <FontAwesome name="share" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Share</Text>
@@ -471,26 +543,26 @@ export default function Post({ item, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     // padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   //
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     // padding: 12,
     borderRadius: 8,
     // marginTop: 4,
@@ -503,22 +575,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: '90%',
+    width: "90%",
   },
 
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     height: 40,
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -529,7 +601,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: 'gray',
+    borderBottomColor: "gray",
     borderBottomWidth: 0.5,
   },
   icon: {
@@ -551,15 +623,15 @@ const styles = StyleSheet.create({
   },
   //button bottom post
   buttonBottomPost: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     // padding: 4,
   },
   textBottomPost: {
     fontSize: 12,
     marginLeft: 8,
-    fontWeight: '500',
-    color: '#65676B',
+    fontWeight: "500",
+    color: "#65676B",
   },
 });

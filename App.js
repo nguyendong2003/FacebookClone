@@ -1,7 +1,12 @@
-import React from 'react';
-import Navigation from './Navigation.js';
+import React from "react";
+import Navigation from "./Navigation.js";
+import { Provider as AuthProvider } from "./context/AuthContext.js";  
 const App = () => {
-  return <Navigation />;
+  return (
+    <AuthProvider>
+      <Navigation />
+    </AuthProvider>
+  );
 };
 
 export default App;

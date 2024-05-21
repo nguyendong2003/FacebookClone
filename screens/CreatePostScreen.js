@@ -17,7 +17,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
-} from 'react-native';
+} from "react-native";
 
 import {
   MaterialCommunityIcons,
@@ -30,36 +30,62 @@ import {
   Ionicons,
   Fontisto,
   Entypo,
-} from '@expo/vector-icons';
+} from "@expo/vector-icons";
 
-import { Dropdown } from 'react-native-element-dropdown';
+import { Dropdown } from "react-native-element-dropdown";
 
 // Upload image
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 // Camera
-import { Camera, CameraType } from 'expo-camera/legacy';
+import { Camera, CameraType } from "expo-camera/legacy";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
+import { Context as PostContext } from "../context/PostContext";
+import { Context as AccountContext } from "../context/AccountContext";
+import { LogBox } from 'react-native';
 
-export default function CreatePostScreen({ navigation }) {
-  const [textPost, setTextPost] = useState('');
+export default function CreatePostScreen({ navigation, route }) {
+  const [textPost, setTextPost] = useState("");
   const [imagePostList, setImagePostList] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
+  const { createPost } = useContext(PostContext);
+  const { state } = useContext(AccountContext);
 
   // chọn chế độ bài viết
-  const [value, setValue] = useState('1');
+  const [value, setValue] = useState("1");
 
   const data = [
-    { label: 'Public', value: '1' },
-    { label: 'Private', value: '2' },
+    { label: "Public", value: "1" },
+    { label: "Private", value: "2" },
   ];
 
   // useEffect(() => {
   //   console.log(value);
   // }, [value]);
 
+  LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);
+  
+  const submitPost = async () => {
+    if (textPost.trim().length > 0 || imagePostList?.length > 0) {
+      await createPost({
+        content: textPost,
+        images: imagePostList,
+        view_mode: value,
+      });
+      if (route?.params?.onFetchPost)
+        route.params.onFetchPost();
+
+      setTextPost("");
+      setImagePostList(null);
+      setPhoto(null);
+      setIsSubmit(false);
+      navigation.goBack();
+    }
+  };
   // pick multiple image
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -109,11 +135,11 @@ export default function CreatePostScreen({ navigation }) {
   }, [textPost, imagePostList]);
 
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
@@ -131,7 +157,7 @@ export default function CreatePostScreen({ navigation }) {
   useEffect(() => {
     async function requestCameraPermission() {
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraPermission.status === 'granted');
+      setHasCameraPermission(cameraPermission.status === "granted");
     }
 
     requestCameraPermission();
@@ -182,22 +208,22 @@ export default function CreatePostScreen({ navigation }) {
           style={{
             flex: 1,
             height: Math.round((windowWidth * 16) / 9),
-            width: '100%',
+            width: "100%",
           }}
         >
           <View
             style={{
               flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
+              flexDirection: "row",
+              justifyContent: "space-between",
               margin: 30,
             }}
           >
             <TouchableOpacity
               style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
+                alignSelf: "flex-end",
+                alignItems: "center",
+                backgroundColor: "transparent",
               }}
               onPress={() => setShowCamera(false)}
             >
@@ -205,28 +231,28 @@ export default function CreatePostScreen({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
+                alignSelf: "flex-end",
+                alignItems: "center",
+                backgroundColor: "transparent",
               }}
               onPress={() => takePicture()}
             >
               <FontAwesome
                 name="camera"
-                style={{ color: '#fff', fontSize: 40 }}
+                style={{ color: "#fff", fontSize: 40 }}
               />
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                alignSelf: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
+                alignSelf: "flex-end",
+                alignItems: "center",
+                backgroundColor: "transparent",
               }}
               onPress={() => toggleCameraType()}
             >
               <MaterialCommunityIcons
                 name="camera-switch"
-                style={{ color: '#fff', fontSize: 40 }}
+                style={{ color: "#fff", fontSize: 40 }}
               />
             </TouchableOpacity>
           </View>
@@ -247,20 +273,20 @@ export default function CreatePostScreen({ navigation }) {
         >
           <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
               padding: 12,
             }}
           >
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: "row" }}>
               <Image
-                source={require('../assets/messi.jpg')}
+                source={state.account.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: state.account.avatar }}
                 style={{ width: 60, height: 60, borderRadius: 100 }}
               />
               <View style={{ marginLeft: 8 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-                  Nguyễn Đông
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {state.account.profile_name}
                 </Text>
                 <Dropdown
                   style={styles.dropdown}
@@ -279,7 +305,7 @@ export default function CreatePostScreen({ navigation }) {
                   renderLeftIcon={() => (
                     <Ionicons
                       style={styles.icon}
-                      name={value === '1' ? 'earth-sharp' : 'lock-closed'}
+                      name={value === "1" ? "earth-sharp" : "lock-closed"}
                       size={20}
                       color="#0866ff"
                     />
@@ -298,7 +324,7 @@ export default function CreatePostScreen({ navigation }) {
                         style={[
                           styles.textItem,
                           {
-                            color: item.value === value ? '#0866ff' : '#050505',
+                            color: item.value === value ? "#0866ff" : "#050505",
                           },
                         ]}
                       >
@@ -319,14 +345,19 @@ export default function CreatePostScreen({ navigation }) {
             </View>
 
             <View>
-              <Button title="Post" color="#0866ff" disabled={!isSubmit} />
+              <Button
+                title="Post"
+                color="#0866ff"
+                disabled={!isSubmit}
+                onPress={submitPost}
+              />
             </View>
           </View>
           <View style={{ marginTop: 16, padding: 12 }}>
             <TextInput
               style={{
-                color: '#050505',
-                textAlignVertical: 'top',
+                color: "#050505",
+                textAlignVertical: "top",
                 fontSize: 18,
                 // minHeight: imagePostList ? 100 : 0,
               }}
@@ -344,12 +375,35 @@ export default function CreatePostScreen({ navigation }) {
             style={{
               marginTop: 8,
               marginBottom: 8,
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "flex-start",
+              alignItems: "center",
             }}
           >
+            {photo && (
+              <View>
+                <Image
+                  // source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
+                  source={{ uri: photo }}
+                  style={{
+                    width: windowWidth,
+                    height: windowWidth,
+                    alignContent: "center",
+                  }}
+                  resizeMode="cover"
+                />
+                <Entypo
+                  style={{ position: "absolute", left: "88%", top: 10 }}
+                  name="circle-with-cross"
+                  size={36}
+                  color="#ccc"
+                  onPress={() => {
+                    removePhoto();
+                  }}
+                />
+              </View>
+            )}
             {imagePostList &&
               imagePostList.map((image, index) => {
                 return (
@@ -376,11 +430,11 @@ export default function CreatePostScreen({ navigation }) {
                     />
                     <Entypo
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         left:
                           imagePostList.length % 2 === 1 && index === 0
                             ? '90%'
-                            : '80%',
+                            : "80%",
                         top: 8,
                       }}
                       name="circle-with-cross"
@@ -404,12 +458,11 @@ export default function CreatePostScreen({ navigation }) {
               <FontAwesome6 name="image" size={24} color="#45bd62" />
               <Text style={styles.textOptionButton}>Image</Text>
             </TouchableOpacity>
-            {/*
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.optionButtonContainer}
               onPress={() => {}}
-            >
-              <Ionicons name="person-add" size={24} color="#0866ff" />
+            > */}
+              {/* <Ionicons name="person-add" size={24} color="#0866ff" />
               <Text style={styles.textOptionButton}>Tag other people</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -434,7 +487,7 @@ export default function CreatePostScreen({ navigation }) {
             >
               <Entypo name="camera" size={24} color="#0866ff" />
               <Text style={styles.textOptionButton}>Camera</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -446,29 +499,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: "white",
     // paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
     // alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: "white",
     // padding: 16,
     // padding: 4,
     paddingBottom: 8,
   },
   //
   optionButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopColor: '#e2e4e7',
+    flexDirection: "row",
+    alignItems: "center",
+    borderTopColor: "#e2e4e7",
     borderTopWidth: 1,
     padding: 12,
   },
   textOptionButton: {
-    color: '#65676b',
+    color: "#65676b",
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: "400",
     marginLeft: 12,
   },
 
@@ -478,10 +531,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 130,
     height: 36,
-    backgroundColor: '#ebf5ff',
+    backgroundColor: "#ebf5ff",
     borderRadius: 12,
     padding: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,
@@ -496,9 +549,9 @@ const styles = StyleSheet.create({
   },
   item: {
     padding: 17,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   textItem: {
     flex: 1,
@@ -509,8 +562,8 @@ const styles = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 14,
-    color: '#0866FF',
-    fontWeight: '500',
+    color: "#0866FF",
+    fontWeight: "500",
   },
   iconStyle: {
     width: 20,

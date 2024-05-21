@@ -14,7 +14,7 @@ import {
   Platform,
   Dimensions,
   FlatList,
-} from 'react-native';
+} from "react-native";
 
 import {
   MaterialCommunityIcons,
@@ -22,30 +22,47 @@ import {
   FontAwesome,
   Fontisto,
   Entypo,
-} from '@expo/vector-icons';
+} from "@expo/vector-icons";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
-import friendRequestList from '../data/friendRequest.json';
-import FriendRequest from '../components/FriendRequest';
+import friendRequestList from "../data/friendRequest.json";
+import FriendRequest from "../components/FriendRequest";
+import { Context as FriendContext } from "../context/FriendContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function FriendScreen({ navigation }) {
   //
   const [isAvatarFocus, setIsAvatarFocus] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [filteredFruitList, setFilteredFruitList] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const { state, getFriendRequests } = useContext(FriendContext);
 
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
+    window: Dimensions.get("window"),
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
   });
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Replace this with your actual data fetching function
+      const fetchData = async () => {
+        getFriendRequests();
+      };
+
+      fetchData();
+
+      return () => {
+        // You can return a cleanup function here if necessary
+      };
+    }, []))
 
   const { window } = dimensions;
   const windowWidth = window.width;
@@ -60,64 +77,64 @@ export default function FriendScreen({ navigation }) {
       >
         <View style={{ padding: 8 }}>
           <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             <Text
-              style={{ color: '#65676B', fontWeight: 'bold', fontSize: 32 }}
+              style={{ color: "#65676B", fontWeight: "bold", fontSize: 32 }}
             >
               Friends
             </Text>
             <FontAwesome name="search" size={24} color="#65676B" />
           </View>
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexDirection: "row" }}>
             <TouchableOpacity
               style={{
                 padding: 10,
-                backgroundColor: '#E4E6EB',
+                backgroundColor: "#E4E6EB",
                 borderRadius: 20,
               }}
             >
-              <Text style={{ color: '#050505' }}>Suggest</Text>
+              <Text style={{ color: "#050505" }}>Suggest</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={{
                 marginLeft: 8,
                 padding: 10,
-                backgroundColor: '#E4E6EB',
+                backgroundColor: "#E4E6EB",
                 borderRadius: 20,
               }}
             >
-              <Text style={{ color: '#050505' }}>Friends</Text>
+              <Text style={{ color: "#050505" }}>Friends</Text>
             </TouchableOpacity>
           </View>
 
           <View
             style={{
               marginTop: 16,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: "row" }}>
               <Text
-                style={{ color: '#050505', fontSize: 20, fontWeight: 'bold' }}
+                style={{ color: "#050505", fontSize: 20, fontWeight: "bold" }}
               >
                 Friend request
               </Text>
               <Text
                 style={{
-                  color: '#e41e3f',
+                  color: "#e41e3f",
                   fontSize: 20,
-                  fontWeight: 'bold',
+                  fontWeight: "bold",
                   marginLeft: 8,
                 }}
               >
-                57
+                {state.friendRequests.length}
               </Text>
             </View>
             <TouchableOpacity>
-              <Text style={{ color: '#0866ff', fontSize: 20 }}>See all</Text>
+              <Text style={{ color: "#0866ff", fontSize: 20 }}>See all</Text>
             </TouchableOpacity>
           </View>
 
@@ -125,10 +142,10 @@ export default function FriendScreen({ navigation }) {
             style={{
               marginTop: 16,
               marginBottom: 16,
-              alignSelf: 'flex-start',
-              minWidth: '100%',
+              alignSelf: "flex-start",
+              minWidth: "100%",
             }}
-            data={friendRequestList}
+            data={state.friendRequests}
             renderItem={({ item }) => {
               return <FriendRequest item={item} />;
             }}
@@ -137,10 +154,10 @@ export default function FriendScreen({ navigation }) {
             ListEmptyComponent={
               <Text
                 style={{
-                  color: 'red',
+                  color: "red",
                   fontSize: 24,
                   flex: 1,
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 No friend request found
@@ -160,25 +177,25 @@ export default function FriendScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     // paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   //
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
@@ -188,22 +205,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: '90%',
+    width: "90%",
   },
 
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     height: 40,
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -214,7 +231,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: 'gray',
+    borderBottomColor: "gray",
     borderBottomWidth: 0.5,
   },
   icon: {
