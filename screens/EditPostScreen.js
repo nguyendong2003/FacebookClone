@@ -42,16 +42,24 @@ import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
 import { LogBox } from 'react-native';
 
-export default function SharePostScreen({ navigation, route }) {
+export default function EditPostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
   const { item } = route.params;
   //
-  const [textPost, setTextPost] = useState('');
+  const [textPost, setTextPost] = useState(item?.content);
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
   // chọn chế độ bài viết
-  const [value, setValue] = useState('1');
+  const [value, setValue] = useState(
+    item?.view_mode === 'public'
+      ? '1'
+      : item?.view_mode === 'friend'
+      ? '2'
+      : item?.view_mode === 'private'
+      ? '3'
+      : '1'
+  );
 
   const data = [
     { label: 'Public', value: '1' },
@@ -176,9 +184,9 @@ export default function SharePostScreen({ navigation, route }) {
 
             <View>
               <Button
-                title="Share now"
+                title="Edit"
                 color="#0866ff"
-                onPress={() => alert('Shared Post')}
+                onPress={() => alert('Edited Post')}
               />
             </View>
           </View>

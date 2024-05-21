@@ -32,6 +32,7 @@ import { Provider as PostProvider } from './context/PostContext.js';
 import { Provider as AccountProvider } from './context/AccountContext.js';
 import { useContext } from 'react';
 import SharePostScreen from './screens/SharePostScreen.js';
+import EditPostScreen from './screens/EditPostScreen.js';
 
 const Stack = createStackNavigator();
 
@@ -80,6 +81,18 @@ export default function Navigation() {
                     component={SharePostScreen}
                     options={{
                       headerTitle: 'Share post',
+                      headerStyle: {
+                        borderBottomColor: '#e2e4e7',
+                        borderBottomWidth: 1,
+                      },
+                    }}
+                  />
+
+                  <Stack.Screen
+                    name="EditPost"
+                    component={EditPostScreen}
+                    options={{
+                      headerTitle: 'Edit post',
                       headerStyle: {
                         borderBottomColor: '#e2e4e7',
                         borderBottomWidth: 1,

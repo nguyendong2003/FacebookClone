@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   TouchableOpacity,
+  Pressable,
   Button,
   Alert,
   KeyboardAvoidingView,
@@ -16,10 +17,13 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  PanResponder,
+  Animated,
 } from 'react-native';
 
 import {
   MaterialCommunityIcons,
+  MaterialIcons,
   AntDesign,
   FontAwesome,
   FontAwesome5,
@@ -29,7 +33,7 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import moment from 'moment';
 
 import postList from '../data/post.json';
@@ -37,8 +41,6 @@ import commentList from '../data/comment.json';
 
 import Comment from './Comment';
 
-// // Upload image
-import * as ImagePicker from 'expo-image-picker';
 import {
   getReactionToPost,
   reaction,
@@ -56,6 +58,9 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [sizeReaction, setSizeReaction] = useState(null);
   const [sourceReaction, setSourceReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState('#65676B');
+  // press more in post
+  const [isPressingMore, setIsPressingMore] = useState(false);
+  //
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
@@ -117,10 +122,6 @@ export default function Post({ item, navigation, onUpdatePost }) {
     }
   }, [valueReaction]);
 
-  const [dimensions, setDimensions] = useState({
-    window: Dimensions.get('window'),
-  });
-
   const convertReactionValue = (value) => {
     switch (value) {
       case 'LIKE':
@@ -146,12 +147,22 @@ export default function Post({ item, navigation, onUpdatePost }) {
     onUpdatePost(postId);
   };
 
+  //
+  const [dimensions, setDimensions] = useState({
+    window: Dimensions.get('window'),
+  });
+
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
   });
+
+  const { window } = dimensions;
+  const windowWidth = window.width;
+  const windowHeight = window.height;
+  //
 
   useEffect(() => {
     const fetchReaction = async () => {
@@ -194,84 +205,183 @@ export default function Post({ item, navigation, onUpdatePost }) {
     }, 800);
   }, [item]);
 
-  const { window } = dimensions;
-  const windowWidth = window.width;
-  const windowHeight = window.height;
-
   return (
     <View>
       <View style={styles.card} key={item.id}>
         <View
           style={{
             flexDirection: 'row',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            padding: 12,
-            paddingBottom: 0,
           }}
         >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Profile', {
-                isPersonalPage: false,
-                statusFriend: 'realFriend',
-                listFriend: [],
-              });
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 12,
+              paddingBottom: 0,
             }}
           >
-            <Image
-              source={
-                user.avatar == null
-                  ? require('../assets/defaultProfilePicture.jpg')
-                  : { uri: user.avatar }
-              }
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 100,
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Profile', {
+                  isPersonalPage: false,
+                  statusFriend: 'realFriend',
+                  listFriend: [],
+                });
               }}
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
-
-          <View style={{ marginLeft: 8 }}>
-            <TouchableOpacity>
-              <Text
-                style={{
-                  color: '#050505',
-                  fontSize: 15,
-                  fontWeight: '600',
-                }}
-              >
-                {user.profile_name}
-              </Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <Text
-                style={{
-                  color: '#65676B',
-                  fontSize: 13,
-                  fontWeight: 400,
-                }}
-              >
-                {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
-                  'DD/MM/yyyy HH:mm:ss'
-                )}
-              </Text>
-              <Ionicons
-                style={{ marginLeft: 12 }}
-                name={
-                  item.view_mode === 'public'
-                    ? 'earth-sharp'
-                    : item.view_mode === 'friend'
-                    ? 'people-sharp'
-                    : 'lock-closed'
+            >
+              <Image
+                source={
+                  user.avatar == null
+                    ? require('../assets/defaultProfilePicture.jpg')
+                    : { uri: user.avatar }
                 }
-                size={20}
-                color="#050505"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 100,
+                }}
+                resizeMode="cover"
               />
+            </TouchableOpacity>
+
+            <View style={{ marginLeft: 8 }}>
+              <TouchableOpacity>
+                <Text
+                  style={{
+                    color: '#050505',
+                    fontSize: 15,
+                    fontWeight: '600',
+                  }}
+                >
+                  {user.profile_name}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
+                <Text
+                  style={{
+                    color: '#65676B',
+                    fontSize: 13,
+                    fontWeight: 400,
+                  }}
+                >
+                  {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
+                    'DD/MM/yyyy HH:mm:ss'
+                  )}
+                </Text>
+                <Ionicons
+                  style={{ marginLeft: 12 }}
+                  name={
+                    item.view_mode === 'public'
+                      ? 'earth-sharp'
+                      : item.view_mode === 'friend'
+                      ? 'people-sharp'
+                      : 'lock-closed'
+                  }
+                  size={20}
+                  color="#050505"
+                />
+              </View>
             </View>
           </View>
+          <Feather
+            style={{ marginRight: 6, padding: 14 }}
+            name="more-horizontal"
+            size={24}
+            color="black"
+            onPress={() => setIsPressingMore(!isPressingMore)}
+          />
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isPressingMore}
+            onRequestClose={() => {
+              // Alert.alert('Modal has been closed.');
+              setIsPressingMore(!isPressingMore);
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}
+            >
+              <Pressable
+                style={{
+                  height: '25%',
+                  width: '100%',
+                }}
+                onPress={() => setIsPressingMore(false)}
+              />
+              <View
+                style={{
+                  height: '75%',
+                  width: '100%',
+                  backgroundColor: 'white',
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 20,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 12,
+                  }}
+                  onPress={() => {
+                    setIsPressingMore(false);
+                    navigation.navigate('EditPost', {
+                      item: item,
+                    });
+                  }}
+                >
+                  <MaterialIcons name="mode-edit" size={36} color="green" />
+                  <Text
+                    style={{
+                      fontSize: 32,
+                      color: 'green',
+                      fontWeight: 'bold',
+                      marginLeft: 12,
+                    }}
+                  >
+                    Edit this post
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 12,
+                    borderTopColor: '#ccc',
+                    borderTopWidth: 1,
+                  }}
+                  onPress={() => {
+                    alert('Delete post');
+                  }}
+                >
+                  <Feather name="trash-2" size={36} color="red" />
+                  <Text
+                    style={{
+                      fontSize: 32,
+                      color: 'red',
+                      fontWeight: 'bold',
+                      marginLeft: 12,
+                    }}
+                  >
+                    Delete this post
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
+
         <View>
           <Text
             style={{
