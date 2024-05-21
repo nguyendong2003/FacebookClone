@@ -16,7 +16,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
-} from "react-native";
+} from 'react-native';
 
 import {
   MaterialCommunityIcons,
@@ -27,22 +27,26 @@ import {
   Ionicons,
   Fontisto,
   Entypo,
-} from "@expo/vector-icons";
+} from '@expo/vector-icons';
 
-import { useState, useEffect, useContext } from "react";
-import moment from "moment";
+import { useState, useEffect, useContext } from 'react';
+import moment from 'moment';
 
-import postList from "../data/post.json";
-import commentList from "../data/comment.json";
+import postList from '../data/post.json';
+import commentList from '../data/comment.json';
 
-import Comment from "./Comment";
+import Comment from './Comment';
 
 // // Upload image
-import * as ImagePicker from "expo-image-picker";
-import { getReactionToPost, reaction, getPostById } from "../service/PostService";
-import { getAccountById } from "../service/AccountService";
-import { Context as AccountContext } from "../context/AccountContext";
-import { Context as PostContext } from "../context/PostContext";
+import * as ImagePicker from 'expo-image-picker';
+import {
+  getReactionToPost,
+  reaction,
+  getPostById,
+} from '../service/PostService';
+import { getAccountById } from '../service/AccountService';
+import { Context as AccountContext } from '../context/AccountContext';
+import { Context as PostContext } from '../context/PostContext';
 
 export default function Post({ item, navigation, onUpdatePost }) {
   // Reaction
@@ -51,7 +55,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [nameReaction, setNameReaction] = useState(null);
   const [sizeReaction, setSizeReaction] = useState(null);
   const [sourceReaction, setSourceReaction] = useState(null);
-  const [colorReaction, setColorReaction] = useState("#65676B");
+  const [colorReaction, setColorReaction] = useState('#65676B');
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
@@ -63,75 +67,75 @@ export default function Post({ item, navigation, onUpdatePost }) {
     // Xác định màu dựa trên giá trị reaction
     switch (valueReaction) {
       case 1:
-        setColorReaction("#0866FF");
-        setNameReaction("Like");
+        setColorReaction('#0866FF');
+        setNameReaction('Like');
         setSizeReaction(44 - 16);
-        setSourceReaction(require("../assets/facebook-like.png"));
+        setSourceReaction(require('../assets/facebook-like.png'));
 
         break;
       case 2:
-        setColorReaction("#F33E58");
-        setNameReaction("Love");
+        setColorReaction('#F33E58');
+        setNameReaction('Love');
         setSizeReaction(40 - 16);
-        setSourceReaction(require("../assets/facebook-heart.jpg"));
+        setSourceReaction(require('../assets/facebook-heart.jpg'));
         break;
       case 3:
-        setColorReaction("#F7B125");
-        setNameReaction("Care");
+        setColorReaction('#F7B125');
+        setNameReaction('Care');
         setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-care2.jpg"));
+        setSourceReaction(require('../assets/facebook-care2.jpg'));
         break;
       case 4:
-        setColorReaction("#F7B125");
-        setNameReaction("Haha");
+        setColorReaction('#F7B125');
+        setNameReaction('Haha');
         setSizeReaction(48 - 20);
-        setSourceReaction(require("../assets/facebook-haha.png"));
+        setSourceReaction(require('../assets/facebook-haha.png'));
         break;
       case 5:
-        setColorReaction("#F7B125");
-        setNameReaction("Wow");
+        setColorReaction('#F7B125');
+        setNameReaction('Wow');
         setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-wow.png"));
+        setSourceReaction(require('../assets/facebook-wow.png'));
         break;
       case 6:
-        setColorReaction("#E9710F");
-        setNameReaction("Sad");
+        setColorReaction('#E9710F');
+        setNameReaction('Sad');
         setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-sad.jpg"));
+        setSourceReaction(require('../assets/facebook-sad.jpg'));
         break;
       case 7:
-        setColorReaction("#E9710F");
-        setNameReaction("Angry");
+        setColorReaction('#E9710F');
+        setNameReaction('Angry');
         setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-angry.png"));
+        setSourceReaction(require('../assets/facebook-angry.png'));
         break;
 
       default:
-        setColorReaction("#65676B"); // Màu mặc định
-        setNameReaction("Like");
+        setColorReaction('#65676B'); // Màu mặc định
+        setNameReaction('Like');
         setSourceReaction(null);
     }
   }, [valueReaction]);
 
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get("window"),
+    window: Dimensions.get('window'),
   });
 
   const convertReactionValue = (value) => {
     switch (value) {
-      case "LIKE":
+      case 'LIKE':
         return 1;
-      case "LOVE":
+      case 'LOVE':
         return 2;
-      case "CARE":
+      case 'CARE':
         return 3;
-      case "HAHA":
+      case 'HAHA':
         return 4;
-      case "WOW":
+      case 'WOW':
         return 5;
-      case "SAD":
+      case 'SAD':
         return 6;
-      case "ANGRY":
+      case 'ANGRY':
         return 7;
       default:
         return 0;
@@ -140,10 +144,10 @@ export default function Post({ item, navigation, onUpdatePost }) {
 
   const updatePostHandler = async (postId) => {
     onUpdatePost(postId);
-  }
+  };
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
@@ -169,14 +173,15 @@ export default function Post({ item, navigation, onUpdatePost }) {
     try {
       if (reaction_type === 'NONE') {
         setReactionCount(reactionCount - 1);
-      }
-      else 
-        setReactionCount(reactionCount + 1);
+      } else setReactionCount(reactionCount + 1);
 
-      const response = await reaction({ id_account: state.account.id , postId, reaction_type});
+      const response = await reaction({
+        id_account: state.account.id,
+        postId,
+        reaction_type,
+      });
       setValueReaction(convertReactionValue(response.type));
       await onUpdatePost(postId);
-
     } catch (error) {
       console.log(error);
     }
@@ -198,8 +203,8 @@ export default function Post({ item, navigation, onUpdatePost }) {
       <View style={styles.card} key={item.id}>
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignItems: 'center',
             padding: 12,
             paddingBottom: 0,
           }}
@@ -214,7 +219,11 @@ export default function Post({ item, navigation, onUpdatePost }) {
             }}
           >
             <Image
-              source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar}}
+              source={
+                user.avatar == null
+                  ? require('../assets/defaultProfilePicture.jpg')
+                  : { uri: user.avatar }
+              }
               style={{
                 width: 40,
                 height: 40,
@@ -228,24 +237,39 @@ export default function Post({ item, navigation, onUpdatePost }) {
             <TouchableOpacity>
               <Text
                 style={{
-                  color: "#050505",
+                  color: '#050505',
                   fontSize: 15,
-                  fontWeight: "600",
+                  fontWeight: '600',
                 }}
               >
                 {user.profile_name}
               </Text>
             </TouchableOpacity>
-
-            <Text
-              style={{
-                color: "#65676B",
-                fontSize: 13,
-                fontWeight: 400,
-              }}
-            >
-              {moment(item.create_time, "YYYY-MM-DD ").format("DD/MM/yyyy")}
-            </Text>
+            <View style={{ flexDirection: 'row' }}>
+              <Text
+                style={{
+                  color: '#65676B',
+                  fontSize: 13,
+                  fontWeight: 400,
+                }}
+              >
+                {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
+                  'DD/MM/yyyy HH:mm:ss'
+                )}
+              </Text>
+              <Ionicons
+                style={{ marginLeft: 12 }}
+                name={
+                  item.view_mode === 'public'
+                    ? 'earth-sharp'
+                    : item.view_mode === 'friend'
+                    ? 'people-sharp'
+                    : 'lock-closed'
+                }
+                size={20}
+                color="#050505"
+              />
+            </View>
           </View>
         </View>
         <View>
@@ -253,7 +277,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
             style={{
               marginTop: 8,
               fontSize: 17,
-              fontWeight: "400",
+              fontWeight: '400',
 
               paddingHorizontal: 12,
               paddingVertical: 0,
@@ -264,10 +288,10 @@ export default function Post({ item, navigation, onUpdatePost }) {
           <View
             style={{
               marginTop: 8,
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "flex-start",
-              alignItems: "center",
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
             }}
           >
             {item?.postImages.map((image, index) => (
@@ -294,11 +318,146 @@ export default function Post({ item, navigation, onUpdatePost }) {
             ))}
           </View>
         </View>
+
+        {/* Hiện bài post được chia sẻ */}
+        {item?.post && (
+          <View>
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderBottomWidth: 0,
+                marginHorizontal: 8,
+                paddingBottom: 8,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: 12,
+                  paddingBottom: 0,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Profile', {
+                      isPersonalPage: false,
+                      statusFriend: 'realFriend',
+                      listFriend: [],
+                    });
+                  }}
+                >
+                  <Image
+                    source={
+                      item?.post?.avatar == null
+                        ? require('../assets/defaultProfilePicture.jpg')
+                        : { uri: item?.post?.avatar }
+                    }
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 100,
+                    }}
+                    resizeMode="cover"
+                  />
+                </TouchableOpacity>
+
+                <View style={{ marginLeft: 8 }}>
+                  <TouchableOpacity>
+                    <Text
+                      style={{
+                        color: '#050505',
+                        fontSize: 15,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {/* {item.profile_name} */}
+                      Nguyễn Đông
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Text
+                      style={{
+                        color: '#65676B',
+                        fontSize: 13,
+                        fontWeight: 400,
+                      }}
+                    >
+                      {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
+                        'DD/MM/yyyy HH:mm:ss'
+                      )}
+                    </Text>
+                    <Ionicons
+                      style={{ marginLeft: 12 }}
+                      name={
+                        item.view_mode === 'public'
+                          ? 'earth-sharp'
+                          : item.view_mode === 'friend'
+                          ? 'people-sharp'
+                          : 'lock-closed'
+                      }
+                      size={20}
+                      color="#050505"
+                    />
+                  </View>
+                </View>
+              </View>
+              <View>
+                <Text
+                  style={{
+                    marginTop: 8,
+                    fontSize: 17,
+                    fontWeight: '400',
+
+                    paddingHorizontal: 12,
+                    paddingVertical: 0,
+                  }}
+                >
+                  {item?.content}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+              }}
+            >
+              {item?.postImages.map((image, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: image.image }}
+                  style={{
+                    marginHorizontal: 2,
+                    marginTop: 4,
+                    // borderRadius: 20,
+                  }}
+                  width={
+                    item?.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  height={
+                    item?.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          </View>
+        )}
+        {/*  */}
+
         <View
           style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            borderBottomColor: "#ccc",
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            borderBottomColor: '#ccc',
             borderBottomWidth: 1,
             // padding: 4,
             paddingVertical: 4,
@@ -307,62 +466,65 @@ export default function Post({ item, navigation, onUpdatePost }) {
         >
           <TouchableOpacity
             style={{
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
-            onPress={() => alert("Reactions")}
+            onPress={() => alert('Reactions')}
           >
             <Image
-              source={require("../assets/facebook-like.png")}
+              source={require('../assets/facebook-like.png')}
               style={{ width: 24, height: 24 }}
             />
             <Image
-              source={require("../assets/facebook-haha.png")}
+              source={require('../assets/facebook-haha.png')}
               style={{ width: 24, height: 24 }}
             />
             <Image
-              source={require("../assets/facebook-heart.jpg")}
+              source={require('../assets/facebook-heart.jpg')}
               style={{ width: 24, height: 24, marginLeft: 2 }}
             />
             <Text
               style={{
                 marginLeft: 3,
                 fontSize: 12,
-                color: "#65676B",
+                color: '#65676B',
               }}
             >
               {item?.reaction_quantity}
             </Text>
           </TouchableOpacity>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={{ padding: 4 }}
               onPress={() => {
-                navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
+                navigation.navigate('Comment', {
+                  postId: item?.id,
+                  onUpdatePost: updatePostHandler,
+                });
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                {item?.comment_quantity + " comments"}
+                {item?.comment_quantity + ' comments'}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={{ marginLeft: 4, padding: 4 }}
               onPress={() => {
-                navigation.navigate("Comment");
+                navigation.navigate('Comment');
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                {item?.share_quantity + " shares"}
+                {item?.share_quantity + ' shares'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
         <View
           style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            alignItems: "center",
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center',
             marginTop: 8,
             paddingTop: 2,
             paddingBottom: 10,
@@ -399,22 +561,22 @@ export default function Post({ item, navigation, onUpdatePost }) {
             {/* <Text style={styles.textBottomPost}>Like</Text> */}
             <Text style={[styles.textBottomPost, { color: colorReaction }]}>
               {/* Like */}
-              {nameReaction ? nameReaction : "Like"}
+              {nameReaction ? nameReaction : 'Like'}
             </Text>
 
             {isPressingLike && (
               <View
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: -84,
                   left: -14,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "white",
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'white',
                   padding: 8,
                   borderRadius: 50,
 
-                  shadowColor: "black",
+                  shadowColor: 'black',
                   shadowOffset: {
                     width: 0,
                     height: 2,
@@ -431,7 +593,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-like.png")}
+                    source={require('../assets/facebook-like.png')}
                     style={{ width: 44, height: 44, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
@@ -442,7 +604,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-heart.jpg")}
+                    source={require('../assets/facebook-heart.jpg')}
                     style={{ width: 40, height: 40 }}
                   />
                 </TouchableOpacity>
@@ -453,7 +615,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-care2.jpg")}
+                    source={require('../assets/facebook-care2.jpg')}
                     style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
@@ -464,7 +626,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-haha.png")}
+                    source={require('../assets/facebook-haha.png')}
                     style={{ width: 48, height: 48 }}
                   />
                 </TouchableOpacity>
@@ -475,7 +637,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-wow.png")}
+                    source={require('../assets/facebook-wow.png')}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -487,7 +649,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-sad.jpg")}
+                    source={require('../assets/facebook-sad.jpg')}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -499,7 +661,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-angry.png")}
+                    source={require('../assets/facebook-angry.png')}
                     style={{ width: 36, height: 36 }}
                   />
                 </TouchableOpacity>
@@ -510,26 +672,24 @@ export default function Post({ item, navigation, onUpdatePost }) {
           <TouchableOpacity
             style={styles.buttonBottomPost}
             onPress={() => {
-              navigation.navigate("Comment", {
+              navigation.navigate('Comment', {
                 initialCommentFocus: true,
                 postId: item?.id,
-                 onUpdatePost: updatePostHandler
+                onUpdatePost: updatePostHandler,
               });
             }}
           >
             <FontAwesome5 name="comment" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Comment</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-            style={styles.buttonBottomPost}
-            onPress={() => alert("send")}
-          >
-            <Feather name="send" size={24} color="#65676B" />
-            <Text style={styles.textBottomPost}>Send</Text>
-          </TouchableOpacity> */}
+
           <TouchableOpacity
             style={styles.buttonBottomPost}
-            onPress={() => alert("share")}
+            onPress={() =>
+              navigation.navigate('SharePost', {
+                item: item,
+              })
+            }
           >
             <FontAwesome name="share" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Share</Text>
@@ -543,26 +703,26 @@ export default function Post({ item, navigation, onUpdatePost }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    backgroundColor: "white",
+    alignItems: 'center',
+    backgroundColor: 'white',
     paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: "center",
-    backgroundColor: "white",
+    alignItems: 'center',
+    backgroundColor: 'white',
     // padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   //
   card: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     // padding: 12,
     borderRadius: 8,
     // marginTop: 4,
@@ -575,22 +735,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: "center",
-    fontWeight: "bold",
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: "90%",
+    width: '90%',
   },
 
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
 
     height: 40,
-    borderColor: "black",
+    borderColor: 'black',
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -601,7 +761,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: "gray",
+    borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
   },
   icon: {
@@ -623,15 +783,15 @@ const styles = StyleSheet.create({
   },
   //button bottom post
   buttonBottomPost: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     // padding: 4,
   },
   textBottomPost: {
     fontSize: 12,
     marginLeft: 8,
-    fontWeight: "500",
-    color: "#65676B",
+    fontWeight: '500',
+    color: '#65676B',
   },
 });
