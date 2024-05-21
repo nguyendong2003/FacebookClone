@@ -205,7 +205,13 @@ export default function Post({ item, navigation, onUpdatePost }) {
           }}
         >
           <TouchableOpacity
-          onPress={() => {navigation.navigate('Profile', {isPersonalPage: false, statusFriend: "realFriend", listFriend: []})}}
+            onPress={() => {
+              navigation.navigate('Profile', {
+                isPersonalPage: false,
+                statusFriend: 'realFriend',
+                listFriend: [],
+              });
+            }}
           >
             <Image
               source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar}}
@@ -269,12 +275,20 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 key={index}
                 source={{ uri: image.image }}
                 style={{
-                  marginLeft: 8,
-                  marginTop: 8,
-                  borderRadius: 20,
+                  marginHorizontal: 2,
+                  marginTop: 4,
+                  // borderRadius: 20,
                 }}
-                width={windowWidth / 2 - 12}
-                height={windowWidth / 2 - 12}
+                width={
+                  item?.postImages.length % 2 === 1 && index === 0
+                    ? windowWidth - 4
+                    : windowWidth / 2 - 4
+                }
+                height={
+                  item?.postImages.length % 2 === 1 && index === 0
+                    ? windowWidth - 4
+                    : windowWidth / 2 - 4
+                }
                 resizeMode="cover"
               />
             ))}
