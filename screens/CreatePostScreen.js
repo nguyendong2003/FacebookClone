@@ -33,7 +33,6 @@ import {
 } from "@expo/vector-icons";
 
 import { Dropdown } from "react-native-element-dropdown";
-
 // Upload image
 import * as ImagePicker from "expo-image-picker";
 // Camera
@@ -60,7 +59,6 @@ export default function CreatePostScreen({ navigation, route }) {
     { label: "Public", value: "1" },
     { label: "Private", value: "2" },
   ];
-
   // useEffect(() => {
   //   console.log(value);
   // }, [value]);
@@ -81,7 +79,6 @@ export default function CreatePostScreen({ navigation, route }) {
 
       setTextPost("");
       setImagePostList(null);
-      setPhoto(null);
       setIsSubmit(false);
       navigation.goBack();
     }
@@ -381,7 +378,7 @@ export default function CreatePostScreen({ navigation, route }) {
               alignItems: "center",
             }}
           >
-            {photo && (
+            {/* {photo && (
               <View>
                 <Image
                   // source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
@@ -403,7 +400,7 @@ export default function CreatePostScreen({ navigation, route }) {
                   }}
                 />
               </View>
-            )}
+            )} */}
             {imagePostList &&
               imagePostList.map((image, index) => {
                 return (
@@ -414,7 +411,7 @@ export default function CreatePostScreen({ navigation, route }) {
                       style={{
                         marginHorizontal: 2,
                         marginTop: 4,
-                        borderRadius: 20,
+                        // borderRadius: 20,
                       }}
                       width={
                         imagePostList.length % 2 === 1 && index === 0
@@ -458,36 +455,14 @@ export default function CreatePostScreen({ navigation, route }) {
               <FontAwesome6 name="image" size={24} color="#45bd62" />
               <Text style={styles.textOptionButton}>Image</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity
-              style={styles.optionButtonContainer}
-              onPress={() => {}}
-            > */}
-              {/* <Ionicons name="person-add" size={24} color="#0866ff" />
-              <Text style={styles.textOptionButton}>Tag other people</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.optionButtonContainer}
-              onPress={() => {}}
-            >
-              <MaterialIcons name="add-reaction" size={24} color="#f7bb2d" />
-              <Text style={styles.textOptionButton}>Reaction</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.optionButtonContainer}
-              onPress={() => {}}
-            >
-              <Ionicons name="text" size={24} color="#2abba7" />
-              <Text style={styles.textOptionButton}>Background Color</Text>
-            </TouchableOpacity>
-            */}
-
+            
             <TouchableOpacity
               style={styles.optionButtonContainer}
               onPress={() => openCamera()}
             >
               <Entypo name="camera" size={24} color="#0866ff" />
               <Text style={styles.textOptionButton}>Camera</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity> 
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

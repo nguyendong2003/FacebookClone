@@ -277,15 +277,15 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 style={{
                   marginHorizontal: 2,
                   marginTop: 4,
-                  borderRadius: 20,
+                  // borderRadius: 20,
                 }}
                 width={
-                  item?.images.length % 2 === 1 && index === 0
+                  item?.postImages.length % 2 === 1 && index === 0
                     ? windowWidth - 4
                     : windowWidth / 2 - 4
                 }
                 height={
-                  item?.images.length % 2 === 1 && index === 0
+                  item?.postImages.length % 2 === 1 && index === 0
                     ? windowWidth - 4
                     : windowWidth / 2 - 4
                 }
