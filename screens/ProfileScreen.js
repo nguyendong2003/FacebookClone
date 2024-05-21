@@ -105,6 +105,7 @@ export default function ProfileScreen({navigation, route}){
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity 
                             style={[styles.Button, {backgroundColor: "#CFECEC", flex:1}]}
+                            onPress={() => navigation.navigate('EditProfile')}
                         >
                             <FontAwesome5 style={{marginRight: 10}} name="pen" size={13} color="black" />
                             <Text style={{fontSize: 15}}>Edit personal page</Text>

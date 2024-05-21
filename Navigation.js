@@ -17,6 +17,8 @@ import SearchScreen from './screens/SearchScreen';
 import CreatePostScreen from './screens/CreatePostScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import ListAllFriendScreen from './screens/ListAllFriendScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+import EditProfileDetailScreen from './screens/EditProfileDetailScreen';
 
 //
 
@@ -105,6 +107,20 @@ export default function Navigation() {
             elevation: 10
           }}
           />
+          <Stack.Screen
+          name='EditProfile'
+          component={EditProfileScreen}
+          options={{
+            title:"Edit personal page"
+          }}  
+          />
+          <Stack.Screen
+          name='EditProfileDetail'
+          component={EditProfileDetailScreen}
+          options={{
+            title:"Edit detail"
+          }}  
+          />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
@@ -112,6 +128,10 @@ export default function Navigation() {
 }
 
 const styles = StyleSheet.create({
+  checkmarkContainer:{
+    alignItems:"center",
+    marginRight: 10
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
