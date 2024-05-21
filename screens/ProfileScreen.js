@@ -13,6 +13,7 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
+import { MaterialIcons } from '@expo/vector-icons';
 
 import listPost from "../data/postProfile.json";
 import FriendProfile from "../components/FriendProfile";
@@ -201,6 +202,7 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
+              onPress={() => navigation.navigate('EditProfile')}
             >
               <FontAwesome5
                 style={{ marginRight: 10 }}
