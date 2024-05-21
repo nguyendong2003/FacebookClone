@@ -5,7 +5,7 @@ import {
   CardStyleInterpolators,
   createStackNavigator,
 } from '@react-navigation/stack';
-
+import { useNavigation } from "@react-navigation/native";
 //screens
 import PrevHomeScreen from './screens/PrevHomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -19,6 +19,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import ListAllFriendScreen from './screens/ListAllFriendScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import EditProfileDetailScreen from './screens/EditProfileDetailScreen';
+import EditDescriptionScreen from './screens/EditDescriptionScreen';
 
 //
 
@@ -119,6 +120,16 @@ export default function Navigation() {
           component={EditProfileDetailScreen}
           options={{
             title:"Edit detail"
+          }}  
+          />
+          <Stack.Screen
+          name='EditDescription'
+          component={EditDescriptionScreen}
+          options={{
+            title:"Edit description",
+            headerRight:()=> (
+              <Text onPress={()=> navigation.navigate('EditProfile')} style={{color:"#2f68c4", marginRight: 10, fontSize: 18}}>Save</Text>
+            )
           }}  
           />
         </Stack.Group>

@@ -8,13 +8,16 @@ export default function EditProfileScreen(
     route
 ){
     const navigation = useNavigation()
+    const handleModifyDescription = () =>{
+        navigation.navigate('EditDescription');
+    }
     return (
         <ScrollView style={styles.container}>
             <View style={styles.seperate}></View>
             <View style={styles.description}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.Text}>Description</Text>
-                    <Text style= {[styles.Text, {color: "#87a6e6", fontWeight: "normal", fontSize: 18}]}>Modify</Text>
+                    <Text onPress={handleModifyDescription} style= {[styles.Text, {color: "#87a6e6", fontWeight: "normal", fontSize: 18}]}>Modify</Text>
                 </View>
             </View>
             <View style={styles.textInputContainer}>
