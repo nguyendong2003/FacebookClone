@@ -64,8 +64,10 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
+  const [shareUser, setShareUser] = useState({});
 
   const { state } = useContext(AccountContext);
+  const { reloadPost } = useContext(PostContext);
   //
   useEffect(() => {
     // console.log(valueReaction);
@@ -176,22 +178,31 @@ export default function Post({ item, navigation, onUpdatePost }) {
     const fetchUser = async () => {
       const response = await getAccountById(item?.user_id);
       setUser(response);
+
+      if (item?.share_post != null) {
+        const responseShare = await getAccountById(item?.share_post.user_id);
+        setShareUser(responseShare);
+      }
     };
     fetchUser();
   }, []);
 
   const reactionHandler = async (postId, reaction_type) => {
     try {
+      console.log(item?.id);
       if (reaction_type === 'NONE') {
         setReactionCount(reactionCount - 1);
       } else setReactionCount(reactionCount + 1);
 
+      console.log('reaction_type', reaction_type);
+      console.log('postId', postId);
       const response = await reaction({
         id_account: state.account.id,
         postId,
         reaction_type,
       });
       setValueReaction(convertReactionValue(response.type));
+
       await onUpdatePost(postId);
     } catch (error) {
       console.log(error);
@@ -226,6 +237,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Profile', {
+                  accountId: user.id,
                   isPersonalPage: false,
                   statusFriend: 'realFriend',
                   listFriend: [],
@@ -267,8 +279,8 @@ export default function Post({ item, navigation, onUpdatePost }) {
                     fontWeight: 400,
                   }}
                 >
-                  {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
-                    'DD/MM/yyyy HH:mm:ss'
+                  {moment(item.create_time, 'YYYY-MM-DD').format(
+                    'DD/MM/yyyy'
                   )}
                 </Text>
                 <Ionicons
@@ -286,13 +298,18 @@ export default function Post({ item, navigation, onUpdatePost }) {
               </View>
             </View>
           </View>
-          <Feather
-            style={{ marginRight: 6, padding: 14 }}
-            name="more-horizontal"
-            size={24}
-            color="black"
-            onPress={() => setIsPressingMore(!isPressingMore)}
-          />
+          {
+            state.account.id === item.user_id && (
+              <TouchableOpacity
+                style={{
+                  padding: 8,
+                }}
+                onPress={() => setIsPressingMore(!isPressingMore)}
+              >
+                <MaterialIcons name="more-vert" size={24} color="#65676B" />
+              </TouchableOpacity>
+            )
+          }
           <Modal
             animationType="slide"
             transparent={true}
@@ -395,7 +412,8 @@ export default function Post({ item, navigation, onUpdatePost }) {
           >
             {item?.content}
           </Text>
-          <View
+          {item.hasOwnProperty('postImages') ? (
+            <View
             style={{
               marginTop: 8,
               flexDirection: 'row',
@@ -426,11 +444,11 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 resizeMode="cover"
               />
             ))}
-          </View>
+          </View>) : <></>}
         </View>
 
         {/* Hiện bài post được chia sẻ */}
-        {item?.post && (
+        {item.share_post != null && (
           <View>
             <View
               style={{
@@ -452,6 +470,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate('Profile', {
+                      accountId: shareUser.id,
                       isPersonalPage: false,
                       statusFriend: 'realFriend',
                       listFriend: [],
@@ -460,9 +479,9 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 >
                   <Image
                     source={
-                      item?.post?.avatar == null
+                      shareUser.avatar == null
                         ? require('../assets/defaultProfilePicture.jpg')
-                        : { uri: item?.post?.avatar }
+                        : { uri: shareUser.avatar }
                     }
                     style={{
                       width: 40,
@@ -482,8 +501,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                         fontWeight: '600',
                       }}
                     >
-                      {/* {item.profile_name} */}
-                      Nguyễn Đông
+                      {shareUser.profile_name}
                     </Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row' }}>
@@ -494,8 +512,8 @@ export default function Post({ item, navigation, onUpdatePost }) {
                         fontWeight: 400,
                       }}
                     >
-                      {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
-                        'DD/MM/yyyy HH:mm:ss'
+                      {moment(item.share_post.create_time, 'YYYY-MM-DD').format(
+                        'DD/MM/yyyy'
                       )}
                     </Text>
                     <Ionicons
@@ -524,7 +542,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                     paddingVertical: 0,
                   }}
                 >
-                  {item?.content}
+                  {item?.share_post.content}
                 </Text>
               </View>
             </View>
@@ -536,7 +554,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 alignItems: 'center',
               }}
             >
-              {item?.postImages.map((image, index) => (
+              {item?.share_post.postImages.map((image, index) => (
                 <Image
                   key={index}
                   source={{ uri: image.image }}
@@ -546,12 +564,12 @@ export default function Post({ item, navigation, onUpdatePost }) {
                     // borderRadius: 20,
                   }}
                   width={
-                    item?.postImages.length % 2 === 1 && index === 0
+                    item?.share_post.postImages.length % 2 === 1 && index === 0
                       ? windowWidth - 4
                       : windowWidth / 2 - 4
                   }
                   height={
-                    item?.postImages.length % 2 === 1 && index === 0
+                    item?.share_post.postImages.length % 2 === 1 && index === 0
                       ? windowWidth - 4
                       : windowWidth / 2 - 4
                   }

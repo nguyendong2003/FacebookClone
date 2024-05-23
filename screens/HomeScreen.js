@@ -42,9 +42,12 @@ import Post from "../components/Post";
 import * as ImagePicker from "expo-image-picker";
 
 import { Context as AccountContext } from "../context/AccountContext";
+import { Context as PostContext } from "../context/PostContext";
 
 export default function HomeScreen({ navigation }) {
   const { state: accountState, getAccount } = useContext(AccountContext);
+  const { state: postState, reloadPost } = useContext(PostContext);
+
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
   });
@@ -60,6 +63,10 @@ export default function HomeScreen({ navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  const updatePostById = async (id) => {
+    await reloadPost(id);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
@@ -69,9 +76,9 @@ export default function HomeScreen({ navigation }) {
               alignSelf: "flex-start",
               minWidth: "100%",
             }}
-            data={[]}
+            data={postState.posts}
             renderItem={({ item }) => (
-              <Post item={item} navigation={navigation} />
+              <Post item={item} navigation={navigation} onUpdatePost={updatePostById}/>
             )}
             keyExtractor={(item, index) => item.id.toString()}
             ItemSeparatorComponent={

@@ -4,13 +4,14 @@ import SpringServer from "../api/SpringServer";
 const postReducer = (state, action) => {
   switch (action.type) {
     case "GET_POSTS":
-      if (Array.isArray(action.payload)) {
-        return { ...state, posts: action.payload };
-      } else {
-        return { ...state, posts: [...state.posts, action.payload] };
-      }
-    case "UPDATE_POST":
-      return { ...state, posts: state.posts.map(post => post.id === action.payload.id ? action.payload : post) };
+      return { ...state, posts: action.payload };
+    case "RELOAD_POST":
+      return {
+        ...state,
+        posts: state.posts.map((post) =>
+          post.id === action.payload.id ? action.payload : post
+        ),
+      };
     case "ERROR":
       return { ...state, errorMessage: action.payload };
     default:
@@ -18,10 +19,29 @@ const postReducer = (state, action) => {
   }
 };
 
+const reloadPost = (dispatch) => {
+  return async (id) => {
+    try {
+      const response = await SpringServer.get(
+        `/facebook.api/posts/getPostById/${id}`
+      );
+      dispatch({ type: "RELOAD_POST", payload: response.data });
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+
+        payload: "Something went wrong with getting posts",
+      });
+    }
+  };
+};
+
 const getPosts = (dispatch) => {
   return async () => {
     try {
-      const response = await SpringServer.get("/facebook.api/posts");
+      const response = await SpringServer.get(
+        "facebook.api/posts/getAllFriendPost"
+      );
       dispatch({ type: "GET_POSTS", payload: response.data });
     } catch (error) {
       dispatch({
@@ -37,7 +57,7 @@ const createPost = (dispatch) => {
     try {
       const formData = new FormData();
       formData.append("content", content);
-      formData.append("view_mode", (view_mode == 1 ? "public" : "private"));
+      formData.append("view_mode", view_mode == 1 ? "public" : "private");
 
       if (images != null) {
         images.forEach((imageUri, index) => {
@@ -72,7 +92,9 @@ const createPost = (dispatch) => {
 const getPostById = (dispatch) => {
   return async (postId) => {
     try {
-      const response = await SpringServer.get(`/facebook.api/posts/getPostById/${postId}`);
+      const response = await SpringServer.get(
+        `/facebook.api/posts/getPostById/${postId}`
+      );
       dispatch({ type: "UPDATE_POST", payload: response.data });
     } catch (error) {
       dispatch({
@@ -83,9 +105,8 @@ const getPostById = (dispatch) => {
   };
 };
 
-
 export const { Context, Provider } = createDataContext(
   postReducer,
-  { getPosts, createPost, getPostById },
+  { getPosts, createPost, getPostById, reloadPost },
   { posts: [], errorMessage: "" }
 );
