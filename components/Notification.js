@@ -12,7 +12,10 @@ export default function Notification(
         <View style={[styles.container, {backgroundColor : isRead? "white": "#e9f2f7"}]}>
             <TouchableOpacity 
             style={styles.notifyContainer}
-            onPress={()=> setIsRead(true)}
+            onPress={()=> {
+                setIsRead(true)
+                navigation.navigate("PostDetail", {postId: 1, title: "Nguyễn Đông",})
+            }}
             >
                 <View>
                     <Image

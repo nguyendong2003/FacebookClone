@@ -44,7 +44,7 @@ import { getAccountById } from "../service/AccountService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
 
-export default function Post({ item, navigation, onUpdatePost }) {
+export default function Post({ item, navigation, onUpdatePost, postType }) {
   // Reaction
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -55,6 +55,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
+  const [statusPost, setStausPost] = useState(postType)
 
   const { state } = useContext(AccountContext);
   //
@@ -140,6 +141,121 @@ export default function Post({ item, navigation, onUpdatePost }) {
 
   const updatePostHandler = async (postId) => {
     onUpdatePost(postId);
+  }
+
+  const renderPostReaction=() =>{
+    return statusPost == "POST" ? (
+      <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        borderBottomColor: "#ccc",
+        borderBottomWidth: 1,
+        // padding: 4,
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+      }}
+    >
+      <TouchableOpacity
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+        onPress={() => alert("Reactions")}
+      >
+        <Image
+          source={require("../assets/facebook-like.png")}
+          style={{ width: 24, height: 24 }}
+        />
+        <Image
+          source={require("../assets/facebook-haha.png")}
+          style={{ width: 24, height: 24 }}
+        />
+        <Image
+          source={require("../assets/facebook-heart.jpg")}
+          style={{ width: 24, height: 24, marginLeft: 2 }}
+        />
+        <Text
+          style={{
+            marginLeft: 3,
+            fontSize: 12,
+            color: "#65676B",
+          }}
+        >
+          {item?.reaction_quantity}
+        </Text>
+      </TouchableOpacity>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <TouchableOpacity
+          style={{ padding: 4 }}
+          onPress={() => {
+            navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: 400 }}>
+            {item?.comment_quantity + " comments"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ marginLeft: 4, padding: 4 }}
+          onPress={() => {
+            navigation.navigate("Comment");
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: 400 }}>
+            {item?.share_quantity + " shares"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+    ): null
+  }
+
+  const renderPostDetailReaction = () => {
+    return statusPost == "POST_DETAIL" ? (
+        <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          borderTopWidth: 1,
+          borderTopColor: "#ccc",
+          // padding: 4,
+          paddingVertical: 4,
+          paddingHorizontal: 12,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+          onPress={() => alert("Reactions")}
+        >
+          <Image
+            source={require("../assets/facebook-like.png")}
+            style={{ width: 24, height: 24 }}
+          />
+          <Image
+            source={require("../assets/facebook-haha.png")}
+            style={{ width: 24, height: 24 }}
+          />
+          <Image
+            source={require("../assets/facebook-heart.jpg")}
+            style={{ width: 24, height: 24, marginLeft: 2 }}
+          />
+          <Text
+            style={{
+              marginLeft: 3,
+              fontSize: 12,
+              color: "#65676B",
+            }}
+          >
+            {item?.reaction_quantity}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ): null
   }
 
   useEffect(() => {
@@ -294,70 +410,8 @@ export default function Post({ item, navigation, onUpdatePost }) {
             ))}
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            borderBottomColor: "#ccc",
-            borderBottomWidth: 1,
-            // padding: 4,
-            paddingVertical: 4,
-            paddingHorizontal: 12,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-            onPress={() => alert("Reactions")}
-          >
-            <Image
-              source={require("../assets/facebook-like.png")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Image
-              source={require("../assets/facebook-haha.png")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Image
-              source={require("../assets/facebook-heart.jpg")}
-              style={{ width: 24, height: 24, marginLeft: 2 }}
-            />
-            <Text
-              style={{
-                marginLeft: 3,
-                fontSize: 12,
-                color: "#65676B",
-              }}
-            >
-              {item?.reaction_quantity}
-            </Text>
-          </TouchableOpacity>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity
-              style={{ padding: 4 }}
-              onPress={() => {
-                navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
-              }}
-            >
-              <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                {item?.comment_quantity + " comments"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{ marginLeft: 4, padding: 4 }}
-              onPress={() => {
-                navigation.navigate("Comment");
-              }}
-            >
-              <Text style={{ fontSize: 12, fontWeight: 400 }}>
-                {item?.share_quantity + " shares"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+{/* here bro */}
+        {renderPostReaction()}
         <View
           style={{
             flexDirection: "row",
@@ -535,6 +589,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
             <Text style={styles.textBottomPost}>Share</Text>
           </TouchableOpacity>
         </View>
+        {renderPostDetailReaction()}
       </View>
     </View>
   );

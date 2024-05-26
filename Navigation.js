@@ -31,6 +31,7 @@ import { Provider as FriendProvider } from "./context/FriendContext.js";
 import { Provider as PostProvider } from "./context/PostContext.js";
 import { Provider as AccountProvider } from "./context/AccountContext.js";
 import { useContext } from "react";
+import PostDetailScreen from "./screens/PostDetailScreen.js";
 
 const Stack = createStackNavigator();
 
@@ -137,6 +138,14 @@ export default function Navigation() {
                       headerRight:()=> (
                         <Text style={{color:"#2f68c4", marginRight: 10, fontSize: 18}}>Save</Text>
                       )
+                    }}  
+                    />
+                    <Stack.Screen
+                    name='PostDetail'
+                    component={PostDetailScreen}
+                    options={{
+                      title:"Post Detail",
+                      headerTitleAlign:"center"
                     }}  
                     />
                   </Stack.Group>
