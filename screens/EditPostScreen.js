@@ -262,7 +262,7 @@ export default function EditPostScreen({ navigation, route }) {
                     Nguyễn Đông
                   </Text>
                 </TouchableOpacity>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text
                     style={{
                       color: '#65676B',
@@ -271,7 +271,7 @@ export default function EditPostScreen({ navigation, route }) {
                     }}
                   >
                     {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
-                      'DD/MM/yyyy HH:mm:ss'
+                      'DD/MM/yyyy HH:mm'
                     )}
                   </Text>
                   <Ionicons
@@ -283,7 +283,7 @@ export default function EditPostScreen({ navigation, route }) {
                         ? 'people-sharp'
                         : 'lock-closed'
                     }
-                    size={20}
+                    size={14}
                     color="#050505"
                   />
                 </View>
