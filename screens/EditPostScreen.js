@@ -339,6 +339,40 @@ export default function EditPostScreen({ navigation, route }) {
                   </Text>
                 </View>
               </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                }}
+              >
+                {item?.share_post?.postImages?.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image.image }}
+                    style={{
+                      marginHorizontal: 2,
+                      marginTop: 4,
+                      // borderRadius: 20,
+                    }}
+                    width={
+                      item?.share_post?.postImages.length % 2 === 1 &&
+                      index === 0
+                        ? windowWidth - 4
+                        : windowWidth / 2 - 4
+                    }
+                    height={
+                      item?.share_post?.postImages.length % 2 === 1 &&
+                      index === 0
+                        ? windowWidth - 4
+                        : windowWidth / 2 - 4
+                    }
+                    resizeMode="cover"
+                  />
+                ))}
+              </View>
             </View>
           )}
         </ScrollView>
