@@ -3,6 +3,8 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { getPostById } from "../service/PostService";
 import Post from "../components/Post";
+import CommentScreen from "./CommentScreen";
+import { FlatList } from "react-native";
 
 export default function PostDetailScreen() {
     const navigation = useNavigation();
@@ -37,7 +39,7 @@ export default function PostDetailScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.separate} />
-            <Post postType="POST_DETAIL" item={post} navigation={navigation} />
+            <CommentScreen route={{ params: { postId: postId, navigation: navigation, typeCommentScreen: "POST_DETAIL"} }}/>
         </View>
     );
 }

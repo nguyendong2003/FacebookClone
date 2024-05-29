@@ -189,7 +189,7 @@ export default function Post({ item, navigation, onUpdatePost, postType }) {
         <TouchableOpacity
           style={{ padding: 4 }}
           onPress={() => {
-            navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
+            navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler, typeCommentScreen:"POST"});
           }}
         >
           <Text style={{ fontSize: 12, fontWeight: 400 }}>
@@ -563,12 +563,13 @@ export default function Post({ item, navigation, onUpdatePost, postType }) {
 
           <TouchableOpacity
             style={styles.buttonBottomPost}
-            onPress={() => {
-              navigation.navigate("Comment", {
-                initialCommentFocus: true,
-                postId: item?.id,
-                 onUpdatePost: updatePostHandler
-              });
+            onPress={() => { statusPost == "POST" ? navigation.navigate("Comment", {
+              initialCommentFocus: true,
+              postId: item?.id,
+              typeCommentScreen: "POST",
+               onUpdatePost: updatePostHandler
+            }) : alert("Comment")
+              
             }}
           >
             <FontAwesome5 name="comment" size={24} color="#65676B" />

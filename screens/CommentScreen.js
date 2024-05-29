@@ -16,6 +16,7 @@ import {
   Modal,
   Dimensions,
   FlatList,
+  ActivityIndicator
 } from "react-native";
 
 import {
@@ -30,8 +31,10 @@ import {
 } from "@expo/vector-icons";
 
 import { useState, useEffect, useRef, useContext } from "react";
+import { getPostById } from "../service/PostService";
 
 import Comment from "../components/Comment";
+import Post from "../components/Post";
 
 // import commentList from '../data/comment.json';
 import { getCommentsByPostId, createComment } from "../service/CommentService";
@@ -42,7 +45,12 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from 'react-native';
 
 export default function CommentScreen({ route, navigation }) {
-  //
+  const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
+  const stickyHeaderIndices = typeCommentScreen === "POST" ? [0] : null;
+  const [userPost, setUserPost] = useState([]);
+  // const [stickyHeader, setStickHeader] = useState();
+  // typeCommentScreen == "POST" ? setStickHeader(0) : setStickHeader(1);
+  
   const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
@@ -57,6 +65,25 @@ export default function CommentScreen({ route, navigation }) {
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
+  // refactor lại listHeader của FlatList
+  const [postId, setPostID] = useState(route?.params?.postId);
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  useEffect(() => {
+      const fetchPost = async () => {
+          const post = await getPostById(postId);
+          setPost(post);
+          // setLoading(false); // Set loading to false after data is fetched
+      };
+      fetchPost();
+  }, [postId]);
+
+  // useLayoutEffect(() => {
+  //     navigation.setOptions({
+  //         headerTitle: title || 'None',
+  //     });
+  // }, [navigation, title]);
 
   useEffect(() => {
     if (isReplying || isCommentTextFocus) {
@@ -77,6 +104,7 @@ export default function CommentScreen({ route, navigation }) {
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
     setCommentList(response);
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -144,6 +172,13 @@ export default function CommentScreen({ route, navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  const updatePostById = async (postId) => {
+    const update_post = await getPostById(postId);
+    setUserPost(
+      userPost.map((post) => (post.id === postId ? update_post : post))
+    );
+  };
+
   const submitComment = async () => {
     if (isCommentValid) {
       formData = new FormData();
@@ -176,6 +211,15 @@ export default function CommentScreen({ route, navigation }) {
       alert("Invalid comment");
     }
   };
+
+  if (loading) {
+    return (
+        <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
@@ -183,7 +227,7 @@ export default function CommentScreen({ route, navigation }) {
         <FlatList
           ref={flatListRef}
           keyboardShouldPersistTaps="handled"
-          stickyHeaderIndices={[0]}
+          stickyHeaderIndices={stickyHeaderIndices}
           showsVerticalScrollIndicator={false}
           ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end" }}
           style={{
@@ -220,8 +264,9 @@ export default function CommentScreen({ route, navigation }) {
               No comment found
             </Text>
           } // display when empty data
-          ListHeaderComponent={
-            <View
+          ListHeaderComponent={()=>{
+            return typeCommentScreen == "POST" ? (
+              <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -263,6 +308,8 @@ export default function CommentScreen({ route, navigation }) {
                 }}
               />
             </View>
+            ) : <Post postType="POST_DETAIL" item={post} navigation={navigation} onUpdatePost={updatePostById} />
+          }
           }
         />
         <View
