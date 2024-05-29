@@ -78,7 +78,7 @@ export default function HomeScreen({ navigation }) {
             }}
             data={postState.posts}
             renderItem={({ item }) => (
-              <Post item={item} navigation={navigation} onUpdatePost={updatePostById}/>
+              <Post item={item} navigation={navigation} onUpdatePost={updatePostById} postType="POST"/>
             )}
             keyExtractor={(item, index) => item.id.toString()}
             ItemSeparatorComponent={

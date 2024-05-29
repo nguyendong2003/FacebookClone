@@ -34,6 +34,7 @@ import { Provider as UserPostProvider } from "./context/UserPostContext.js";
 import { useContext } from "react";
 import SharePostScreen from "./screens/SharePostScreen.js";
 import EditPostScreen from "./screens/EditPostScreen.js";
+import PostDetailScreen from "./screens/PostDetailScreen.js";
 
 const Stack = createStackNavigator();
 
@@ -175,7 +176,15 @@ export default function Navigation() {
                           ),
                         }}
                       />
-                    </Stack.Group>
+                      <Stack.Screen
+                    name='PostDetail'
+                    component={PostDetailScreen}
+                    options={{
+                      title:"Post Detail",
+                      headerTitleAlign:"center"
+                    }}  
+                    />
+                  </Stack.Group>
                   </>
                 ) : (
                   <>

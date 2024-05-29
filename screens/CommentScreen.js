@@ -16,6 +16,7 @@ import {
   Modal,
   Dimensions,
   FlatList,
+  ActivityIndicator
 } from "react-native";
 
 import {
@@ -30,8 +31,10 @@ import {
 } from "@expo/vector-icons";
 
 import { useState, useEffect, useRef, useContext } from "react";
+import { getPostById } from "../service/PostService";
 
 import Comment from "../components/Comment";
+import Post from "../components/Post";
 
 // import commentList from '../data/comment.json';
 import { getCommentsByPostId, createComment } from "../service/CommentService";
@@ -42,7 +45,12 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from 'react-native';
 
 export default function CommentScreen({ route, navigation }) {
-  //
+  // const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
+  // const stickyHeaderIndices = typeCommentScreen === "POST" ? [0] : null;
+  // const [userPost, setUserPost] = useState([]);
+  // const [stickyHeader, setStickHeader] = useState();
+  // typeCommentScreen == "POST" ? setStickHeader(0) : setStickHeader(1);
+  
   const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
@@ -57,6 +65,15 @@ export default function CommentScreen({ route, navigation }) {
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
+
+  const [loading, setLoading] = useState(true); // Add loading state
+
+
+  // useLayoutEffect(() => {
+  //     navigation.setOptions({
+  //         headerTitle: title || 'None',
+  //     });
+  // }, [navigation, title]);
 
   useEffect(() => {
     if (isReplying || isCommentTextFocus) {
@@ -77,6 +94,7 @@ export default function CommentScreen({ route, navigation }) {
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
     setCommentList(response);
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -144,6 +162,13 @@ export default function CommentScreen({ route, navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  // const updatePostById = async (postId) => {
+  //   const update_post = await getPostById(postId);
+  //   setUserPost(
+  //     userPost.map((post) => (post.id === postId ? update_post : post))
+  //   );
+  // };
+
   const submitComment = async () => {
     if (isCommentValid) {
       formData = new FormData();
@@ -176,6 +201,15 @@ export default function CommentScreen({ route, navigation }) {
       alert("Invalid comment");
     }
   };
+
+  if (loading) {
+    return (
+        <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
@@ -192,7 +226,6 @@ export default function CommentScreen({ route, navigation }) {
           }}
           data={commentList}
           renderItem={({ item, index }) => (
-          
             <Comment
               item={item}
               setIsReplying={setIsReplying}
@@ -221,49 +254,53 @@ export default function CommentScreen({ route, navigation }) {
               No comment found
             </Text>
           } // display when empty data
-          ListHeaderComponent={
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingVertical: 12,
-                paddingHorizontal: 12,
-                marginBottom: 16,
-                backgroundColor: "white",
-              }}
-            >
-              <TouchableOpacity
-                style={{ flexDirection: "row", alignItems: "center" }}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate("Reaction")}
-              >
-                <Image
-                  source={require("../assets/facebook-like.png")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Image
-                  source={require("../assets/facebook-haha.png")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Image
-                  source={require("../assets/facebook-heart.jpg")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Text numberOfLines={1} style={{ width: 200 }}>
-                  You, Nguyễn Đông and 127.191 other
-                </Text>
-                <Entypo name="chevron-small-right" size={24} color="black" />
-              </TouchableOpacity>
-              <AntDesign
-                name="like2"
-                size={24}
-                color="black"
-                onPress={() => {
-                  // route?.params.setValueReaction(1);
+          ListHeaderComponent={()=>{
+            return (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingVertical: 12,
+                  paddingHorizontal: 12,
+                  marginBottom: 16,
+                  backgroundColor: "white",
                 }}
-              />
-            </View>
+              >
+                <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                  activeOpacity={0.7}
+                  onPress={() => navigation.navigate("Reaction")}
+                >
+                  <Image
+                    source={require("../assets/facebook-like.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Image
+                    source={require("../assets/facebook-haha.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Image
+                    source={require("../assets/facebook-heart.jpg")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Text numberOfLines={1} style={{ width: 200 }}>
+                    You, Nguyễn Đông and 127.191 other
+                  </Text>
+                  <Entypo name="chevron-small-right" size={24} color="black" />
+                </TouchableOpacity>
+                <AntDesign
+                  name="like2"
+                  size={24}
+                  color="black"
+                  onPress={() => {
+                    // route?.params.setValueReaction(1);
+                  }}
+                />
+              </View>
+            )
+              
+          }
           }
         />
         <View
@@ -303,8 +340,6 @@ export default function CommentScreen({ route, navigation }) {
                 onPress={() => {
                   setIsReplying(false);
                   setCommentIdReplying(null);
-                  setNameReplying("");
-                  setCommentText("");
                 }}
               >
                 <Text

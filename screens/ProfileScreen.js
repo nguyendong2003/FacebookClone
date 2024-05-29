@@ -245,6 +245,7 @@ export default function ProfileScreen({ navigation, route }) {
             item={item}
             navigation={navigation}
             onUpdatePost={updatePostById}
+            postType="POST"
           />
         )}
         keyExtractor={(item, index) => item.id.toString()}
