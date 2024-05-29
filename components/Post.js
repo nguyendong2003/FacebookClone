@@ -352,7 +352,7 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                     alert('Delete post');
                   }}
                 >
-                  <Feather name="trash-2" size={36} color="red" />
+                  <Feather name="trash-2" size={24} color="#050505" />
                   <Text
                     style={{
                       fontSize: 32,
