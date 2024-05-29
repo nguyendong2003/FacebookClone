@@ -355,7 +355,7 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                   <Feather name="trash-2" size={24} color="#050505" />
                   <Text
                     style={{
-                      fontSize: 32,
+                      fontSize: 18,
                       color: 'red',
                       fontWeight: 'bold',
                       marginLeft: 12,
