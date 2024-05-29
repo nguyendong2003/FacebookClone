@@ -7,10 +7,10 @@
         "to_comment_post_id": 8,
         "to_share_id": null,
         "to_comment_share_id": null,
-        "create_time": "2024-05-21T15:25:10",
+        "create_time": "2024-05-29T05:03:12",
         "content": "<B>User</B> reacted to your comment",
         "type": "SORRY",
-        "_read": false
+        "_read": true
     },
     {
         "id": 11,
@@ -22,7 +22,7 @@
         "to_comment_share_id": null,
         "create_time": "2024-05-21T11:26:05",
         "content": "<B>User</B> reacted to your comment",
-        "type": "Care",
+        "type": "CARE",
         "_read": false
     },
     {
@@ -36,7 +36,7 @@
         "create_time": "2024-05-21T10:18:11",
         "content": "<B>Đức Nghĩa</B> mentioned you in a comment",
         "type": "comment",
-        "_read": false
+        "_read": true
     },
     {
         "id": 4,

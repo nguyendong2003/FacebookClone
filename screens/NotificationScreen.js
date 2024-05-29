@@ -25,7 +25,7 @@ import {
 } from '@expo/vector-icons';
 
 import { useState, useEffect } from 'react';
-import notificationList from '../data/notification.json'
+import notificationList from '../data/dataNotify.json'
 // import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import Notification from '../components/Notification';
 // import { useState } from 'react';
