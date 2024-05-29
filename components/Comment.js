@@ -29,10 +29,10 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 
+import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { getAccountById } from "../service/AccountService";
 import moment from "moment";
-export default function Comment({
+const Comment = ({
   item,
   setIsReplying,
   commentIdReplying,
@@ -42,18 +42,13 @@ export default function Comment({
   scrollToComment,
   coords,
   setCoords,
-}) {
+}) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
-  const [account, setAccount] = useState({});
-  // Scroll to comment when reply
-  // const scrollView = useRef(null);
 
   useEffect(() => {
-    // Xác định màu dựa trên giá trị reaction
-    // console.log(valueReaction);
     switch (valueReaction) {
       case 1:
         setColorReaction("#0866FF");
@@ -100,15 +95,6 @@ export default function Comment({
   });
 
   useEffect(() => {
-    
-    const fetchAccount = async (id) => {
-      const response = await getAccountById(id);
-      setAccount(response);
-    };
-    fetchAccount(item?.id_account);
-  }, []);
-
-  useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
       setDimensions({ window });
     });
@@ -146,7 +132,7 @@ export default function Comment({
       >
         <TouchableOpacity>
           <Image
-            source={account?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: account?.avatar }}
+            source={item?.account_user?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: item?.account_user?.avatar }}
             style={{ width: 40, height: 40, borderRadius: 100 }}
           />
         </TouchableOpacity>
@@ -172,7 +158,7 @@ export default function Comment({
                   fontWeight: "bold",
                 }}
               >
-                {account.profile_name}
+                {item.account_user.profile_name}
               </Text>
             </TouchableOpacity>
 
@@ -363,8 +349,8 @@ export default function Comment({
                 onPress={() => {
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
-                  setNameReplying(account.profile_name);
-                  setCommentText(`${account.profile_name} `);
+                  setNameReplying(item.account_user.profile_name);
+                  setCommentText(`${item.account_user.profile_name} `);
                   scrollToComment(item?.id);
                 }}
               >
@@ -439,6 +425,8 @@ export default function Comment({
     </View>
   );
 }
+
+export default React.memo(Comment);
 
 const styles = StyleSheet.create({
   container: {

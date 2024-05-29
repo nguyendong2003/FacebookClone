@@ -36,3 +36,31 @@ export const getUserPosts = async (id) => {
   const response = await SpringServer.get(`/facebook.api/posts/${id}`);
   return response.data;
 }
+
+export const createPost = async ({ content, images, view_mode, share_id = 0 }) => {
+  const formData = new FormData();
+  formData.append("content", content);
+  formData.append("view_mode", view_mode == 1 ? "public" : "private");
+  formData.append("shareId", share_id);
+
+  if (images != null) {
+    images.forEach((imageUri, index) => {
+      formData.append("images", {
+        name: `image${index}.jpg`,
+        type: "image/jpeg",
+        uri: imageUri,
+      });
+    });
+  }
+
+  const response = await SpringServer.post(
+    "/facebook.api/posts/createPost",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data;
+}

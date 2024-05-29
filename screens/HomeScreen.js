@@ -110,9 +110,7 @@ export default function HomeScreen({ navigation }) {
                   onPress={() => {
                     navigation.navigate("Profile", {
                       accountId: accountState.account.id,
-                      isPersonalPage: true,
-                      statusFriend: "personalPage",
-                      listFriend: listFriend,
+                      isPersonalPage: true
                     });
                   }}
                 >

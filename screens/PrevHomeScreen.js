@@ -11,16 +11,18 @@ import { useEffect, useContext } from "react";
 import { Context as AuthContext } from "../context/AuthContext";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
+import { Context as UserPostContext } from "../context/UserPostContext";
 
 export default function PrevHomeScreen({ navigation }) {
   const { checkLoggedIn, state } = useContext(AuthContext);
   const { getAccount } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
-
+  const { getPosts: getUserPosts } = useContext(UserPostContext);
   useEffect(() => {
     if (state.token != null) {
       getAccount();
       getPosts();
+      getUserPosts();
     } else checkLoggedIn();
   }, []);
 

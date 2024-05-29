@@ -8,8 +8,8 @@ import {
 } from "react-native";
 import listFriendProfile from "../data/listFriendProfile.json";
 import { useNavigation } from "@react-navigation/native";
-
-export default function FriendProfile({ item, navigation }) {
+import React from "react";
+const FriendProfile = ({ item, navigation }) => {
   // const navigation = useNavigation()
   return (
     <Pressable
@@ -36,6 +36,7 @@ export default function FriendProfile({ item, navigation }) {
     </Pressable>
   );
 }
+export default React.memo(FriendProfile);
 
 const styles = StyleSheet.create({
   friendContainer: {
