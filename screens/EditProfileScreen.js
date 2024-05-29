@@ -3,10 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
+import { useContext } from "react";
+import { Context as AccountContext } from "../context/AccountContext";
 
 export default function EditProfileScreen(
     route
 ){
+    const { state: accountState } = useContext(AccountContext);
+
     const navigation = useNavigation()
     const handleModifyDescription = () =>{
         navigation.navigate('EditDescription');
@@ -23,7 +27,7 @@ export default function EditProfileScreen(
             <View style={styles.textInputContainer}>
                 <TextInput
                 placeholder="Enter description"
-                value="What's up bro? This is just normal description"
+                value={accountState.account.description}
                 />
             </View>
             <View style={styles.seperate}></View>
@@ -39,25 +43,25 @@ export default function EditProfileScreen(
             <View style={styles.rowInformation}>
                 <Ionicons name="location-sharp" size={20} color="black" />
                 <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                    Lived at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Đà Nẵng</Text>
+                    Lived at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>{accountState.account.live_at}</Text>
                 </Text>
             </View>
             <View style={styles.rowInformation}>
                 <FontAwesome name="home" size={20} color="black" />
                 <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                    Home at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>Quảng Nam</Text>
+                    Home at <Text style={[styles.textInformation,{fontWeight: "bold"}]}>{accountState.account.come_from}</Text>
                 </Text>
             </View>
             <View style={styles.rowInformation}>
                 <FontAwesome name="birthday-cake" size={20} color="black" />
                 <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                    Birthday on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>29/08</Text>
+                    Birthday on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>{accountState.account.birth_date}</Text>
                 </Text>
             </View>
             <View style={styles.rowInformation}>
                 <FontAwesome5 name="clock" size={20} color="black" />
                 <Text style={[styles.textInformation, {marginLeft: 10}]}>
-                    Participate on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>16/2/2017</Text>
+                    Participate on <Text style={[styles.textInformation,{fontWeight: "bold"}]}>{accountState.account.create_time}</Text>
                 </Text>
             </View>
         </ScrollView>
