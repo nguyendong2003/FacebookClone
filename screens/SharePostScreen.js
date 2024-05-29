@@ -36,18 +36,17 @@ import { Dropdown } from 'react-native-element-dropdown';
 
 import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import moment from 'moment';
-
+import { DeviceEventEmitter } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
 import { LogBox } from 'react-native';
-
+import { createPost } from '../service/PostService';
 export default function SharePostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
   const { item } = route.params;
   //
   const [textPost, setTextPost] = useState('');
-  const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
   // chọn chế độ bài viết
@@ -58,9 +57,6 @@ export default function SharePostScreen({ navigation, route }) {
     { label: 'Friend', value: '2' },
     { label: 'Private', value: '3' },
   ];
-  // useEffect(() => {
-  //   console.log(value);
-  // }, [value]);
 
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
@@ -81,6 +77,20 @@ export default function SharePostScreen({ navigation, route }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
+  const sharePostHandler = async () => {
+    try {
+      await createPost({
+        content: textPost,
+        images: null,
+        view_mode: value,
+        share_id: item.share_post ? item.share_post.id : item.id,
+      });
+      DeviceEventEmitter.emit('fetchPost');
+      navigation.goBack()
+    } catch (error) {
+      console.log(error);
+    }
+  }
   // console.log(item);
 
   return (
@@ -178,7 +188,7 @@ export default function SharePostScreen({ navigation, route }) {
               <Button
                 title="Share now"
                 color="#0866ff"
-                onPress={() => alert('Shared Post')}
+                onPress={sharePostHandler}
               />
             </View>
           </View>
@@ -228,9 +238,9 @@ export default function SharePostScreen({ navigation, route }) {
               >
                 <Image
                   source={
-                    item.avatar == null
+                    (item.share_post == null ? item.user.avatar : item.share_post.user.avatar) == null
                       ? require('../assets/defaultProfilePicture.jpg')
-                      : { uri: item.avatar }
+                      : { uri: item.share_post == null ? item.user.avatar : item.share_post.user.avatar }
                   }
                   style={{
                     width: 40,
@@ -250,8 +260,7 @@ export default function SharePostScreen({ navigation, route }) {
                       fontWeight: '600',
                     }}
                   >
-                    {/* {item.profile_name} */}
-                    Nguyễn Đông
+                    {item.user.profile_name}
                   </Text>
                 </TouchableOpacity>
                 <View style={{ flexDirection: 'row' }}>
@@ -292,7 +301,7 @@ export default function SharePostScreen({ navigation, route }) {
                   paddingVertical: 0,
                 }}
               >
-                {item?.content}
+                {item?.share_post ? item?.share_post.content : item?.content}
               </Text>
             </View>
           </View>
@@ -304,7 +313,7 @@ export default function SharePostScreen({ navigation, route }) {
               alignItems: 'center',
             }}
           >
-            {item?.postImages.map((image, index) => (
+            {(item?.share_post ? item.share_post.postImages : item.postImages).map((image, index) => (
               <Image
                 key={index}
                 source={{ uri: image.image }}

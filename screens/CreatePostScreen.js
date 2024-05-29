@@ -43,13 +43,13 @@ import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
+import { createPost } from '../service/PostService';
 import { LogBox } from 'react-native';
 
 export default function CreatePostScreen({ navigation, route }) {
   const [textPost, setTextPost] = useState('');
   const [imagePostList, setImagePostList] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
-  const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
   // chọn chế độ bài viết
@@ -74,6 +74,7 @@ export default function CreatePostScreen({ navigation, route }) {
         content: textPost,
         images: imagePostList,
         view_mode: value,
+        share_id: 0,
       });
       if (route?.params?.onFetchPost) route.params.onFetchPost();
 

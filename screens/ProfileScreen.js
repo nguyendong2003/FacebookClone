@@ -13,17 +13,15 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
-import { MaterialIcons } from '@expo/vector-icons';
-
-import listPost from "../data/postProfile.json";
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
 // const listFriend =[]
-
+import {DeviceEventEmitter} from "react-native"
 import { useState, useContext, useEffect } from "react";
 
 import { Context as FriendContext } from "../context/FriendContext";
-
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as UserPostContext } from "../context/UserPostContext";
 import { getUserPosts, getPostById } from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
 import {
@@ -34,7 +32,7 @@ import {
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
-
+  const { state: accountState } = useContext(AccountContext);
   const { sendRequest, cancelFriendRequest, acceptFriendRequest } =
     useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
@@ -43,11 +41,12 @@ export default function ProfileScreen({ navigation, route }) {
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
   const [status, setStatus] = useState(null);
-
+  
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
   };
+  DeviceEventEmitter.addListener("fetchPost", fetchUserPost)
 
   const fetchProfileStatus = async () => {
     const data = await getProfileStatus(route.params.accountId);
@@ -61,14 +60,13 @@ export default function ProfileScreen({ navigation, route }) {
   useEffect(() => {
     getAccountById(route.params.accountId).then((data) => {
       setUser(data);
+      fetchProfileStatus();
+      fetchUserPost();
     });
-    fetchProfileStatus();
 
     getFriendsByAccountId(route.params.accountId).then((data) => {
       setFriendList(data);
     });
-
-    fetchUserPost();
   }, []);
 
   const updatePostById = async (postId) => {
@@ -97,16 +95,19 @@ export default function ProfileScreen({ navigation, route }) {
 
     fetchProfileStatus();
   };
+
   const renderCreatePost = () => {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() =>
-          navigation.navigate("CreatePost", { onFetchPost: fetchUserPost })
-        }
+        onPress={() => navigation.navigate("CreatePost", {onFetchPost: fetchUserPost})}
       >
         <Image
-          source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar }}
+          source={
+            user.avatar == null
+              ? require("../assets/defaultProfilePicture.jpg")
+              : { uri: user.avatar }
+          }
           style={[
             styles.avatar,
             { margin: 10, width: 40, height: 40, borderWidth: 1 },
@@ -202,7 +203,7 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
-              onPress={() => navigation.navigate('EditProfile')}
+              onPress={() => navigation.navigate("EditProfile")}
             >
               <FontAwesome5
                 style={{ marginRight: 10 }}
@@ -330,7 +331,9 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>{user.description}</Text>
+                <Text style={{ fontSize: 15 }}>
+                  {user.description}
+                </Text>
               </View>
               {/* description */}
             </View>
@@ -377,7 +380,10 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(user.birth_date, "YYYY-MM-DD ").format("DD/MM/yyyy")}
+                    {moment(
+                      user.birth_date,
+                      "YYYY-MM-DD "
+                    ).format("DD/MM/yyyy")}
                   </Text>
                 </Text>
               </View>
@@ -406,7 +412,9 @@ export default function ProfileScreen({ navigation, route }) {
             >
               Friend
             </Text>
-            <Text style={{ marginLeft: 10, fontSize: 13 }}>{user.total_friend + " friends"}</Text>
+            <Text style={{ marginLeft: 10, fontSize: 13 }}>
+              {user.total_friend + " friends"}
+            </Text>
 
             <FlatList
               style={{ marginTop: 10 }}
