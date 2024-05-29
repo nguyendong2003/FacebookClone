@@ -299,14 +299,14 @@ const Post = ({ item, navigation, onUpdatePost }) => {
             >
               <Pressable
                 style={{
-                  height: '25%',
+                  height: '80%',
                   width: '100%',
                 }}
                 onPress={() => setIsPressingMore(false)}
               />
               <View
                 style={{
-                  height: '75%',
+                  height: '20%',
                   width: '100%',
                   backgroundColor: 'white',
                   borderTopLeftRadius: 20,
