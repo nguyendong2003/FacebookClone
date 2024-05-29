@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   TouchableOpacity,
+  Pressable,
   Button,
   Alert,
   KeyboardAvoidingView,
@@ -16,10 +17,13 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  PanResponder,
+  Animated,
 } from "react-native";
 
 import {
   MaterialCommunityIcons,
+  MaterialIcons,
   AntDesign,
   FontAwesome,
   FontAwesome5,
@@ -29,7 +33,7 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import moment from "moment";
 
 import postList from "../data/post.json";
@@ -37,14 +41,17 @@ import commentList from "../data/comment.json";
 
 import Comment from "./Comment";
 
-// // Upload image
-import * as ImagePicker from "expo-image-picker";
-import { getReactionToPost, reaction, getPostById } from "../service/PostService";
+import {
+  getReactionToPost,
+  reaction,
+  getPostById,
+} from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
 import { Context as AccountContext } from "../context/AccountContext";
-import { Context as PostContext } from "../context/PostContext";
+import { Context as UserPostContext } from "../context/UserPostContext";
+import React from "react";
 
-export default function Post({ item, navigation, onUpdatePost }) {
+const Post = ({ item, navigation, onUpdatePost }) => {
   // Reaction
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -52,15 +59,16 @@ export default function Post({ item, navigation, onUpdatePost }) {
   const [sizeReaction, setSizeReaction] = useState(null);
   const [sourceReaction, setSourceReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
+  // press more in post
+  const [isPressingMore, setIsPressingMore] = useState(false);
+  //
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
-  const [user, setUser] = useState({});
 
   const { state } = useContext(AccountContext);
+  const { reloadPost } = useContext(UserPostContext);
   //
   useEffect(() => {
-    // console.log(valueReaction);
-    // Xác định màu dựa trên giá trị reaction
     switch (valueReaction) {
       case 1:
         setColorReaction("#0866FF");
@@ -113,10 +121,6 @@ export default function Post({ item, navigation, onUpdatePost }) {
     }
   }, [valueReaction]);
 
-  const [dimensions, setDimensions] = useState({
-    window: Dimensions.get("window"),
-  });
-
   const convertReactionValue = (value) => {
     switch (value) {
       case "LIKE":
@@ -140,7 +144,11 @@ export default function Post({ item, navigation, onUpdatePost }) {
 
   const updatePostHandler = async (postId) => {
     onUpdatePost(postId);
-  }
+  };
+
+  const [dimensions, setDimensions] = useState({
+    window: Dimensions.get("window"),
+  });
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
@@ -149,34 +157,29 @@ export default function Post({ item, navigation, onUpdatePost }) {
     return () => subscription?.remove();
   });
 
-  useEffect(() => {
-    const fetchReaction = async () => {
-      const response = await getReactionToPost(item?.id);
-      setValueReaction(convertReactionValue(response.type));
-    };
-    fetchReaction();
-  }, []);
+  const { window } = dimensions;
+  const windowWidth = window.width;
+  const windowHeight = window.height;
+
+  const fetchReaction = async () => {
+    const response = await getReactionToPost(item?.id);
+    setValueReaction(convertReactionValue(response.type));
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getAccountById(item?.user_id);
-      setUser(response);
-    };
-    fetchUser();
-  }, []);
+    fetchReaction();
+  }, [item?.id, item?.user_id]);
 
   const reactionHandler = async (postId, reaction_type) => {
     try {
-      if (reaction_type === 'NONE') {
-        setReactionCount(reactionCount - 1);
-      }
-      else 
-        setReactionCount(reactionCount + 1);
-
-      const response = await reaction({ id_account: state.account.id , postId, reaction_type});
+      const response = await reaction({
+        id_account: state.account.id,
+        postId,
+        reaction_type,
+      });
       setValueReaction(convertReactionValue(response.type));
-      await onUpdatePost(postId);
 
+      await onUpdatePost(postId);
     } catch (error) {
       console.log(error);
     }
@@ -187,11 +190,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
       setReactionCount(item?.reaction_quantity);
       setCommentCount(item?.comment_quantity);
     }, 800);
-  }, [item]);
-
-  const { window } = dimensions;
-  const windowWidth = window.width;
-  const windowHeight = window.height;
+  }, [item?.reaction_quantity, item?.comment_quantity]);
 
   return (
     <View>
@@ -199,55 +198,177 @@ export default function Post({ item, navigation, onUpdatePost }) {
         <View
           style={{
             flexDirection: "row",
+            justifyContent: "space-between",
             alignItems: "center",
-            padding: 12,
-            paddingBottom: 0,
           }}
         >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Profile', {
-                isPersonalPage: false,
-                statusFriend: 'realFriend',
-                listFriend: [],
-              });
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              padding: 12,
+              paddingBottom: 0,
             }}
           >
-            <Image
-              source={user.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: user.avatar}}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 100,
-              }}
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
-
-          <View style={{ marginLeft: 8 }}>
-            <TouchableOpacity>
-              <Text
-                style={{
-                  color: "#050505",
-                  fontSize: 15,
-                  fontWeight: "600",
-                }}
-              >
-                {user.profile_name}
-              </Text>
-            </TouchableOpacity>
-
-            <Text
-              style={{
-                color: "#65676B",
-                fontSize: 13,
-                fontWeight: 400,
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Profile", {
+                  accountId: item.user.id,
+                  isPersonalPage: false,
+                });
               }}
             >
-              {moment(item.create_time, "YYYY-MM-DD ").format("DD/MM/yyyy")}
-            </Text>
+              <Image
+                source={
+                  item.user.avatar == null
+                    ? require("../assets/defaultProfilePicture.jpg")
+                    : { uri: item.user.avatar }
+                }
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 100,
+                }}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+
+            <View style={{ marginLeft: 8 }}>
+              <TouchableOpacity>
+                <Text
+                  style={{
+                    color: "#050505",
+                    fontSize: 15,
+                    fontWeight: "600",
+                  }}
+                >
+                  {item.user.profile_name}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: "row" }}>
+                <Text
+                  style={{
+                    color: "#65676B",
+                    fontSize: 13,
+                    fontWeight: 400,
+                  }}
+                >
+                  {moment(item.create_time, "YYYY-MM-DD").format("DD/MM/yyyy")}
+                </Text>
+                <Ionicons
+                  style={{ marginLeft: 12 }}
+                  name={
+                    item.view_mode === "public"
+                      ? "earth-sharp"
+                      : item.view_mode === "friend"
+                      ? "people-sharp"
+                      : "lock-closed"
+                  }
+                  size={20}
+                  color="#050505"
+                />
+              </View>
+            </View>
           </View>
+          {state.account.id === item.user.id && (
+            <TouchableOpacity
+              style={{
+                padding: 8,
+              }}
+              onPress={() => setIsPressingMore(!isPressingMore)}
+            >
+              <MaterialIcons name="more-vert" size={24} color="#65676B" />
+            </TouchableOpacity>
+          )}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isPressingMore}
+            onRequestClose={() => {
+              // Alert.alert('Modal has been closed.');
+              setIsPressingMore(!isPressingMore);
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <Pressable
+                style={{
+                  height: "25%",
+                  width: "100%",
+                }}
+                onPress={() => setIsPressingMore(false)}
+              />
+              <View
+                style={{
+                  height: "75%",
+                  width: "100%",
+                  backgroundColor: "white",
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 20,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    padding: 12,
+                  }}
+                  onPress={() => {
+                    setIsPressingMore(false);
+                    navigation.navigate("EditPost", {
+                      item: item,
+                    });
+                  }}
+                >
+                  <MaterialIcons name="mode-edit" size={36} color="green" />
+                  <Text
+                    style={{
+                      fontSize: 32,
+                      color: "green",
+                      fontWeight: "bold",
+                      marginLeft: 12,
+                    }}
+                  >
+                    Edit this post
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    padding: 12,
+                    borderTopColor: "#ccc",
+                    borderTopWidth: 1,
+                  }}
+                  onPress={() => {
+                    alert("Delete post");
+                  }}
+                >
+                  <Feather name="trash-2" size={36} color="red" />
+                  <Text
+                    style={{
+                      fontSize: 32,
+                      color: "red",
+                      fontWeight: "bold",
+                      marginLeft: 12,
+                    }}
+                  >
+                    Delete this post
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
+
         <View>
           <Text
             style={{
@@ -261,39 +382,176 @@ export default function Post({ item, navigation, onUpdatePost }) {
           >
             {item?.content}
           </Text>
-          <View
-            style={{
-              marginTop: 8,
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "flex-start",
-              alignItems: "center",
-            }}
-          >
-            {item?.postImages.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image.image }}
-                style={{
-                  marginHorizontal: 2,
-                  marginTop: 4,
-                  // borderRadius: 20,
-                }}
-                width={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                height={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                resizeMode="cover"
-              />
-            ))}
-          </View>
+          {item.hasOwnProperty("postImages") ? (
+            <View
+              style={{
+                marginTop: 8,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
+            >
+              {item?.postImages.map((image, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: image.image }}
+                  style={{
+                    marginHorizontal: 2,
+                    marginTop: 4,
+                    // borderRadius: 20,
+                  }}
+                  width={
+                    item?.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  height={
+                    item?.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          ) : (
+            <></>
+          )}
         </View>
+
+        {/* Hiện bài post được chia sẻ */}
+        {item.share_post != null && (
+          <View>
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderBottomWidth: 0,
+                marginHorizontal: 8,
+                paddingBottom: 8,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 12,
+                  paddingBottom: 0,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("Profile", {
+                      accountId: item.share_post.id,
+                      isPersonalPage: false,
+                    });
+                  }}
+                >
+                  <Image
+                    source={
+                      item.share_post.user.avatar == null
+                        ? require("../assets/defaultProfilePicture.jpg")
+                        : { uri: item.share_post.user.avatar }
+                    }
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 100,
+                    }}
+                    resizeMode="cover"
+                  />
+                </TouchableOpacity>
+
+                <View style={{ marginLeft: 8 }}>
+                  <TouchableOpacity>
+                    <Text
+                      style={{
+                        color: "#050505",
+                        fontSize: 15,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {item.share_post.user.profile_name}
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: "row" }}>
+                    <Text
+                      style={{
+                        color: "#65676B",
+                        fontSize: 13,
+                        fontWeight: 400,
+                      }}
+                    >
+                      {moment(item.share_post.create_time, "YYYY-MM-DD").format(
+                        "DD/MM/yyyy"
+                      )}
+                    </Text>
+                    <Ionicons
+                      style={{ marginLeft: 12 }}
+                      name={
+                        item.share_post.view_mode === "public"
+                          ? "earth-sharp"
+                          : item.share_post.view_mode === "friend"
+                          ? "people-sharp"
+                          : "lock-closed"
+                      }
+                      size={20}
+                      color="#050505"
+                    />
+                  </View>
+                </View>
+              </View>
+              <View>
+                <Text
+                  style={{
+                    marginTop: 8,
+                    fontSize: 17,
+                    fontWeight: "400",
+
+                    paddingHorizontal: 12,
+                    paddingVertical: 0,
+                  }}
+                >
+                  {item?.share_post.content}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
+            >
+              {item?.share_post.postImages.map((image, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: image.image }}
+                  style={{
+                    marginHorizontal: 2,
+                    marginTop: 4,
+                    // borderRadius: 20,
+                  }}
+                  width={
+                    item?.share_post.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  height={
+                    item?.share_post.postImages.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          </View>
+        )}
+        {/*  */}
+
         <View
           style={{
             flexDirection: "row",
@@ -338,7 +596,10 @@ export default function Post({ item, navigation, onUpdatePost }) {
             <TouchableOpacity
               style={{ padding: 4 }}
               onPress={() => {
-                navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler});
+                navigation.navigate("Comment", {
+                  postId: item?.id,
+                  onUpdatePost: updatePostHandler,
+                });
               }}
             >
               <Text style={{ fontSize: 12, fontWeight: 400 }}>
@@ -374,9 +635,9 @@ export default function Post({ item, navigation, onUpdatePost }) {
             onPress={() => {
               setIsPressingLike(false);
               if (valueReaction > 0) {
-                reactionHandler(item?.id, 'NONE');
+                reactionHandler(item?.id, "NONE");
               } else {
-                reactionHandler(item?.id, 'LIKE');
+                reactionHandler(item?.id, "LIKE");
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -427,7 +688,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'LIKE');
+                    reactionHandler(item?.id, "LIKE");
                   }}
                 >
                   <Image
@@ -438,7 +699,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'LOVE');
+                    reactionHandler(item?.id, "LOVE");
                   }}
                 >
                   <Image
@@ -449,7 +710,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'CARE');
+                    reactionHandler(item?.id, "CARE");
                   }}
                 >
                   <Image
@@ -460,7 +721,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'HAHA');
+                    reactionHandler(item?.id, "HAHA");
                   }}
                 >
                   <Image
@@ -471,7 +732,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'WOW');
+                    reactionHandler(item?.id, "WOW");
                   }}
                 >
                   <Image
@@ -483,7 +744,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'SAD');
+                    reactionHandler(item?.id, "SAD");
                   }}
                 >
                   <Image
@@ -495,7 +756,7 @@ export default function Post({ item, navigation, onUpdatePost }) {
                   style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
-                    reactionHandler(item?.id, 'ANGRY');
+                    reactionHandler(item?.id, "ANGRY");
                   }}
                 >
                   <Image
@@ -513,23 +774,21 @@ export default function Post({ item, navigation, onUpdatePost }) {
               navigation.navigate("Comment", {
                 initialCommentFocus: true,
                 postId: item?.id,
-                 onUpdatePost: updatePostHandler
+                onUpdatePost: updatePostHandler,
               });
             }}
           >
             <FontAwesome5 name="comment" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Comment</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-            style={styles.buttonBottomPost}
-            onPress={() => alert("send")}
-          >
-            <Feather name="send" size={24} color="#65676B" />
-            <Text style={styles.textBottomPost}>Send</Text>
-          </TouchableOpacity> */}
+
           <TouchableOpacity
             style={styles.buttonBottomPost}
-            onPress={() => alert("share")}
+            onPress={() =>
+              navigation.navigate("SharePost", {
+                item: item,
+              })
+            }
           >
             <FontAwesome name="share" size={24} color="#65676B" />
             <Text style={styles.textBottomPost}>Share</Text>
@@ -538,7 +797,9 @@ export default function Post({ item, navigation, onUpdatePost }) {
       </View>
     </View>
   );
-}
+};
+
+export default React.memo(Post);
 
 const styles = StyleSheet.create({
   container: {

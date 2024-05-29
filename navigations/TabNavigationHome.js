@@ -52,6 +52,7 @@ export default function TabNavigationHome({ navigation }) {
   });
 
   const { getAccount } = useContext(AccountContext);
+  const { getPosts } = useContext(PostContext);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -66,9 +67,17 @@ export default function TabNavigationHome({ navigation }) {
 
   // console.log({ windowWidth, windowHeight });
 
-  useEffect(() => {
-    getAccount()
-  }, [])
+  // const fetchAccount = async () => {
+  //   await getAccount();
+  // };
+
+  // const fetchPost = async () => {
+  //   await getPosts();
+  // };
+  // useEffect(() => {
+  //   fetchAccount();
+  //   fetchPost();
+  // }, [])
 
   return (
     <View

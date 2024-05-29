@@ -192,6 +192,7 @@ export default function CommentScreen({ route, navigation }) {
           }}
           data={commentList}
           renderItem={({ item, index }) => (
+          
             <Comment
               item={item}
               setIsReplying={setIsReplying}
@@ -302,6 +303,8 @@ export default function CommentScreen({ route, navigation }) {
                 onPress={() => {
                   setIsReplying(false);
                   setCommentIdReplying(null);
+                  setNameReplying("");
+                  setCommentText("");
                 }}
               >
                 <Text

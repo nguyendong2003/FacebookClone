@@ -27,8 +27,37 @@ const getAccount = (dispatch) => {
   };
 };
 
+const updateDetail = (dispatch) => {
+  return async (data) => {
+    try {
+      await SpringServer.put("/account/updateDetailInfo", data);
+      getAccount(dispatch)();
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with updating detail",
+      });
+    }
+  };
+};
+
+const updateDescription = (dispatch) => {
+  return async (data) => {
+    try {
+  console.log(data);
+
+      await SpringServer.put("/account/updateDescription", data);
+      getAccount(dispatch)();
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: "Something went wrong with updating description",
+      });
+    }
+  };
+};
 export const { Context, Provider } = createDataContext(
   accountReducer,
-  { getAccount },
+  { getAccount, updateDetail, updateDescription },
   { account: null, errorMessage: "" }
 );

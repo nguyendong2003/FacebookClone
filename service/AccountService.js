@@ -5,3 +5,14 @@ export const getAccountById = async (id) => {
   return response.data;
 };
 
+export const updateDetail = async (data) => {
+  const response = await SpringServer.put(`/account/updateDetailInfo`, data);
+  return response.data;
+}
+
+export const updateDescription = async (data) => {
+  const response = await SpringServer.put(`/account/updateDescription`, data);
+  return response.data;
+}
+
+
