@@ -45,9 +45,9 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from 'react-native';
 
 export default function CommentScreen({ route, navigation }) {
-  const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
-  const stickyHeaderIndices = typeCommentScreen === "POST" ? [0] : null;
-  const [userPost, setUserPost] = useState([]);
+  // const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
+  // const stickyHeaderIndices = typeCommentScreen === "POST" ? [0] : null;
+  // const [userPost, setUserPost] = useState([]);
   // const [stickyHeader, setStickHeader] = useState();
   // typeCommentScreen == "POST" ? setStickHeader(0) : setStickHeader(1);
   
@@ -66,18 +66,18 @@ export default function CommentScreen({ route, navigation }) {
   const { state } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
   // refactor lại listHeader của FlatList
-  const [postId, setPostID] = useState(route?.params?.postId);
-  const [post, setPost] = useState(null);
+  // const [postId, setPostID] = useState(route?.params?.postId);
+  // const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true); // Add loading state
 
-  useEffect(() => {
-      const fetchPost = async () => {
-          const post = await getPostById(postId);
-          setPost(post);
-          // setLoading(false); // Set loading to false after data is fetched
-      };
-      fetchPost();
-  }, [postId]);
+  // useEffect(() => {
+  //     const fetchPost = async () => {
+  //         const post = await getPostById(postId);
+  //         setPost(post);
+  //         // setLoading(false); // Set loading to false after data is fetched
+  //     };
+  //     fetchPost();
+  // }, [postId]);
 
   // useLayoutEffect(() => {
   //     navigation.setOptions({
@@ -172,12 +172,12 @@ export default function CommentScreen({ route, navigation }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
-  const updatePostById = async (postId) => {
-    const update_post = await getPostById(postId);
-    setUserPost(
-      userPost.map((post) => (post.id === postId ? update_post : post))
-    );
-  };
+  // const updatePostById = async (postId) => {
+  //   const update_post = await getPostById(postId);
+  //   setUserPost(
+  //     userPost.map((post) => (post.id === postId ? update_post : post))
+  //   );
+  // };
 
   const submitComment = async () => {
     if (isCommentValid) {
@@ -227,7 +227,7 @@ export default function CommentScreen({ route, navigation }) {
         <FlatList
           ref={flatListRef}
           keyboardShouldPersistTaps="handled"
-          stickyHeaderIndices={stickyHeaderIndices}
+          stickyHeaderIndices={[0]}
           showsVerticalScrollIndicator={false}
           ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end" }}
           style={{
@@ -265,50 +265,51 @@ export default function CommentScreen({ route, navigation }) {
             </Text>
           } // display when empty data
           ListHeaderComponent={()=>{
-            return typeCommentScreen == "POST" ? (
+            return (
               <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingVertical: 12,
-                paddingHorizontal: 12,
-                marginBottom: 16,
-                backgroundColor: "white",
-              }}
-            >
-              <TouchableOpacity
-                style={{ flexDirection: "row", alignItems: "center" }}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate("Reaction")}
-              >
-                <Image
-                  source={require("../assets/facebook-like.png")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Image
-                  source={require("../assets/facebook-haha.png")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Image
-                  source={require("../assets/facebook-heart.jpg")}
-                  style={{ width: 24, height: 24 }}
-                />
-                <Text numberOfLines={1} style={{ width: 200 }}>
-                  You, Nguyễn Đông and 127.191 other
-                </Text>
-                <Entypo name="chevron-small-right" size={24} color="black" />
-              </TouchableOpacity>
-              <AntDesign
-                name="like2"
-                size={24}
-                color="black"
-                onPress={() => {
-                  // route?.params.setValueReaction(1);
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingVertical: 12,
+                  paddingHorizontal: 12,
+                  marginBottom: 16,
+                  backgroundColor: "white",
                 }}
-              />
-            </View>
-            ) : <Post postType="POST_DETAIL" item={post} navigation={navigation} onUpdatePost={updatePostById} />
+              >
+                <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                  activeOpacity={0.7}
+                  onPress={() => navigation.navigate("Reaction")}
+                >
+                  <Image
+                    source={require("../assets/facebook-like.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Image
+                    source={require("../assets/facebook-haha.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Image
+                    source={require("../assets/facebook-heart.jpg")}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Text numberOfLines={1} style={{ width: 200 }}>
+                    You, Nguyễn Đông and 127.191 other
+                  </Text>
+                  <Entypo name="chevron-small-right" size={24} color="black" />
+                </TouchableOpacity>
+                <AntDesign
+                  name="like2"
+                  size={24}
+                  color="black"
+                  onPress={() => {
+                    // route?.params.setValueReaction(1);
+                  }}
+                />
+              </View>
+            )
+              
           }
           }
         />
