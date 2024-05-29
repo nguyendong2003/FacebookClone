@@ -356,7 +356,7 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: 'red',
+                      color: '#050505',
                       fontWeight: 'bold',
                       marginLeft: 12,
                     }}
