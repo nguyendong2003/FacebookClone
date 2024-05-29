@@ -475,11 +475,11 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                       {item.share_post.user.profile_name}
                     </Text>
                   </TouchableOpacity>
-                  <View style={{ flexDirection: 'row' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text
                       style={{
                         color: '#65676B',
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 400,
                       }}
                     >
@@ -496,7 +496,7 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                           ? 'people-sharp'
                           : 'lock-closed'
                       }
-                      size={20}
+                      size={14}
                       color="#050505"
                     />
                   </View>
