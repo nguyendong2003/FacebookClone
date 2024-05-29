@@ -253,7 +253,9 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                     fontWeight: 400,
                   }}
                 >
-                  {moment(item.create_time, 'YYYY-MM-DD').format('DD/MM/yyyy')}
+                  {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
+                    'DD/MM/yyyy HH:mm'
+                  )}
                 </Text>
                 <Ionicons
                   style={{ marginLeft: 12 }}
@@ -483,9 +485,10 @@ const Post = ({ item, navigation, onUpdatePost }) => {
                         fontWeight: 400,
                       }}
                     >
-                      {moment(item.share_post.create_time, 'YYYY-MM-DD').format(
-                        'DD/MM/yyyy'
-                      )}
+                      {moment(
+                        item.share_post.create_time,
+                        'YYYY-MM-DD HH:mm:ss'
+                      ).format('DD/MM/yyy HH:mm')}
                     </Text>
                     <Ionicons
                       style={{ marginLeft: 12 }}
