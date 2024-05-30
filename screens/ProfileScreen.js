@@ -332,9 +332,11 @@ export default function ProfileScreen({ navigation, route }) {
                 <Image
                   style={styles.avatar}
                   source={
-                    user?.avatar == null
-                      ? require("../assets/defaultProfilePicture.jpg")
-                      : imageAvatar ? { uri: imageAvatar } : {uri: user.avatar}
+                    imageAvatar == null ?
+                      user?.avatar == null
+                        ? require("../assets/defaultProfilePicture.jpg")
+                        :  {uri: user.avatar}
+                      : { uri: imageAvatar }
                   }
                 />
                 <Pressable
