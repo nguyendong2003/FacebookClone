@@ -38,6 +38,7 @@ import Post from "../components/Post";
 
 // import commentList from '../data/comment.json';
 import { getCommentsByPostId, createComment } from "../service/CommentService";
+import {createNotification} from "../service/NotificationService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
 // Upload image
@@ -60,20 +61,29 @@ export default function CommentScreen({ route, navigation }) {
   const [isReplying, setIsReplying] = useState(false);
   const [commentIdReplying, setCommentIdReplying] = useState(null);
   const [nameReplying, setNameReplying] = useState("");
+  const [idUserReplying, setIdUserReplying] = useState("");
   const [commentList, setCommentList] = useState([]);
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
   const { getPosts } = useContext(PostContext);
-
+  const [postId, setPostID] = useState(route?.params?.postId);
   const [loading, setLoading] = useState(true); // Add loading state
-
+  const [post, setPost] = useState(null)
 
   // useLayoutEffect(() => {
   //     navigation.setOptions({
   //         headerTitle: title || 'None',
   //     });
   // }, [navigation, title]);
+  useEffect(() => {
+    const fetchPost = async () => {
+        const post = await getPostById(postId);
+        setPost(post);
+        // setLoading(false); // Set loading to false after data is fetched
+    };
+    fetchPost();
+  }, [postId]);
 
   useEffect(() => {
     if (isReplying || isCommentTextFocus) {
@@ -176,9 +186,12 @@ export default function CommentScreen({ route, navigation }) {
       formData.append("id_account", state.account.id);
       if (commentIdReplying) {
         formData.append("to_comment_id", commentIdReplying);
+        notificationHandler(idUserReplying, null, commentIdReplying)
       } 
-      else 
+      else {
         formData.append("id_post", route?.params?.postId);
+        notificationHandler(post.user.id, route?.params?.postId, null)
+      }
 
       formData.append("content", commentText);
 
@@ -189,7 +202,7 @@ export default function CommentScreen({ route, navigation }) {
           uri: commentImage,
         });
       }
-
+      
       await createComment(formData);
       setCommentText("");
       setIsReplying(false);
@@ -202,6 +215,21 @@ export default function CommentScreen({ route, navigation }) {
     }
   };
 
+  const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id,
+        to_comment_post_id,
+        notify_type: "comment"
+      })
+
+      console.log(response);
+    }catch(error) {
+      console.log(error);
+    }
+  }
   if (loading) {
     return (
         <View style={styles.loadingContainer}>
@@ -233,6 +261,7 @@ export default function CommentScreen({ route, navigation }) {
               commentIdReplying={commentIdReplying}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
+              setIdUserReplying = {setIdUserReplying}
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}

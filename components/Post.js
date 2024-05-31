@@ -46,6 +46,8 @@ import {
   reaction,
   getPostById,
 } from "../service/PostService";
+
+import {createNotification} from "../service/NotificationService"
 import { getAccountById } from "../service/AccountService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as UserPostContext } from "../context/UserPostContext";
@@ -309,6 +311,22 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
     }, 800);
   }, [item?.reaction_quantity, item?.comment_quantity]);
 
+  const notificationHandler = async(to_account_id, to_post_id, notify_type) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id,
+        to_comment_post_id: null,
+        notify_type
+      })
+
+      console.log(response);
+    }catch(error) {
+      console.log(error);
+    }
+  }
+
   return (
     <View>
       <View style={styles.card} key={item.id}>
@@ -559,7 +577,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("Profile", {
-                      accountId: item.share_post.id,
+                      accountId: item.share_post.user.id,
                       isPersonalPage: false,
                     });
                   }}
@@ -687,6 +705,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                 reactionHandler(item?.id, "NONE");
               } else {
                 reactionHandler(item?.id, "LIKE");
+                notificationHandler(item?.user.id, item?.id, "LIKE")
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -738,6 +757,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LIKE");
+                    notificationHandler(item?.user.id, item?.id, "LIKE")
                   }}
                 >
                   <Image
@@ -749,6 +769,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LOVE");
+                    notificationHandler(item?.user.id, item?.id, "LOVE")
                   }}
                 >
                   <Image
@@ -760,6 +781,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "CARE");
+                    notificationHandler(item?.user.id, item?.id, "CARE")
                   }}
                 >
                   <Image
@@ -771,6 +793,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "HAHA");
+                    notificationHandler(item?.user.id, item?.id, "HAHA")
                   }}
                 >
                   <Image
@@ -782,6 +805,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "WOW");
+                    notificationHandler(item?.user.id, item?.id, "WOW")
                   }}
                 >
                   <Image
@@ -794,6 +818,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "SAD");
+                    notificationHandler(item?.user.id, item?.id, "SAD")
                   }}
                 >
                   <Image
@@ -806,6 +831,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "ANGRY");
+                    notificationHandler(item?.user.id, item?.id, "ANGRY")
                   }}
                 >
                   <Image

@@ -63,6 +63,7 @@ import {
     const { getPosts } = useContext(PostContext);
     // refactor lại listHeader của FlatList
     const [postId, setPostID] = useState(route?.params?.postId);
+    const [commentId, setCommentId] = useState(route?.params?.commentId);
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true); // Add loading state
   
@@ -74,7 +75,6 @@ import {
         };
         fetchPost();
     }, [postId]);
-
   
     useEffect(() => {
       if (isReplying || isCommentTextFocus) {
@@ -251,12 +251,16 @@ import {
                   textAlign: "center",
                 }}
               >
-                No comment found
+                {/* No comment found */}
               </Text>
             } // display when empty data
             ListHeaderComponent={()=>{
-              return <Post postType="POST_DETAIL" item={post} navigation={navigation} onUpdatePost={updatePostById} />
-            }
+              return post ? (
+                <Post postType="POST_DETAIL" item={post} navigation={navigation} onUpdatePost={updatePostById} />
+              ) : (
+                  <ActivityIndicator size="large" color="#0000ff" />
+              );
+              }
             }
           />
           <View

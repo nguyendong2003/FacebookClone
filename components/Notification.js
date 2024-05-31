@@ -1,14 +1,16 @@
 import { Image ,View, Text, StyleSheet, TouchableOpacity } from "react-native"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import B from "../components/B";
-
+import {updateNotification} from "../service/NotificationService"
+import {getPostOfComment} from "../service/CommentService"
+import moment from "moment";
 export default function Notification(
     {navigation, item}
 ){
-
     const [isRead, setIsRead] = useState(item._read)
     const [type, setType] = useState(item.type)
+    const [post, setPost] = useState(null)
 
     const text = item.content;
     const parts = text.split("</B>");
@@ -25,6 +27,9 @@ export default function Notification(
                 break;
             case "LOVE":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/love.png')}/>)
+                break;
+            case "HAHA":
+                return (<Image style={{width:24, height:24}} source={require('../iconfb/haha.png')}/>)
                 break;
             case "LIKE":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/like.png')}/>)
@@ -44,31 +49,82 @@ export default function Notification(
     }
 
     const remainTime = (time)=> {
-        const currentTime = new Date().getTime();
-        const timePost = new Date(time).getTime();
-        const remain = currentTime - timePost;
-        const remainSecond = remain/1000;
-        const remainMinute = remainSecond/60;
-        const remainHour = remainMinute/60;
-        const remainDay = remainHour/24;
-        if(remainSecond < 60){
-            return Math.floor(remainSecond) + " seconds ago";
-        }else if(remainMinute < 60){
-            return Math.floor(remainMinute) + " minutes ago";
-        }else if(remainHour < 24){
-            return Math.floor(remainHour) + " hours ago";
-        }else{
-            return Math.floor(remainDay) + " days ago";
+        // const currentTime = new Date().getTime();
+        // const timePost = new Date(time).getTime();
+        // const remain = currentTime - timePost;
+        // const remainSecond = remain/1000;
+        // const remainMinute = remainSecond/60;
+        // const remainHour = remainMinute/60;
+        // const remainDay = remainHour/24;
+        // if(remainSecond < 60){
+        //     return Math.floor(remainSecond) + " seconds ago";
+        // }else if(remainMinute < 60){
+        //     return Math.floor(remainMinute) + " minutes ago";
+        // }else if(remainHour < 24){
+        //     return Math.floor(remainHour) + " hours ago";
+        // }else{
+        //     return Math.floor(remainDay) + " days ago";
+        // }
+
+        const createDate = new Date(time);
+        const now = new Date();
+
+        const diffInSeconds = Math.floor((now - createDate) / 1000);
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        const diffInDays = Math.floor(diffInHours / 24);
+        const diffInMonths = Math.floor(diffInDays / 30);
+        const diffInYears = Math.floor(diffInMonths / 12);
+
+        if (diffInYears > 0) {
+            return `${diffInYears} years ago`;
+        } else if (diffInMonths > 0) {
+            return `${diffInMonths} months ago`;
+        } else if (diffInDays > 0) {
+            return `${diffInDays} days ago`;
+        } else if (diffInHours > 0) {
+            return `${diffInHours} hours ago`;
+        } else if (diffInMinutes > 0) {
+            return `${diffInMinutes} minutes ago`;
+        } else {
+            return "just now";
         }
     }
+
+    const updateNotificationHandler = async() => {
+        try {
+            if(!isRead) {
+                const response = await updateNotification(item.id)
+                // console.log(response)
+                setIsRead(true)
+            }
+        }catch(error) {
+            console.log(error);
+        }
+    }
+
+    const getPostOfCommentHandler = async() => {
+        if(item.to_comment_post_id) {
+            try {
+                const responsse = await getPostOfComment(item?.to_comment_post_id)
+                setPost(responsse)
+            }catch(error) {
+                console.log(error);
+            }
+        }
+    }
+
+    useEffect(() => {
+        getPostOfCommentHandler()
+    }, [item])
 
     return(
         <View style={[styles.container, {backgroundColor : isRead? "white": "#e9f2f7"}]}>
             <TouchableOpacity 
             style={styles.notifyContainer}
             onPress={()=> {
-                setIsRead(true)
-                navigation.navigate("PostDetail", {postId: 1, title: "Nguyễn Đông",})
+                updateNotificationHandler()
+                navigation.navigate("PostDetail", {postId: (item.to_post_id != null) ? item.to_post_id : post.id, commentId: item.to_comment_post_id})
             }}
             >
                 <View>
@@ -82,12 +138,12 @@ export default function Notification(
                     
                 </View>
                 <View style={styles.contentContainer}>
-                    <Text numberOfLines={3} style={styles.titleNotification}><B>{user}</B> {rest}</Text>
-                    <Text style={styles.dateNotfication}>{remainTime(item.create_time)}</Text>                    
+                    <Text numberOfLines={3} style={styles.titleNotification}><B>{user}</B>{rest}</Text>
+                    <Text style={styles.dateNotfication}>{moment(item?.create_time).fromNow()}</Text>                    
                 </View>
             </TouchableOpacity>
         </View>
-        
+
     );
 }
 

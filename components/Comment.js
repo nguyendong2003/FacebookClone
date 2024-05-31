@@ -30,7 +30,9 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import {createNotification} from "../service/NotificationService"
+import { Context as AccountContext } from "../context/AccountContext";
 import moment from "moment";
 const Comment = ({
   item,
@@ -38,6 +40,7 @@ const Comment = ({
   commentIdReplying,
   setCommentIdReplying,
   setNameReplying,
+  setIdUserReplying,
   setCommentText,
   scrollToComment,
   coords,
@@ -47,7 +50,7 @@ const Comment = ({
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
-
+  const { state } = useContext(AccountContext);
   useEffect(() => {
     switch (valueReaction) {
       case 1:
@@ -106,7 +109,21 @@ const Comment = ({
   const windowHeight = window.height;
 
   const ref = useRef();
+  const notificationHandler = async(to_account_id, to_comment_post_id, notify_type) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id: null,
+        to_comment_post_id,
+        notify_type
+      })
 
+      console.log(response);
+    }catch(error) {
+      console.log(error);
+    }
+  }
   return (
     <View>
       <View
@@ -225,6 +242,7 @@ const Comment = ({
                     setValueReaction(0);
                   } else {
                     setValueReaction(1);
+                    notificationHandler(item?.account_user.id, item?.id, "LIKE")
                   }
                 }}
                 onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -265,6 +283,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(1);
+                        notificationHandler(item?.account_user.id, item?.id, "LIKE")
                       }}
                     >
                       <Image
@@ -276,6 +295,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(2);
+                        notificationHandler(item?.account_user.id, item?.id, "LOVE")
                       }}
                     >
                       <Image
@@ -287,6 +307,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(3);
+                        notificationHandler(item?.account_user.id, item?.id, "CARE")
                       }}
                     >
                       <Image
@@ -298,6 +319,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(4);
+                        notificationHandler(item?.account_user.id, item?.id, "HAHA")
                       }}
                     >
                       <Image
@@ -309,6 +331,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(5);
+                        notificationHandler(item?.account_user.id, item?.id, "WOW")
                       }}
                     >
                       <Image
@@ -321,6 +344,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(6);
+                        notificationHandler(item?.account_user.id, item?.id, "SAD")
                       }}
                     >
                       <Image
@@ -333,6 +357,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(7);
+                        notificationHandler(item?.account_user.id, item?.id, "ANGRY")
                       }}
                     >
                       <Image
@@ -350,6 +375,7 @@ const Comment = ({
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
                   setNameReplying(item.account_user.profile_name);
+                  setIdUserReplying(item.account_user.id);
                   setCommentText(`${item.account_user.profile_name} `);
                   scrollToComment(item?.id);
                 }}
@@ -416,6 +442,7 @@ const Comment = ({
             commentIdReplying={commentIdReplying}
             setCommentIdReplying={setCommentIdReplying}
             setNameReplying={setNameReplying}
+            setIdUserReplying = {setIdUserReplying}
             scrollToComment={scrollToComment}
             coords={coords}
             setCoords={setCoords}

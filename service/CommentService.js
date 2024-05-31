@@ -18,3 +18,10 @@ export const createComment = async (formData) => {
     }
   );
 };
+
+export const getPostOfComment = async(id) => {
+  const response =  await SpringServer.get(
+    `/facebook.api/post/comments/getPostOfComment/${id}`
+  );
+  return response.data;
+}
