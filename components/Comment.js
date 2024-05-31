@@ -30,8 +30,11 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import moment from "moment";
+import { reaction } from "../service/CommentService";
+import { Context as AccountContext } from "../context/AccountContext";
+
 const Comment = ({
   item,
   setIsReplying,
@@ -47,6 +50,7 @@ const Comment = ({
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
+  const { state: accountState } = useContext(AccountContext);
 
   useEffect(() => {
     switch (valueReaction) {
@@ -89,6 +93,40 @@ const Comment = ({
     }
   }, [valueReaction]);
 
+  const convertReactionValue = (value) => {
+    switch (value) {
+      case "LIKE":
+        return 1;
+      case "LOVE":
+        return 2;
+      case "CARE":
+        return 3;
+      case "HAHA":
+        return 4;
+      case "WOW":
+        return 5;
+      case "SAD":
+        return 6;
+      case "ANGRY":
+        return 7;
+      default:
+        return 0;
+    }
+  };
+
+  useEffect(() => {
+    setValueReaction(convertReactionValue(item?.reaction));
+  }, []);
+
+  const reactionHandler = async (type) => {
+    await reaction({
+      id_account: accountState.account.id,
+      id_comment: item.id,
+      reaction_type: type,
+    });
+
+    setValueReaction(convertReactionValue(type));
+  }
   //
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
@@ -222,9 +260,9 @@ const Comment = ({
                 onPress={() => {
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
-                    setValueReaction(0);
+                    reactionHandler("NONE")
                   } else {
-                    setValueReaction(1);
+                    reactionHandler("LIKE")
                   }
                 }}
                 onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -264,7 +302,7 @@ const Comment = ({
                     <TouchableOpacity
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(1);
+                        reactionHandler("LIKE");
                       }}
                     >
                       <Image
@@ -275,7 +313,7 @@ const Comment = ({
                     <TouchableOpacity
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(2);
+                        reactionHandler("LOVE");
                       }}
                     >
                       <Image
@@ -286,7 +324,7 @@ const Comment = ({
                     <TouchableOpacity
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(3);
+                        reactionHandler("CARE");
                       }}
                     >
                       <Image
@@ -297,7 +335,7 @@ const Comment = ({
                     <TouchableOpacity
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(4);
+                        reactionHandler("HAHA");
                       }}
                     >
                       <Image
@@ -308,7 +346,7 @@ const Comment = ({
                     <TouchableOpacity
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(5);
+                        reactionHandler("WOW");
                       }}
                     >
                       <Image
@@ -320,7 +358,7 @@ const Comment = ({
                       style={{ marginLeft: 4 }}
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(6);
+                        reactionHandler("SAD");
                       }}
                     >
                       <Image
@@ -332,7 +370,7 @@ const Comment = ({
                       style={{ marginLeft: 4 }}
                       onPress={() => {
                         setIsPressingLike(false);
-                        setValueReaction(7);
+                        reactionHandler("ANGRY");
                       }}
                     >
                       <Image
