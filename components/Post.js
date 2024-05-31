@@ -160,14 +160,9 @@ const Post = ({ item, navigation, onUpdatePost }) => {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
-
-  const fetchReaction = async () => {
-    const response = await getReactionToPost(item?.id);
-    setValueReaction(convertReactionValue(response.type));
-  };
-
+  
   useEffect(() => {
-    fetchReaction();
+    setValueReaction(convertReactionValue(item?.reaction));
   }, [item?.id, item?.user_id]);
 
   const reactionHandler = async (postId, reaction_type) => {

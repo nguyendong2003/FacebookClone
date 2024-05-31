@@ -73,7 +73,7 @@ export default function CreatePostScreen({ navigation, route }) {
       await createPost({
         content: textPost,
         images: imagePostList,
-        view_mode: value,
+        view_mode: data[value - 1].label.toLowerCase(),
         share_id: 0,
       });
       if (route?.params?.onFetchPost) route.params.onFetchPost();

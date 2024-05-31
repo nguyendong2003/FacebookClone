@@ -16,7 +16,7 @@ import moment from "moment";
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
 // const listFriend =[]
-import {DeviceEventEmitter} from "react-native"
+import { DeviceEventEmitter } from "react-native";
 import { useState, useContext, useEffect } from "react";
 
 import { Context as FriendContext } from "../context/FriendContext";
@@ -41,12 +41,11 @@ export default function ProfileScreen({ navigation, route }) {
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
   const [status, setStatus] = useState(null);
-  
+
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
   };
-  DeviceEventEmitter.addListener("fetchPost", fetchUserPost)
 
   const fetchProfileStatus = async () => {
     const data = await getProfileStatus(route.params.accountId);
@@ -58,15 +57,22 @@ export default function ProfileScreen({ navigation, route }) {
   };
 
   useEffect(() => {
-    getAccountById(route.params.accountId).then((data) => {
-      setUser(data);
+    const fetchUserData = async () => {
+      const user = await getAccountById(route.params.accountId);
+      setUser(user);
       fetchProfileStatus();
       fetchUserPost();
-    });
 
-    getFriendsByAccountId(route.params.accountId).then((data) => {
-      setFriendList(data);
-    });
+      const friendsData = await getFriendsByAccountId(route.params.accountId);
+      setFriendList(friendsData);
+    };
+    fetchUserData();
+
+    const subscription = DeviceEventEmitter.addListener("fetchPost", fetchUserPost);
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const updatePostById = async (postId) => {
@@ -100,7 +106,9 @@ export default function ProfileScreen({ navigation, route }) {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() => navigation.navigate("CreatePost", {onFetchPost: fetchUserPost})}
+        onPress={() =>
+          navigation.navigate("CreatePost", { onFetchPost: fetchUserPost })
+        }
       >
         <Image
           source={
@@ -331,9 +339,7 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>
-                  {user.description}
-                </Text>
+                <Text style={{ fontSize: 15 }}>{user.description}</Text>
               </View>
               {/* description */}
             </View>
@@ -380,10 +386,9 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(
-                      user.birth_date,
-                      "YYYY-MM-DD "
-                    ).format("DD/MM/yyyy")}
+                    {moment(user.birth_date, "YYYY-MM-DD ").format(
+                      "DD/MM/yyyy"
+                    )}
                   </Text>
                 </Text>
               </View>

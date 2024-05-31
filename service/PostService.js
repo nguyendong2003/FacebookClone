@@ -40,7 +40,7 @@ export const getUserPosts = async (id) => {
 export const createPost = async ({ content, images, view_mode, share_id = 0 }) => {
   const formData = new FormData();
   formData.append("content", content);
-  formData.append("view_mode", view_mode == 1 ? "public" : "private");
+  formData.append("view_mode", view_mode);
   formData.append("shareId", share_id);
 
   if (images != null) {
