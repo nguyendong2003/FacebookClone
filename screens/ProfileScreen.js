@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   Button,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -15,6 +16,7 @@ import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
+import * as ImagePicker from "expo-image-picker";
 // const listFriend =[]
 import { DeviceEventEmitter } from "react-native";
 import { useState, useContext, useEffect } from "react";
@@ -41,6 +43,8 @@ export default function ProfileScreen({ navigation, route }) {
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
   const [status, setStatus] = useState(null);
+  const [imageCover, setImageCover] = useState(null);
+  const [imageAvatar, setImageAvatar] = useState(null);
 
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
@@ -80,6 +84,35 @@ export default function ProfileScreen({ navigation, route }) {
     setUserPost(
       userPost.map((post) => (post.id === postId ? update_post : post))
     );
+  };
+
+  const pickImage = async (type) => {
+    // Hỏi quyền truy cập thư viện ảnh
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    // Mở thư viện ảnh để người dùng chọn ảnh
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    
+    if(type == "cover"){
+      if (!result.canceled) {
+        setImageCover(result.assets[0].uri);
+      }
+    }else{
+      if (!result.canceled) {
+        setImageAvatar(result.assets[0].uri);
+      }
+    }
+    // console.log(image)
   };
 
   const sendRequestHandler = async () => {
@@ -253,6 +286,7 @@ export default function ProfileScreen({ navigation, route }) {
             item={item}
             navigation={navigation}
             onUpdatePost={updatePostById}
+            postType="POST"
           />
         )}
         keyExtractor={(item, index) => item.id.toString()}
@@ -274,7 +308,10 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
-            <View style={styles.coverPhotoContainer}>
+            <Pressable 
+            style={styles.coverPhotoContainer}
+            onPress={() => pickImage("cover")}
+            >
               <View
                 style={[
                   styles.cameraContainer,
@@ -290,9 +327,9 @@ export default function ProfileScreen({ navigation, route }) {
               </View>
               <Image
                 style={styles.coverPhoto}
-                source={require("../assets/coverPhoto.jpg")}
+                source={imageCover ? { uri: imageCover } : require('../assets/coverPhoto.jpg')}
               />
-            </View>
+            </Pressable>
             {/* CoverPhoto */}
 
             <View
@@ -303,16 +340,19 @@ export default function ProfileScreen({ navigation, route }) {
                 <Image
                   style={styles.avatar}
                   source={
-                    user?.avatar == null
-                      ? require("../assets/defaultProfilePicture.jpg")
-                      : { uri: user.avatar }
+                    imageAvatar == null ?
+                      user?.avatar == null
+                        ? require("../assets/defaultProfilePicture.jpg")
+                        :  {uri: user.avatar}
+                      : { uri: imageAvatar }
                   }
                 />
-                <View
+                <Pressable
                   style={[
                     styles.cameraContainer,
                     { bottom: "3%", right: "3%" },
                   ]}
+                  onPress={() => pickImage("avatar")}
                 >
                   <Ionicons
                     style={styles.camera}
@@ -321,7 +361,7 @@ export default function ProfileScreen({ navigation, route }) {
                     color="black"
                   />
                   {/* Avatar */}
-                </View>
+                </Pressable>
               </View>
 
               {/* name */}

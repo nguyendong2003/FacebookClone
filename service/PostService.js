@@ -64,3 +64,10 @@ export const createPost = async ({ content, images, view_mode, share_id = 0 }) =
   );
   return response.data;
 }
+
+export const getReactionsOfPost = async (postId) => {
+  const response = await SpringServer.get(
+    `/facebook.api/post/reactions/${postId}`
+  );
+  return response.data;
+}

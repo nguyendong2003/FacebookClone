@@ -1,0 +1,80 @@
+[
+    {
+        "id": 12,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715013355/cd0yvmtukfzvda0pnaah.png",
+        "receiver_id": 1,
+        "to_post_id": null,
+        "to_comment_post_id": 8,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-29T05:03:12",
+        "content": "<B>User</B> reacted to your comment",
+        "type": "SORRY",
+        "_read": true
+    },
+    {
+        "id": 11,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715013355/cd0yvmtukfzvda0pnaah.png",
+        "receiver_id": 1,
+        "to_post_id": null,
+        "to_comment_post_id": 9,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-21T11:26:05",
+        "content": "<B>User</B> reacted to your comment",
+        "type": "CARE",
+        "_read": false
+    },
+    {
+        "id": 8,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715003384/svr7jyqlc25atmhqypjj.png",
+        "receiver_id": 1,
+        "to_post_id": null,
+        "to_comment_post_id": 9,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-21T10:18:11",
+        "content": "<B>Đức Nghĩa</B> mentioned you in a comment",
+        "type": "comment",
+        "_read": true
+    },
+    {
+        "id": 4,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715003377/nlji6mebg2gq0yc14iwa.png",
+        "receiver_id": 1,
+        "to_post_id": 4,
+        "to_comment_post_id": null,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-21T09:54:56",
+        "content": "<B>Nguyễn Tuấn</B> commented on your post",
+        "type": "comment",
+        "_read": false
+    },
+    {
+        "id": 3,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715003377/nlji6mebg2gq0yc14iwa.png",
+        "receiver_id": 1,
+        "to_post_id": 4,
+        "to_comment_post_id": null,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-21T09:54:01",
+        "content": "<B>Nguyễn Tuấn</B> reacted to your post",
+        "type": "LOVE",
+        "_read": false
+    },
+    {
+        "id": 1,
+        "avatar_sender": "https://res.cloudinary.com/dwqwjohey/image/upload/v1715013355/cd0yvmtukfzvda0pnaah.png",
+        "receiver_id": 1,
+        "to_post_id": 1,
+        "to_comment_post_id": null,
+        "to_share_id": null,
+        "to_comment_share_id": null,
+        "create_time": "2024-05-21T00:00:00",
+        "content": "<B>User</B> likes your post",
+        "type": "LIKE",
+        "_read": true
+    }
+]

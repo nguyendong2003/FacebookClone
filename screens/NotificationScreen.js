@@ -14,6 +14,7 @@ import {
   Platform,
   Dimensions,
   FlatList,
+  RefreshControl
 } from 'react-native';
 
 import {
@@ -23,23 +24,47 @@ import {
   Fontisto,
   Entypo,
 } from '@expo/vector-icons';
-
-import { useState, useEffect } from 'react';
-import notificationList from '../data/notification.json'
+import { useState, useEffect, useContext, React, useCallback } from "react";
+// import notificationList from '../data/dataNotify.json'
 // import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import Notification from '../components/Notification';
-// import { useState } from 'react';
+
+import { Context as AccountContext } from "../context/AccountContext";
+import {getNotificationByAccount} from "../service/NotificationService"
 
 export default function NotificationScreen({ navigation }) {
+  const [notificationList, setNotificationList] = useState(null)
+  const { state } = useContext(AccountContext);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await getNotificationByAccount(state.account.id)
+      setNotificationList(response)
+    }
+    fetchData()
+  }, [refreshing])
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}>
       <Text style={{fontSize: 24, fontWeight: "bold", margin: 9}}>Notifications</Text>
       <FlatList
       data={notificationList}
       renderItem={({item})=>(
         <Notification navigation={navigation} item={item} key={item.id}/>
       )}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       />
     </View>
   );
