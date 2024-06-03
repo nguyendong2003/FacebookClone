@@ -121,6 +121,8 @@ const Comment = ({
   }, []);
 
   const reactionHandler = async (type) => {
+    console.log(item.id)
+
     await reaction({
       id_account: accountState.account.id,
       id_comment: item.id,
@@ -149,14 +151,12 @@ const Comment = ({
   const notificationHandler = async(to_account_id, to_comment_post_id, notify_type) => {
     try{
       const response = await createNotification({
-        from_account_id: state.account.id,
+        from_account_id: accountState.account.id,
         to_account_id,
         to_post_id: null,
         to_comment_post_id,
         notify_type
       })
-
-      console.log(response);
     }catch(error) {
       console.log(error);
     }

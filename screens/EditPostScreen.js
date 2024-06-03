@@ -210,109 +210,13 @@ export default function EditPostScreen({ navigation, route }) {
 
           <View
             style={{
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderBottomWidth: 0,
-              marginHorizontal: 8,
-              paddingBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 12,
-                paddingBottom: 0,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate('Profile', {
-                    isPersonalPage: false,
-                    statusFriend: 'realFriend',
-                    listFriend: [],
-                  });
-                }}
-              >
-                <Image
-                  source={
-                    item.avatar == null
-                      ? require('../assets/defaultProfilePicture.jpg')
-                      : { uri: item.avatar }
-                  }
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 100,
-                  }}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
-
-              <View style={{ marginLeft: 8 }}>
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      color: '#050505',
-                      fontSize: 15,
-                      fontWeight: '600',
-                    }}
-                  >
-                    {/* {item.profile_name} */}
-                    Nguyễn Đông
-                  </Text>
-                </TouchableOpacity>
-                <View style={{ flexDirection: 'row' }}>
-                  <Text
-                    style={{
-                      color: '#65676B',
-                      fontSize: 13,
-                      fontWeight: 400,
-                    }}
-                  >
-                    {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
-                      'DD/MM/yyyy HH:mm:ss'
-                    )}
-                  </Text>
-                  <Ionicons
-                    style={{ marginLeft: 12 }}
-                    name={
-                      item.view_mode === 'public'
-                        ? 'earth-sharp'
-                        : item.view_mode === 'friend'
-                        ? 'people-sharp'
-                        : 'lock-closed'
-                    }
-                    size={20}
-                    color="#050505"
-                  />
-                </View>
-              </View>
-            </View>
-            <View>
-              <Text
-                style={{
-                  marginTop: 8,
-                  fontSize: 17,
-                  fontWeight: '400',
-
-                  paddingHorizontal: 12,
-                  paddingVertical: 0,
-                }}
-              >
-                {item?.content}
-              </Text>
-            </View>
-          </View>
-          <View
-            style={{
               flexDirection: 'row',
               flexWrap: 'wrap',
               justifyContent: 'flex-start',
               alignItems: 'center',
             }}
           >
-            {item?.postImages.map((image, index) => (
+            {item?.postImages?.map((image, index) => (
               <Image
                 key={index}
                 source={{ uri: image.image }}
@@ -335,6 +239,142 @@ export default function EditPostScreen({ navigation, route }) {
               />
             ))}
           </View>
+
+          {item?.share_post != null && (
+            <View>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ccc',
+                  borderBottomWidth: 0,
+                  marginHorizontal: 8,
+                  paddingBottom: 8,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 12,
+                    paddingBottom: 0,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate('Profile', {
+                        isPersonalPage: false,
+                        statusFriend: 'realFriend',
+                        listFriend: [],
+                      });
+                    }}
+                  >
+                    <Image
+                      source={
+                        item?.share_post?.user?.avatar == null
+                          ? require('../assets/defaultProfilePicture.jpg')
+                          : { uri: item?.share_post?.user?.avatar }
+                      }
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 100,
+                      }}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+
+                  <View style={{ marginLeft: 8 }}>
+                    <TouchableOpacity>
+                      <Text
+                        style={{
+                          color: '#050505',
+                          fontSize: 15,
+                          fontWeight: '600',
+                        }}
+                      >
+                        {item?.share_post?.user?.profile_name}
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Text
+                        style={{
+                          color: '#65676B',
+                          fontSize: 13,
+                          fontWeight: 400,
+                        }}
+                      >
+                        {moment(item.create_time, 'YYYY-MM-DD HH:mm:ss').format(
+                          'DD/MM/yyyy HH:mm'
+                        )}
+                      </Text>
+                      <Ionicons
+                        style={{ marginLeft: 12 }}
+                        name={
+                          item.view_mode === 'public'
+                            ? 'earth-sharp'
+                            : item.view_mode === 'friend'
+                            ? 'people-sharp'
+                            : 'lock-closed'
+                        }
+                        size={14}
+                        color="#050505"
+                      />
+                    </View>
+                  </View>
+                </View>
+                <View>
+                  <Text
+                    style={{
+                      marginTop: 8,
+                      fontSize: 17,
+                      fontWeight: '400',
+
+                      paddingHorizontal: 12,
+                      paddingVertical: 0,
+                    }}
+                  >
+                    {item?.share_post?.content}
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                }}
+              >
+                {item?.share_post?.postImages?.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image.image }}
+                    style={{
+                      marginHorizontal: 2,
+                      marginTop: 4,
+                      // borderRadius: 20,
+                    }}
+                    width={
+                      item?.share_post?.postImages.length % 2 === 1 &&
+                      index === 0
+                        ? windowWidth - 4
+                        : windowWidth / 2 - 4
+                    }
+                    height={
+                      item?.share_post?.postImages.length % 2 === 1 &&
+                      index === 0
+                        ? windowWidth - 4
+                        : windowWidth / 2 - 4
+                    }
+                    resizeMode="cover"
+                  />
+                ))}
+              </View>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
