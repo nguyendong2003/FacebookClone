@@ -30,12 +30,11 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef, useContext, useContext } from "react";
+import { useState, useEffect, useRef, useContext} from "react";
 import {createNotification} from "../service/NotificationService"
 import { Context as AccountContext } from "../context/AccountContext";
 import moment from "moment";
 import { reaction } from "../service/CommentService";
-import { Context as AccountContext } from "../context/AccountContext";
 
 const Comment = ({
   item,
@@ -53,7 +52,8 @@ const Comment = ({
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
-  const { state } = useContext(AccountContext);
+  const { state: accountState } = useContext(AccountContext);
+
   useEffect(() => {
     switch (valueReaction) {
       case 1:

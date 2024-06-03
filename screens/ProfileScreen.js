@@ -59,20 +59,22 @@ export default function ProfileScreen({ navigation, route }) {
     }
     setStatus(data);
   };
+  const fetchUserData = async () => {
+    const user = await getAccountById(route.params.accountId);
+    setUser(user);
+    fetchProfileStatus();
+    fetchUserPost();
 
+    const friendsData = await getFriendsByAccountId(route.params.accountId);
+    setFriendList(friendsData);
+  };
   useEffect(() => {
-    const fetchUserData = async () => {
-      const user = await getAccountById(route.params.accountId);
-      setUser(user);
-      fetchProfileStatus();
-      fetchUserPost();
-
-      const friendsData = await getFriendsByAccountId(route.params.accountId);
-      setFriendList(friendsData);
-    };
     fetchUserData();
 
-    const subscription = DeviceEventEmitter.addListener("fetchPost", fetchUserPost);
+    const subscription = DeviceEventEmitter.addListener(
+      "fetchPost",
+      fetchUserPost
+    );
 
     return () => {
       subscription.remove();
@@ -88,10 +90,11 @@ export default function ProfileScreen({ navigation, route }) {
 
   const pickImage = async (type) => {
     // Hỏi quyền truy cập thư viện ảnh
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
+      alert("Permission to access camera roll is required!");
       return;
     }
 
@@ -102,12 +105,12 @@ export default function ProfileScreen({ navigation, route }) {
       aspect: [4, 3],
       quality: 1,
     });
-    
-    if(type == "cover"){
+
+    if (type == "cover") {
       if (!result.canceled) {
         setImageCover(result.assets[0].uri);
       }
-    }else{
+    } else {
       if (!result.canceled) {
         setImageAvatar(result.assets[0].uri);
       }
@@ -308,9 +311,9 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
-            <Pressable 
-            style={styles.coverPhotoContainer}
-            onPress={() => pickImage("cover")}
+            <Pressable
+              style={styles.coverPhotoContainer}
+              onPress={() => pickImage("cover")}
             >
               <View
                 style={[
@@ -327,7 +330,11 @@ export default function ProfileScreen({ navigation, route }) {
               </View>
               <Image
                 style={styles.coverPhoto}
-                source={imageCover ? { uri: imageCover } : require('../assets/coverPhoto.jpg')}
+                source={
+                  imageCover
+                    ? { uri: imageCover }
+                    : require("../assets/coverPhoto.jpg")
+                }
               />
             </Pressable>
             {/* CoverPhoto */}
@@ -340,10 +347,10 @@ export default function ProfileScreen({ navigation, route }) {
                 <Image
                   style={styles.avatar}
                   source={
-                    imageAvatar == null ?
-                      user?.avatar == null
+                    imageAvatar == null
+                      ? user?.avatar == null
                         ? require("../assets/defaultProfilePicture.jpg")
-                        :  {uri: user.avatar}
+                        : { uri: user.avatar }
                       : { uri: imageAvatar }
                   }
                 />

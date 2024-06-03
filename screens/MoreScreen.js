@@ -5,11 +5,12 @@ import { getAccountById } from "../service/AccountService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-
+import { Context as AuthContext } from "../context/AuthContext";
 
 export default function MoreScreen(
   { route}
 ) {
+  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
   const { state: accountState, getAccount } = useContext(AccountContext);
   // console.log(accountState.account)
@@ -36,7 +37,7 @@ export default function MoreScreen(
       </TouchableOpacity>
         <TouchableOpacity
         style={styles.buttonContainer}
-        onPress={() => alert("This feature is not available yet")}
+        onPress={() => logout()}
         >
           <Text style={styles.buttonText}>Log out</Text>
         </TouchableOpacity>

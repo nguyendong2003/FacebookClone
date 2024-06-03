@@ -67,7 +67,7 @@ export default function Reaction({
   return (
     <TouchableOpacity
       onPress={() => {
-        alert(`${name} click`);
+        navigation.navigate("Profile", { accountId: item.id });
       }}
     >
       <View style={styles.container}>
@@ -81,7 +81,8 @@ export default function Reaction({
         >
           <View>
             <Image
-              source={{ uri: avatar }}
+              source={avatar == null ? require("../assets/defaultProfilePicture.jpg")
+              : { uri: avatar }}
               style={{ width: size * 2, height: size * 2, borderRadius: 100 }}
             />
             {icon && (

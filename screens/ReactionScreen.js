@@ -36,7 +36,7 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function ReactionScreen({ navigation, route }) {
   //
-  const [reactions, setReactions] = useState([{type: "All", number: 0}]);
+  const [reactions, setReactions] = useState(null);
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
   });
@@ -122,28 +122,18 @@ export default function ReactionScreen({ navigation, route }) {
     },
   ];
 
-  const fetchReactions = async () => {
-    const response = await getReactionsOfPost(route.params.postId);
-    const reactions_arr = Object.keys(response).map((key) => ({
-      type: key,
-      number: response[key] ? response[key].length : null,
-    }));
-    
-    const total_reaction = reactions_arr.reduce((sum, reaction) => sum + (reaction.number || 0), 0);
-    setReactions([{type: "All", number: total_reaction}, ...reactions_arr]);
-  };
+
   useEffect(() => {
-    fetchReactions();
+    setReactions(route.params.reactions);
   }, []);
   const ReactionTabScreen = ({ route }) => {
     // Trích xuất giá trị của màn hình từ route.params nếu cần
     const { name, icon, size, value } = route.params;
-
+    
     const renderReactionList =
       value === 0
         ? reactionList
         : reactionList.filter((item) => item.type === value);
-
     return (
       <View style={styles.container}>
         {/* <View
@@ -193,14 +183,15 @@ export default function ReactionScreen({ navigation, route }) {
             alignSelf: "flex-start",
             minWidth: "100%",
           }}
-          data={renderReactionList}
+          data={reactions.filter((reaction) => reaction.type === name)[0].users}
           renderItem={({ item }) => (
             // <Post item={item} navigation={navigation} />
             <Reaction
+              navigation={navigation}
               item={item}
-              name={item.name}
+              name={item.profile_name}
               avatar={item?.avatar}
-              icon={icon}
+              icon={icons[name]}
               size={size}
               value={value}
             />
@@ -231,7 +222,7 @@ export default function ReactionScreen({ navigation, route }) {
   useEffect(() => {
   }, [reactions]);
   
-  if (reactions.length === 0) {
+  if (reactions == null) {
     return (
       <></>
     );
