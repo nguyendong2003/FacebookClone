@@ -33,8 +33,9 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect, useContext, useRef } from 'react';
-import moment from 'moment';
+import { useState, useEffect, useContext, useRef } from "react";
+import moment from "moment";
+import { getReactionsOfPost } from "../service/PostService";
 
 import postList from '../data/post.json';
 import commentList from '../data/comment.json';
@@ -47,11 +48,11 @@ import {
   getPostById,
 } from '../service/PostService';
 
-import {createNotification} from "../service/NotificationService"
-import { getAccountById } from '../service/AccountService';
-import { Context as AccountContext } from '../context/AccountContext';
-import { Context as UserPostContext } from '../context/UserPostContext';
-import React from 'react';
+import { createNotification } from "../service/NotificationService";
+import { getAccountById } from "../service/AccountService";
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as UserPostContext } from "../context/UserPostContext";
+import React from "react";
 
 const Post = ({ item, navigation, onUpdatePost, postType }) => {
   // Reaction
@@ -67,7 +68,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
   const [reactionCount, setReactionCount] = useState(item?.reaction_quantity);
   const [commentCount, setCommentCount] = useState(item?.comment_quantity);
   const [user, setUser] = useState({});
-  const [statusPost, setStausPost] = useState(postType)
+  const [statusPost, setStausPost] = useState(postType);
+  const [reactions, setReactions] = useState([{ type: "All", number: 0, users: []}]);
 
   const { state } = useContext(AccountContext);
   const { reloadPost } = useContext(UserPostContext);
@@ -147,85 +149,132 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
   };
 
   const updatePostHandler = async (postId) => {
-    onUpdatePost(postId);
+    await onUpdatePost(postId);
   };
+
+  const fetchReactions = async () => {
+    const response = await getReactionsOfPost(item?.id);
+
+    let reactions_arr = Object.keys(response).map((key) => ({
+      type: key,
+      number: response[key] ? response[key].length : null,
+      users: response[key],
+    }));
+
+    const total_reaction = reactions_arr.reduce(
+      (sum, reaction) => sum + (reaction.number || 0),
+      0
+    );
+
+    const users = reactions_arr.reduce(
+      (sum, reaction) => sum.concat(reaction.users || []),
+      []
+    );
+    reactions_arr = [{ type: "All", number: total_reaction, users: users }, ...reactions_arr];
+    setReactions(reactions_arr.sort((a, b) => b.number - a.number));
+  };
+
+  const icons = {
+    like: require("../assets/facebook-like.png"),
+    love: require("../assets/facebook-heart.jpg"),
+    care: require("../assets/facebook-care2.jpg"),
+    haha: require("../assets/facebook-haha.png"),
+    wow: require("../assets/facebook-wow.png"),
+    sad: require("../assets/facebook-sad.jpg"),
+    angry: require("../assets/facebook-angry.png"),
+  };
+
+  useEffect(() => {
+    fetchReactions();
+  }, []);
 
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
 
-  const renderPostReaction=() =>{
+  const renderPostReaction = () => {
     return statusPost == "POST" ? (
       <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        borderBottomColor: "#ccc",
-        borderBottomWidth: 1,
-        // padding: 4,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-      }}
-    >
-      <TouchableOpacity
         style={{
           flexDirection: "row",
-          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottomColor: "#ccc",
+          borderBottomWidth: 1,
+          // padding: 4,
+          paddingVertical: 4,
+          paddingHorizontal: 12,
         }}
-        onPress={() => alert("Reactions")}
       >
-        <Image
-          source={require("../assets/facebook-like.png")}
-          style={{ width: 24, height: 24 }}
-        />
-        <Image
-          source={require("../assets/facebook-haha.png")}
-          style={{ width: 24, height: 24 }}
-        />
-        <Image
-          source={require("../assets/facebook-heart.jpg")}
-          style={{ width: 24, height: 24, marginLeft: 2 }}
-        />
-        <Text
+        <TouchableOpacity
           style={{
-            marginLeft: 3,
-            fontSize: 12,
-            color: "#65676B",
+            flexDirection: "row",
+            alignItems: "center",
           }}
-        >
-          {item?.reaction_quantity}
-        </Text>
-      </TouchableOpacity>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity
-          style={{ padding: 4 }}
           onPress={() => {
-            navigation.navigate("Comment", { postId: item?.id, onUpdatePost: updatePostHandler, typeCommentScreen:"POST"});
+            navigation.navigate("Reaction", { postId: item?.id, reactions: reactions });
           }}
         >
-          <Text style={{ fontSize: 12, fontWeight: 400 }}>
-            {item?.comment_quantity + " comments"}
-          </Text>
+          {reactions.slice(1, 4).map(
+            (reaction, index) =>
+              reaction.number > 0 && (
+                <Image
+                  key={index}
+                  source={icons[reaction.type]}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    marginLeft: index > 0 ? 2 : 0,
+                  }}
+                />
+              )
+          )}
+          {item?.reaction_quantity > 0 && (
+            <Text
+              style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: "#65676B",
+              }}
+            >
+              {item?.reaction_quantity}
+            </Text>
+          )}
         </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity
+            style={{ padding: 4 }}
+            onPress={() => {
+              navigation.navigate("Comment", {
+                postId: item?.id,
+                reactions: reactions,
+                onUpdatePost: updatePostHandler,
+                typeCommentScreen: "POST",
+              });
+            }}
+          >
+            <Text style={{ fontSize: 12, fontWeight: 400 }}>
+              {item?.comment_quantity + " comments"}
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={{ marginLeft: 4, padding: 4 }}
-          onPress={() => {
-            navigation.navigate("Comment");
-          }}
-        >
-          <Text style={{ fontSize: 12, fontWeight: 400 }}>
-            {item?.share_quantity + " shares"}
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={{ marginLeft: 4, padding: 4 }}
+            onPress={() => {
+              
+            }}
+          >
+            <Text style={{ fontSize: 12, fontWeight: 400 }}>
+              {item?.share_quantity + " shares"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-    ): null
-  }
+    ) : null;
+  };
 
   const renderPostDetailReaction = () => {
     return statusPost == "POST_DETAIL" ? (
-        <View
+      <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
@@ -266,8 +315,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    ): null
-  }
+    ) : null;
+  };
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -299,6 +348,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       setValueReaction(convertReactionValue(response.type));
 
       await onUpdatePost(postId);
+      fetchReactions();
     } catch (error) {
       console.log(error);
     }
@@ -311,21 +361,23 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
     }, 800);
   }, [item?.reaction_quantity, item?.comment_quantity]);
 
-  const notificationHandler = async(to_account_id, to_post_id, notify_type) => {
-    try{
+  const notificationHandler = async (
+    to_account_id,
+    to_post_id,
+    notify_type
+  ) => {
+    try {
       const response = await createNotification({
         from_account_id: state.account.id,
         to_account_id,
         to_post_id,
         to_comment_post_id: null,
-        notify_type
-      })
-
-      console.log(response);
-    }catch(error) {
+        notify_type,
+      });
+    } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   return (
     <View>
@@ -708,7 +760,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                 reactionHandler(item?.id, 'NONE');
               } else {
                 reactionHandler(item?.id, "LIKE");
-                notificationHandler(item?.user.id, item?.id, "LIKE")
+                notificationHandler(item?.user.id, item?.id, "LIKE");
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -760,7 +812,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LIKE");
-                    notificationHandler(item?.user.id, item?.id, "LIKE")
+                    notificationHandler(item?.user.id, item?.id, "LIKE");
                   }}
                 >
                   <Image
@@ -772,7 +824,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LOVE");
-                    notificationHandler(item?.user.id, item?.id, "LOVE")
+                    notificationHandler(item?.user.id, item?.id, "LOVE");
                   }}
                 >
                   <Image
@@ -784,7 +836,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "CARE");
-                    notificationHandler(item?.user.id, item?.id, "CARE")
+                    notificationHandler(item?.user.id, item?.id, "CARE");
                   }}
                 >
                   <Image
@@ -796,7 +848,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "HAHA");
-                    notificationHandler(item?.user.id, item?.id, "HAHA")
+                    notificationHandler(item?.user.id, item?.id, "HAHA");
                   }}
                 >
                   <Image
@@ -808,7 +860,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "WOW");
-                    notificationHandler(item?.user.id, item?.id, "WOW")
+                    notificationHandler(item?.user.id, item?.id, "WOW");
                   }}
                 >
                   <Image
@@ -821,7 +873,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "SAD");
-                    notificationHandler(item?.user.id, item?.id, "SAD")
+                    notificationHandler(item?.user.id, item?.id, "SAD");
                   }}
                 >
                   <Image
@@ -834,7 +886,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "ANGRY");
-                    notificationHandler(item?.user.id, item?.id, "ANGRY")
+                    notificationHandler(item?.user.id, item?.id, "ANGRY");
                   }}
                 >
                   <Image

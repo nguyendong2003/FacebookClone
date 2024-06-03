@@ -18,7 +18,7 @@ import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
 import * as ImagePicker from "expo-image-picker";
 // const listFriend =[]
-import {DeviceEventEmitter} from "react-native"
+import { DeviceEventEmitter } from "react-native";
 import { useState, useContext, useEffect } from "react";
 
 import { Context as FriendContext } from "../context/FriendContext";
@@ -45,12 +45,11 @@ export default function ProfileScreen({ navigation, route }) {
   const [status, setStatus] = useState(null);
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
-  
+
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
   };
-  DeviceEventEmitter.addListener("fetchPost", fetchUserPost)
 
   const fetchProfileStatus = async () => {
     const data = await getProfileStatus(route.params.accountId);
@@ -60,17 +59,26 @@ export default function ProfileScreen({ navigation, route }) {
     }
     setStatus(data);
   };
+  const fetchUserData = async () => {
+    const user = await getAccountById(route.params.accountId);
+    setUser(user);
+    fetchProfileStatus();
+    fetchUserPost();
 
+    const friendsData = await getFriendsByAccountId(route.params.accountId);
+    setFriendList(friendsData);
+  };
   useEffect(() => {
-    getAccountById(route.params.accountId).then((data) => {
-      setUser(data);
-      fetchProfileStatus();
-      fetchUserPost();
-    });
+    fetchUserData();
 
-    getFriendsByAccountId(route.params.accountId).then((data) => {
-      setFriendList(data);
-    });
+    const subscription = DeviceEventEmitter.addListener(
+      "fetchPost",
+      fetchUserPost
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const updatePostById = async (postId) => {
@@ -82,10 +90,11 @@ export default function ProfileScreen({ navigation, route }) {
 
   const pickImage = async (type) => {
     // Hỏi quyền truy cập thư viện ảnh
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
+      alert("Permission to access camera roll is required!");
       return;
     }
 
@@ -96,12 +105,12 @@ export default function ProfileScreen({ navigation, route }) {
       aspect: [4, 3],
       quality: 1,
     });
-    
-    if(type == "cover"){
+
+    if (type == "cover") {
       if (!result.canceled) {
         setImageCover(result.assets[0].uri);
       }
-    }else{
+    } else {
       if (!result.canceled) {
         setImageAvatar(result.assets[0].uri);
       }
@@ -133,7 +142,9 @@ export default function ProfileScreen({ navigation, route }) {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() => navigation.navigate("CreatePost", {onFetchPost: fetchUserPost})}
+        onPress={() =>
+          navigation.navigate("CreatePost", { onFetchPost: fetchUserPost })
+        }
       >
         <Image
           source={
@@ -300,9 +311,9 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
-            <Pressable 
-            style={styles.coverPhotoContainer}
-            onPress={() => pickImage("cover")}
+            <Pressable
+              style={styles.coverPhotoContainer}
+              onPress={() => pickImage("cover")}
             >
               <View
                 style={[
@@ -319,7 +330,11 @@ export default function ProfileScreen({ navigation, route }) {
               </View>
               <Image
                 style={styles.coverPhoto}
-                source={imageCover ? { uri: imageCover } : require('../assets/coverPhoto.jpg')}
+                source={
+                  imageCover
+                    ? { uri: imageCover }
+                    : require("../assets/coverPhoto.jpg")
+                }
               />
             </Pressable>
             {/* CoverPhoto */}
@@ -332,10 +347,10 @@ export default function ProfileScreen({ navigation, route }) {
                 <Image
                   style={styles.avatar}
                   source={
-                    imageAvatar == null ?
-                      user?.avatar == null
+                    imageAvatar == null
+                      ? user?.avatar == null
                         ? require("../assets/defaultProfilePicture.jpg")
-                        :  {uri: user.avatar}
+                        : { uri: user.avatar }
                       : { uri: imageAvatar }
                   }
                 />
@@ -371,9 +386,7 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>
-                  {user.description}
-                </Text>
+                <Text style={{ fontSize: 15 }}>{user.description}</Text>
               </View>
               {/* description */}
             </View>
@@ -420,10 +433,9 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(
-                      user.birth_date,
-                      "YYYY-MM-DD "
-                    ).format("DD/MM/yyyy")}
+                    {moment(user.birth_date, "YYYY-MM-DD ").format(
+                      "DD/MM/yyyy"
+                    )}
                   </Text>
                 </Text>
               </View>

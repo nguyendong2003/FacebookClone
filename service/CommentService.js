@@ -19,6 +19,24 @@ export const createComment = async (formData) => {
   );
 };
 
+export const reaction = async ({ id_account, id_comment, reaction_type }) => {
+  formData = new FormData();
+  formData.append("id_account", id_account);
+  formData.append("id_comment", id_comment);
+  formData.append("type", reaction_type);
+
+  const response = await SpringServer.put(
+    `/facebook.api/commentpost/reactions/updateReaction`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data;
+}
+
 export const getPostOfComment = async(id) => {
   const response =  await SpringServer.get(
     `/facebook.api/post/comments/getPostOfComment/${id}`

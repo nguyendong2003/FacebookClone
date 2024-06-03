@@ -82,7 +82,7 @@ export default function SharePostScreen({ navigation, route }) {
       await createPost({
         content: textPost,
         images: null,
-        view_mode: value,
+        view_mode: data[value - 1].label.toLowerCase(),
         share_id: item.share_post ? item.share_post.id : item.id,
       });
       DeviceEventEmitter.emit('fetchPost');
