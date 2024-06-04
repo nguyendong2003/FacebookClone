@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   Button,
   Pressable,
+  Modal,
+  Alert
 } from "react-native";
+import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -45,6 +48,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [status, setStatus] = useState(null);
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
+  const [isShowModal, setIsShowModal] = useState(false);
 
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
@@ -233,12 +237,89 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
+              onPress={()=> setIsShowModal(true)}
             >
               <Ionicons name="person" size={13} color="black" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "black" }}>
                 Friend
               </Text>
             </TouchableOpacity>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isShowModal}
+            onRequestClose={() => {
+              // Alert.alert('Modal has been closed.');
+              // setIsPressingMore(!isPressingMore);
+              setIsShowModal(!isShowModal)
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}
+            >
+              <Pressable
+                style={{
+                  height: '90%',
+                  width: '100%',
+                }}
+                onPress={() => setIsShowModal(false)}
+              />
+              <View
+                style={{
+                  height: '10%',
+                  width: '100%',
+                  backgroundColor: 'white',
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 20,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    
+                  }}
+                  onPress={() => {
+                    setIsShowModal(false);
+                    Alert.alert(
+                      'Confirmation',
+                      'Are you sure?',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => console.log('No pressed'),
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'Yes',
+                          onPress: () => setStatus('STRANGER'),
+                        },
+                      ],
+                      { cancelable: false },
+                    );
+                  }}
+                >
+                  <MaterialIcons style={{backgroundColor: "#dcdfe3", borderRadius: 30, padding:5}} name="person-off" size={24} color="black" />
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      color: '#050505',
+                      fontWeight: 'bold',
+                      marginLeft: 12,
+                    }}
+                  >
+                    Unfriend
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           </View>
         );
         break;
