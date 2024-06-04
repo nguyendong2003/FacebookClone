@@ -904,6 +904,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
               navigation.navigate('Comment', {
                 initialCommentFocus: true,
                 postId: item?.id,
+                reactions: reactions,
                 onUpdatePost: updatePostHandler,
               });
             }}
