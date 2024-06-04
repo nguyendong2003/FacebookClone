@@ -357,6 +357,45 @@ export default function ProfileScreen({ navigation, route }) {
     ) : null;
   };
 
+  const renderCameraCover = (status) => {
+    return status == "PERSONAL" ? (
+      
+      <Pressable
+      style={[
+        styles.cameraContainer,
+        { top: "80%", right: "3%", zIndex: 3 },
+      ]}
+      onPress={() => pickImage("cover")}
+    >
+      <Ionicons
+        style={styles.camera}
+        name="camera"
+        size={20}
+        color="black"
+      />
+    </Pressable>
+    ): null
+  }
+  const renderCameraAvatar = (status) => {
+    return status == "PERSONAL" ? (
+      
+      <Pressable
+      style={[
+        styles.cameraContainer,
+        { bottom: "3%", right: "3%" },
+      ]}
+      onPress={() => pickImage("avatar")}
+    >
+      <Ionicons
+        style={styles.camera}
+        name="camera"
+        size={20}
+        color="black"
+      />
+    </Pressable>
+    ): null
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -392,23 +431,10 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
-            <Pressable
+            <View
               style={styles.coverPhotoContainer}
-              onPress={() => pickImage("cover")}
             >
-              <View
-                style={[
-                  styles.cameraContainer,
-                  { top: "80%", right: "3%", zIndex: 3 },
-                ]}
-              >
-                <Ionicons
-                  style={styles.camera}
-                  name="camera"
-                  size={20}
-                  color="black"
-                />
-              </View>
+
               <Image
                 style={styles.coverPhoto}
                 source={
@@ -417,7 +443,8 @@ export default function ProfileScreen({ navigation, route }) {
                     : require("../assets/coverPhoto.jpg")
                 }
               />
-            </Pressable>
+              {renderCameraCover(status)}
+            </View>
             {/* CoverPhoto */}
 
             <View
@@ -435,23 +462,9 @@ export default function ProfileScreen({ navigation, route }) {
                       : { uri: imageAvatar }
                   }
                 />
-                <Pressable
-                  style={[
-                    styles.cameraContainer,
-                    { bottom: "3%", right: "3%" },
-                  ]}
-                  onPress={() => pickImage("avatar")}
-                >
-                  <Ionicons
-                    style={styles.camera}
-                    name="camera"
-                    size={20}
-                    color="black"
-                  />
-                  {/* Avatar */}
-                </Pressable>
+                {renderCameraAvatar(status)}
               </View>
-
+              {/* Avatar */}
               {/* name */}
               <View style={[styles.nameContainer, {}]}>
                 <Text style={styles.name}>{user.profile_name}</Text>
