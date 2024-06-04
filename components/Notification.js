@@ -49,22 +49,6 @@ export default function Notification(
     }
 
     const remainTime = (time)=> {
-        // const currentTime = new Date().getTime();
-        // const timePost = new Date(time).getTime();
-        // const remain = currentTime - timePost;
-        // const remainSecond = remain/1000;
-        // const remainMinute = remainSecond/60;
-        // const remainHour = remainMinute/60;
-        // const remainDay = remainHour/24;
-        // if(remainSecond < 60){
-        //     return Math.floor(remainSecond) + " seconds ago";
-        // }else if(remainMinute < 60){
-        //     return Math.floor(remainMinute) + " minutes ago";
-        // }else if(remainHour < 24){
-        //     return Math.floor(remainHour) + " hours ago";
-        // }else{
-        //     return Math.floor(remainDay) + " days ago";
-        // }
 
         const createDate = new Date(time);
         const now = new Date();
@@ -130,7 +114,7 @@ export default function Notification(
                 <View>
                     <Image
                         style={styles.avartarNotify}
-                        source={{uri: item?.avatar_sender}}
+                        source={ item.avatar_sender? {uri: item.avatar_sender}: require("../assets/defaultProfilePicture.jpg")}
                     />
                     <View style={styles.commentIconContainer}>
                         {renderIcon(item.type)}
