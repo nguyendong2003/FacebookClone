@@ -290,29 +290,33 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
             flexDirection: "row",
             alignItems: "center",
           }}
-          onPress={() => alert("Reactions")}
-        >
-          <Image
-            source={require("../assets/facebook-like.png")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Image
-            source={require("../assets/facebook-haha.png")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Image
-            source={require("../assets/facebook-heart.jpg")}
-            style={{ width: 24, height: 24, marginLeft: 2 }}
-          />
-          <Text
-            style={{
-              marginLeft: 3,
-              fontSize: 12,
-              color: "#65676B",
-            }}
+          onPress={() => navigation.navigate("Reaction", {postId: item.id, reactions: reactions})}
           >
-            {item?.reaction_quantity}
-          </Text>
+          {reactions.slice(1, 4).map(
+            (reaction, index) =>
+              reaction.number > 0 && (
+                <Image
+                  key={index}
+                  source={icons[reaction.type]}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    marginLeft: index > 0 ? 2 : 0,
+                  }}
+                />
+              )
+          )}
+          {item?.reaction_quantity > 0 && (
+            <Text
+              style={{
+                marginLeft: 3,
+                fontSize: 12,
+                color: "#65676B",
+              }}
+            >
+              {item?.reaction_quantity}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     ) : null;
