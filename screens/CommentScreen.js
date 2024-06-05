@@ -412,7 +412,9 @@ export default function CommentScreen({ route, navigation }) {
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#65676B', fontSize: 15 }}>Editing</Text>
+              <Text style={{ color: '#65676B', fontSize: 15 }}>
+                Editing comment
+              </Text>
 
               <TouchableOpacity
                 onPress={() => {

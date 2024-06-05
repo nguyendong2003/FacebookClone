@@ -558,6 +558,13 @@ const Comment = ({
               <TouchableOpacity
                 style={{ marginLeft: 8 }}
                 onPress={() => {
+                  // remove edit comment
+                  setIsCommentTextFocus(false);
+                  setIsCommentEditing(false);
+                  setCommentIdEditing(null);
+                  setCommentImage(null);
+
+                  // Reply comment
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
                   setNameReplying(item.account_user.profile_name);
