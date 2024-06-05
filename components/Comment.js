@@ -284,6 +284,12 @@ const Comment = ({
                   onPress={() => {
                     setIsPressingComment(false);
 
+                    // Remove Reply comment
+                    setIsReplying(false);
+                    setCommentIdReplying(null);
+                    setNameReplying(null);
+                    setIdUserReplying(null);
+
                     // Edit comment
                     setIsCommentTextFocus(true);
                     setIsCommentEditing(true);

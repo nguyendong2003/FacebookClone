@@ -464,7 +464,7 @@ export default function CommentScreen({ route, navigation }) {
             ref={commentInputRef}
             autoFocus={route?.params?.initialCommentFocus}
           />
-          {isCommentTextFocus && (
+          {isCommentTextFocus ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -517,7 +517,7 @@ export default function CommentScreen({ route, navigation }) {
                 }}
               />
             </View>
-          )}
+          ) : null}
         </View>
         {/* </View> */}
       </KeyboardAvoidingView>
