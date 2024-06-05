@@ -26,6 +26,7 @@ import { Context as AccountContext } from "../context/AccountContext";
 import { Context as UserPostContext } from "../context/UserPostContext";
 import { getUserPosts, getPostById } from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
+import { createNotification, deleteNotification, getSendNotificationFromFriendRequest, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
 import {
   getFriendsByAccountId,
   getProfileStatus,
@@ -34,8 +35,8 @@ import {
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
-  const { state: accountState } = useContext(AccountContext);
-  const { sendRequest, cancelFriendRequest, acceptFriendRequest } =
+  const { state } = useContext(AccountContext);
+  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } =
     useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
   const [isFriend, setIsFriend] = useState(statusFriend);
@@ -45,7 +46,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [status, setStatus] = useState(null);
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
-  
+  const [notificationId, setNotificationId] = useState(null);
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
@@ -73,6 +74,16 @@ export default function ProfileScreen({ navigation, route }) {
     });
   }, []);
 
+  useEffect(() => {
+    if(notificationId == null) {
+      if(status == "IN_REQUEST_SENDER") {
+        handleGetSendNotification(route.params.accountId)
+      }else if (status == "IN_REQUEST_RECEIVER") {
+        handleGetReceiveNotification(route.params.accountId)
+      }
+    }
+  }, [status])
+  
   const updatePostById = async (postId) => {
     const update_post = await getPostById(postId);
     setUserPost(
@@ -109,23 +120,68 @@ export default function ProfileScreen({ navigation, route }) {
     // console.log(image)
   };
 
+  const handleCreateNotification = async(to_account_id, notify_type) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id: null,
+        to_comment_post_id: null,
+        notify_type
+      })
+    }catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetSendNotification = async(receiverId) => {
+    try{ 
+      const response = await getSendNotificationFromFriendRequest(receiverId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+  const handleGetReceiveNotification = async(senderId) => {
+    try{ 
+      const response = await getReceiveNotificationFromFriendRequest(senderId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteNotification = async() => {
+    try {
+        const response = await deleteNotification(notificationId)
+    }catch(error) {
+        console.log(error);
+    }
+  }
+
   const sendRequestHandler = async () => {
     await sendRequest(route.params.accountId);
-
     getProfileStatus(route.params.accountId).then((data) => {
       setStatus(data);
     });
+    handleCreateNotification(route.params.accountId, "friend_request")
   };
 
   const cancelRequestHandler = async () => {
     await cancelFriendRequest(route.params.accountId);
+    await handleDeleteNotification()
+    fetchProfileStatus();
+  };
 
+  const rejectRequestHandler = async () => {
+    await rejectFriendRequest(route.params.accountId);
+    await handleDeleteNotification()
     fetchProfileStatus();
   };
 
   const acceptRequestHandler = async () => {
     await acceptFriendRequest(route.params.accountId);
-
+    await handleDeleteNotification()
     fetchProfileStatus();
   };
 
@@ -192,7 +248,9 @@ export default function ProfileScreen({ navigation, route }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
-              onPress={() => setIsFriend("stranger")}
+              onPress={() => {
+                rejectRequestHandler()
+              }}
             >
               <AntDesign name="close" size={13} color="black" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "black" }}>
