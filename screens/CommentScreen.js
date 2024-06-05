@@ -464,7 +464,7 @@ export default function CommentScreen({ route, navigation }) {
             ref={commentInputRef}
             autoFocus={route?.params?.initialCommentFocus}
           />
-          {isCommentTextFocus ? (
+          {isCommentTextFocus || isReplying || isCommentEditing ? (
             <View
               style={{
                 flexDirection: 'row',
