@@ -177,11 +177,6 @@ export default function TabNavigationHome({ navigation }) {
             tabBarIcon: ({ color }) => (
               <View>
                 <Ionicons name="notifications" size={24} color={color} />
-                <Badge
-                status='error'
-                value="11"
-                containerStyle={{position: "absolute", top:-8, right:-8}}
-                />
               </View>
               
             ),
@@ -191,7 +186,6 @@ export default function TabNavigationHome({ navigation }) {
             },
             tabBarActiveTintColor: '#0866ff',
             unmountOnBlur: true,
-            
           }}
         />
         <Tab.Screen
