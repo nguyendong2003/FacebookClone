@@ -55,7 +55,6 @@ export default function EditPostScreen({ navigation, route }) {
   const [textPost, setTextPost] = useState(item?.content);
   const [imagePostList, setImagePostList] = useState(item?.postImages);
   const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
-
   console.log(imagePostList);
   //
   const { createPost } = useContext(PostContext);
@@ -117,10 +116,7 @@ export default function EditPostScreen({ navigation, route }) {
         setImagePostList(imageList);
       } else {
         setImagePostList((prevImageList) => [...prevImageList, ...imageList]);
-        // setImagePostList([...imagePostList, ...imageList]);
       }
-
-      // console.log(imagePostList);
     }
   };
 
@@ -151,6 +147,124 @@ export default function EditPostScreen({ navigation, route }) {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
+
+  // Camera
+  let cameraRef = useRef();
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [type, setType] = useState(CameraType.back);
+
+  useEffect(() => {
+    async function requestCameraPermission() {
+      const cameraPermission = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraPermission.status === 'granted');
+    }
+
+    requestCameraPermission();
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({ headerShown: !showCamera });
+    }, [navigation, showCamera])
+  );
+
+  function toggleCameraType() {
+    setType((current) =>
+      current === CameraType.back ? CameraType.front : CameraType.back
+    );
+  }
+
+  let takePicture = async () => {
+    let options = {
+      quality: 1,
+      base64: true,
+      exif: false,
+    };
+
+    let newPhoto = await cameraRef.current.takePictureAsync(options);
+    setShowCamera(false);
+    if (imagePostList === null) {
+      setImagePostList([newPhoto.uri]);
+    } else {
+      setImagePostList((prevImageList) => [
+        ...prevImageList,
+        { id: 0, image: newPhoto.uri },
+      ]);
+    }
+    setIsSubmit(true);
+  };
+  let openCamera = async () => {
+    // const cameraPermission = await Camera.requestCameraPermissionsAsync();
+    // setHasCameraPermission(cameraPermission.status === 'granted');
+    setShowCamera(true);
+  };
+
+  if (showCamera) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Camera
+          // style={{ flex: 1 }}
+          type={type}
+          ref={cameraRef}
+          ratio="16:9"
+          style={{
+            flex: 1,
+            height: Math.round((windowWidth * 16) / 9),
+            width: '100%',
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              margin: 30,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => setShowCamera(false)}
+            >
+              <AntDesign name="back" size={40} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => takePicture()}
+            >
+              <FontAwesome
+                name="camera"
+                style={{ color: '#fff', fontSize: 40 }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => toggleCameraType()}
+            >
+              <MaterialCommunityIcons
+                name="camera-switch"
+                style={{ color: '#fff', fontSize: 40 }}
+              />
+            </TouchableOpacity>
+          </View>
+        </Camera>
+      </View>
+    );
+  }
+
+  //
 
   return (
     <SafeAreaView style={styles.container}>
@@ -464,6 +578,14 @@ export default function EditPostScreen({ navigation, route }) {
               >
                 <FontAwesome6 name="image" size={24} color="#45bd62" />
                 <Text style={styles.textOptionButton}>Image</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.optionButtonContainer}
+                onPress={() => openCamera()}
+              >
+                <Entypo name="camera" size={24} color="#0866ff" />
+                <Text style={styles.textOptionButton}>Camera</Text>
               </TouchableOpacity>
             </View>
           )}
