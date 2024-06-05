@@ -30,7 +30,8 @@ import {
   getFriendsByAccountId,
   getProfileStatus,
 } from "../service/FriendService";
-
+import { updateAvatar, updateCoverImage } from "../service/AccountService";
+import { ActivityIndicator } from "react-native-paper";
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
@@ -45,6 +46,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [status, setStatus] = useState(null);
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
@@ -70,7 +72,6 @@ export default function ProfileScreen({ navigation, route }) {
   };
   useEffect(() => {
     fetchUserData();
-
     const subscription = DeviceEventEmitter.addListener(
       "fetchPost",
       fetchUserPost
@@ -108,11 +109,13 @@ export default function ProfileScreen({ navigation, route }) {
 
     if (type == "cover") {
       if (!result.canceled) {
-        setImageCover(result.assets[0].uri);
+        await updateCoverImage(result.assets[0].uri);
+        fetchUserData();
       }
     } else {
       if (!result.canceled) {
-        setImageAvatar(result.assets[0].uri);
+        await updateAvatar(result.assets[0].uri)
+        fetchUserData()
       }
     }
     // console.log(image)
@@ -278,7 +281,7 @@ export default function ProfileScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
+        <FlatList
         style={{
           alignSelf: "flex-start",
           minWidth: "100%",
@@ -331,8 +334,8 @@ export default function ProfileScreen({ navigation, route }) {
               <Image
                 style={styles.coverPhoto}
                 source={
-                  imageCover
-                    ? { uri: imageCover }
+                  user.cover_image != null
+                    ? { uri: user.cover_image }
                     : require("../assets/coverPhoto.jpg")
                 }
               />
