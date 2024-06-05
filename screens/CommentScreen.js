@@ -389,6 +389,7 @@ export default function CommentScreen({ route, navigation }) {
                   setIsReplying(false);
                   setCommentText('');
                   setCommentIdReplying(null);
+                  setCommentImage(null);
                 }}
               >
                 <Text
@@ -424,6 +425,7 @@ export default function CommentScreen({ route, navigation }) {
                   setIsCommentEditing(false);
                   setCommentIdEditing(null);
                   setCommentText('');
+                  setCommentImage(null);
                 }}
               >
                 <Text
