@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import listFriendProfile from "../data/listFriendProfile.json";
-import { useNavigation } from "@react-navigation/native";
 import React from "react";
 const FriendProfile = ({ item, navigation }) => {
   // const navigation = useNavigation()
@@ -17,8 +15,6 @@ const FriendProfile = ({ item, navigation }) => {
       onPress={() => {
         navigation.push("Profile", {
           isPersonalPage: false,
-          statusFriend: "IS_FRIEND",
-          listFriend: [],
           accountId: item.id,
         });
         // console.log("aaa")
@@ -53,6 +49,7 @@ const styles = StyleSheet.create({
     // width: "30%"
   },
   friendName: {
+    marginTop: 5,
     textAlign: "center",
     fontSize: 15,
   },

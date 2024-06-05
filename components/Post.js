@@ -412,7 +412,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Profile", {
+                navigation.push('Profile', {
                   accountId: item.user.id,
                   isPersonalPage: false,
                 });
@@ -434,7 +434,14 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
             </TouchableOpacity>
 
             <View style={{ marginLeft: 8 }}>
-              <TouchableOpacity>
+              <TouchableOpacity
+              onPress={() => {
+                navigation.push('Profile', {
+                  accountId: item.user.id,
+                  isPersonalPage: false,
+                });
+              }}
+              >
                 <Text
                   style={{
                     color: "#050505",
@@ -643,7 +650,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
               >
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate("Profile", {
+                    navigation.push("Profile", {
                       accountId: item.share_post.user.id,
                       isPersonalPage: false,
                     });
@@ -665,7 +672,14 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                 </TouchableOpacity>
 
                 <View style={{ marginLeft: 8 }}>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                  
+                  onPress={() => {
+                    navigation.push("Profile", {
+                      accountId: item.share_post.user.id,
+                      isPersonalPage: false,
+                    });
+                  }}>
                     <Text
                       style={{
                         color: "#050505",
