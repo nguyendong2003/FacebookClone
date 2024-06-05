@@ -30,11 +30,13 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext} from "react";
 import {createNotification} from "../service/NotificationService"
 import {getPostOfComment} from "../service/CommentService"
 import { Context as AccountContext } from "../context/AccountContext";
 import moment from "moment";
+import { reaction } from "../service/CommentService";
+
 const Comment = ({
   navigation,
   item,
@@ -46,14 +48,14 @@ const Comment = ({
   setCommentText,
   scrollToComment,
   coords,
-  setCoords,
-  commentId
+  setCoords
 }) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
   const [colorReaction, setColorReaction] = useState("#65676B");
-  const { state } = useContext(AccountContext);
+  const { state: accountState } = useContext(AccountContext);
+
   useEffect(() => {
     switch (valueReaction) {
       case 1:
@@ -95,6 +97,42 @@ const Comment = ({
     }
   }, [valueReaction]);
 
+  const convertReactionValue = (value) => {
+    switch (value) {
+      case "LIKE":
+        return 1;
+      case "LOVE":
+        return 2;
+      case "CARE":
+        return 3;
+      case "HAHA":
+        return 4;
+      case "WOW":
+        return 5;
+      case "SAD":
+        return 6;
+      case "ANGRY":
+        return 7;
+      default:
+        return 0;
+    }
+  };
+
+  useEffect(() => {
+    setValueReaction(convertReactionValue(item?.reaction));
+  }, []);
+
+  const reactionHandler = async (type) => {
+    console.log(item.id)
+
+    await reaction({
+      id_account: accountState.account.id,
+      id_comment: item.id,
+      reaction_type: type,
+    });
+
+    setValueReaction(convertReactionValue(type));
+  }
   //
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
@@ -129,14 +167,12 @@ const Comment = ({
   const notificationHandler = async(notify_type) => {
     try{
       const response = await createNotification({
-        from_account_id: state.account.id,
+        from_account_id: accountState.account.id,
         to_account_id: item?.account_user.id,
         to_post_id: post.id,
         to_comment_post_id: item?.id,
         notify_type
       })
-
-      console.log(response);
     }catch(error) {
       console.log(error);
     }
@@ -265,7 +301,7 @@ const Comment = ({
                 onPress={() => {
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
-                    setValueReaction(0);
+                    reactionHandler("NONE")
                   } else {
                     setValueReaction(1);
                     notificationHandler("LIKE")
@@ -402,7 +438,7 @@ const Comment = ({
                   setCommentIdReplying(item?.id);
                   setNameReplying(item.account_user.profile_name);
                   setIdUserReplying(item.account_user.id);
-                  setCommentText(`${item.account_user.profile_name}`);
+                  setCommentText(`${item.account_user.profile_name} `);
                   scrollToComment(item?.id);
                 }}
               >

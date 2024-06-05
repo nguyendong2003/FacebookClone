@@ -9,6 +9,8 @@ const authReducer = (state, action) => {
       return { ...state, token: action.payload };
     case "ERROR":
       return { ...state, errorMessage: action.payload };
+    case "SIGN_OUT":
+      return { token: null, errorMessage: "" };
     default:
       return state;
   }
@@ -36,7 +38,8 @@ const signIn = (dispatch) => {
 
 const checkLoggedIn = (dispatch) => {
   return async () => {
-    await AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("token");
+
     const token = await AsyncStorage.getItem("token");
     if (token) {
       dispatch({ type: "SIGN_IN", payload: token });
@@ -45,9 +48,16 @@ const checkLoggedIn = (dispatch) => {
 };
 
 const register = (dispatch) => {
-  return async ({ email, username, password, dateOfBirth, gender, fullName }) => {
+  return async ({
+    email,
+    username,
+    password,
+    dateOfBirth,
+    gender,
+    fullName,
+  }) => {
     try {
-      gender = gender == 'male' ? true : false
+      gender = gender == "male" ? true : false;
       const response = await SpringServer.post("/auth/register", {
         username,
         password,
@@ -65,8 +75,15 @@ const register = (dispatch) => {
     }
   };
 };
+const logout = (dispatch) => {
+  return async () => {
+    await AsyncStorage.removeItem("token");
+    dispatch({ type: "SIGN_OUT" });
+  };
+};
+
 export const { Context, Provider } = createDataContext(
   authReducer,
-  { signIn, checkLoggedIn, register },
+  { signIn, checkLoggedIn, register, logout },
   { token: null, errorMessage: "" }
 );

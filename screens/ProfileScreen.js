@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   Button,
   Pressable,
+  Modal,
+  Alert
 } from "react-native";
+import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -18,7 +21,7 @@ import FriendProfile from "../components/FriendProfile";
 import Post from "../components/Post";
 import * as ImagePicker from "expo-image-picker";
 // const listFriend =[]
-import {DeviceEventEmitter} from "react-native"
+import { DeviceEventEmitter } from "react-native";
 import { useState, useContext, useEffect } from "react";
 
 import { Context as FriendContext } from "../context/FriendContext";
@@ -46,12 +49,12 @@ export default function ProfileScreen({ navigation, route }) {
   const [status, setStatus] = useState(null);
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
-  const [notificationId, setNotificationId] = useState(null);
+  const [isShowModal, setIsShowModal] = useState(false);
+const [notificationId, setNotificationId] = useState(null);
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
   };
-  DeviceEventEmitter.addListener("fetchPost", fetchUserPost)
 
   const fetchProfileStatus = async () => {
     const data = await getProfileStatus(route.params.accountId);
@@ -61,17 +64,26 @@ export default function ProfileScreen({ navigation, route }) {
     }
     setStatus(data);
   };
+  const fetchUserData = async () => {
+    const user = await getAccountById(route.params.accountId);
+    setUser(user);
+    fetchProfileStatus();
+    fetchUserPost();
 
+    const friendsData = await getFriendsByAccountId(route.params.accountId);
+    setFriendList(friendsData);
+  };
   useEffect(() => {
-    getAccountById(route.params.accountId).then((data) => {
-      setUser(data);
-      fetchProfileStatus();
-      fetchUserPost();
-    });
+    fetchUserData();
 
-    getFriendsByAccountId(route.params.accountId).then((data) => {
-      setFriendList(data);
-    });
+    const subscription = DeviceEventEmitter.addListener(
+      "fetchPost",
+      fetchUserPost
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -280,12 +292,89 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
+              onPress={()=> setIsShowModal(true)}
             >
               <Ionicons name="person" size={13} color="black" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "black" }}>
                 Friend
               </Text>
             </TouchableOpacity>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isShowModal}
+            onRequestClose={() => {
+              // Alert.alert('Modal has been closed.');
+              // setIsPressingMore(!isPressingMore);
+              setIsShowModal(!isShowModal)
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}
+            >
+              <Pressable
+                style={{
+                  height: '90%',
+                  width: '100%',
+                }}
+                onPress={() => setIsShowModal(false)}
+              />
+              <View
+                style={{
+                  height: '10%',
+                  width: '100%',
+                  backgroundColor: 'white',
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 20,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    
+                  }}
+                  onPress={() => {
+                    setIsShowModal(false);
+                    Alert.alert(
+                      'Confirmation',
+                      'Are you sure?',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => console.log('No pressed'),
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'Yes',
+                          onPress: () => setStatus('STRANGER'),
+                        },
+                      ],
+                      { cancelable: false },
+                    );
+                  }}
+                >
+                  <MaterialIcons style={{backgroundColor: "#dcdfe3", borderRadius: 30, padding:5}} name="person-off" size={24} color="black" />
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      color: '#050505',
+                      fontWeight: 'bold',
+                      marginLeft: 12,
+                    }}
+                  >
+                    Unfriend
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           </View>
         );
         break;
@@ -323,6 +412,45 @@ export default function ProfileScreen({ navigation, route }) {
     ) : null;
   };
 
+  const renderCameraCover = (status) => {
+    return status == "PERSONAL" ? (
+      
+      <Pressable
+      style={[
+        styles.cameraContainer,
+        { top: "80%", right: "3%", zIndex: 3 },
+      ]}
+      onPress={() => pickImage("cover")}
+    >
+      <Ionicons
+        style={styles.camera}
+        name="camera"
+        size={20}
+        color="black"
+      />
+    </Pressable>
+    ): null
+  }
+  const renderCameraAvatar = (status) => {
+    return status == "PERSONAL" ? (
+      
+      <Pressable
+      style={[
+        styles.cameraContainer,
+        { bottom: "3%", right: "3%" },
+      ]}
+      onPress={() => pickImage("avatar")}
+    >
+      <Ionicons
+        style={styles.camera}
+        name="camera"
+        size={20}
+        color="black"
+      />
+    </Pressable>
+    ): null
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -358,28 +486,20 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
-            <Pressable 
-            style={styles.coverPhotoContainer}
-            onPress={() => pickImage("cover")}
+            <View
+              style={styles.coverPhotoContainer}
             >
-              <View
-                style={[
-                  styles.cameraContainer,
-                  { top: "80%", right: "3%", zIndex: 3 },
-                ]}
-              >
-                <Ionicons
-                  style={styles.camera}
-                  name="camera"
-                  size={20}
-                  color="black"
-                />
-              </View>
+
               <Image
                 style={styles.coverPhoto}
-                source={imageCover ? { uri: imageCover } : require('../assets/coverPhoto.jpg')}
+                source={
+                  imageCover
+                    ? { uri: imageCover }
+                    : require("../assets/coverPhoto.jpg")
+                }
               />
-            </Pressable>
+              {renderCameraCover(status)}
+            </View>
             {/* CoverPhoto */}
 
             <View
@@ -390,30 +510,16 @@ export default function ProfileScreen({ navigation, route }) {
                 <Image
                   style={styles.avatar}
                   source={
-                    imageAvatar == null ?
-                      user?.avatar == null
+                    imageAvatar == null
+                      ? user?.avatar == null
                         ? require("../assets/defaultProfilePicture.jpg")
-                        :  {uri: user.avatar}
+                        : { uri: user.avatar }
                       : { uri: imageAvatar }
                   }
                 />
-                <Pressable
-                  style={[
-                    styles.cameraContainer,
-                    { bottom: "3%", right: "3%" },
-                  ]}
-                  onPress={() => pickImage("avatar")}
-                >
-                  <Ionicons
-                    style={styles.camera}
-                    name="camera"
-                    size={20}
-                    color="black"
-                  />
-                  {/* Avatar */}
-                </Pressable>
+                {renderCameraAvatar(status)}
               </View>
-
+              {/* Avatar */}
               {/* name */}
               <View style={[styles.nameContainer, {}]}>
                 <Text style={styles.name}>{user.profile_name}</Text>
@@ -559,8 +665,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: "33.33%",
     height: 130,
-    marginTop: 10,
-    marginBottom: 10,
+    // marginTop: 10,
+    marginBottom: 25,
     // alignItems:"stretch"
   },
   textInformation: {
@@ -573,7 +679,10 @@ const styles = StyleSheet.create({
   },
   rowInformation: {
     flexDirection: "row",
-    margin: 5,
+    marginTop: 5,
+    marginBottom: 5,
+    marginRight: 5,
+    marginLeft: 15
   },
   seperate: {
     width: "100%",

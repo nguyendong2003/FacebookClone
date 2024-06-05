@@ -1,15 +1,15 @@
 import { useEffect, useContext } from "react";
 import { Text, StyleSheet, View, Image, Alert } from "react-native"
 import { TouchableOpacity } from "react-native-gesture-handler"
-import { getAccountById } from "../service/AccountService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-
+import { Context as AuthContext } from "../context/AuthContext";
 
 export default function MoreScreen(
   { route}
 ) {
+  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
   const { state: accountState, getAccount } = useContext(AccountContext);
   // console.log(accountState.account)
@@ -34,12 +34,16 @@ export default function MoreScreen(
         />
         <Text style={styles.name}>{accountState.account.profile_name}</Text>
       </TouchableOpacity>
+      <View
+      style={{flex: 1, justifyContent: "flex-end"}}
+      >
         <TouchableOpacity
         style={styles.buttonContainer}
-        onPress={() => alert("This feature is not available yet")}
+        onPress={() => logout()}
         >
           <Text style={styles.buttonText}>Log out</Text>
         </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -85,7 +89,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#c4ccc4",
     padding: 10,
-    margin: 10,
-    borderRadius: 8
+    marginLeft: 15,
+    marginRight: 15,
+    borderRadius: 8,
+    marginBottom: 20
   }
 })

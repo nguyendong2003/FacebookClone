@@ -16,7 +16,7 @@ import {
   Modal,
   Dimensions,
   FlatList,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -38,12 +38,12 @@ import Post from "../components/Post";
 
 // import commentList from '../data/comment.json';
 import { getCommentsByPostId, createComment } from "../service/CommentService";
-import {createNotification} from "../service/NotificationService";
+import { createNotification } from "../service/NotificationService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
 // Upload image
 import * as ImagePicker from "expo-image-picker";
-import { LogBox } from 'react-native';
+import { LogBox } from "react-native";
 
 export default function CommentScreen({ route, navigation }) {
   // const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
@@ -51,7 +51,16 @@ export default function CommentScreen({ route, navigation }) {
   // const [userPost, setUserPost] = useState([]);
   // const [stickyHeader, setStickHeader] = useState();
   // typeCommentScreen == "POST" ? setStickHeader(0) : setStickHeader(1);
-  
+  const icons = {
+    like: require("../assets/facebook-like.png"),
+    love: require("../assets/facebook-heart.jpg"),
+    care: require("../assets/facebook-care2.jpg"),
+    haha: require("../assets/facebook-haha.png"),
+    wow: require("../assets/facebook-wow.png"),
+    sad: require("../assets/facebook-sad.jpg"),
+    angry: require("../assets/facebook-angry.png"),
+  };
+
   const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
@@ -69,8 +78,8 @@ export default function CommentScreen({ route, navigation }) {
   const { getPosts } = useContext(PostContext);
   const [postId, setPostID] = useState(route?.params?.postId);
   const [loading, setLoading] = useState(true); // Add loading state
-  const [post, setPost] = useState(null)
-
+  const [post, setPost] = useState(null);
+  const [reactions, setReactions] = useState([]);
   // useLayoutEffect(() => {
   //     navigation.setOptions({
   //         headerTitle: title || 'None',
@@ -78,10 +87,11 @@ export default function CommentScreen({ route, navigation }) {
   // }, [navigation, title]);
   useEffect(() => {
     const fetchPost = async () => {
-        const post = await getPostById(postId);
-        setPost(post);
-        // setLoading(false); // Set loading to false after data is fetched
+      const post = await getPostById(postId);
+      setPost(post);
+      // setLoading(false); // Set loading to false after data is fetched
     };
+    setReactions(route?.params?.reactions);
     fetchPost();
   }, [postId]);
 
@@ -104,7 +114,7 @@ export default function CommentScreen({ route, navigation }) {
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
     setCommentList(response);
-    setLoading(false)
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -165,7 +175,7 @@ export default function CommentScreen({ route, navigation }) {
   });
 
   LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state',
+    "Non-serializable values were found in the navigation state",
   ]);
 
   const { window } = dimensions;
@@ -210,6 +220,7 @@ export default function CommentScreen({ route, navigation }) {
       }
       setCommentText("");
       setIsReplying(false);
+      setCommentIdReplying(null)
       setCommentImage(null);
       getPosts();
       fetchComments();
@@ -238,9 +249,9 @@ export default function CommentScreen({ route, navigation }) {
 
   if (loading) {
     return (
-        <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-        </View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
     );
   }
 
@@ -268,7 +279,7 @@ export default function CommentScreen({ route, navigation }) {
               commentIdReplying={commentIdReplying}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
-              setIdUserReplying = {setIdUserReplying}
+              setIdUserReplying={setIdUserReplying}
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
@@ -290,7 +301,7 @@ export default function CommentScreen({ route, navigation }) {
               No comment found
             </Text>
           } // display when empty data
-          ListHeaderComponent={()=>{
+          ListHeaderComponent={() => {
             return (
               <View
                 style={{
@@ -304,24 +315,27 @@ export default function CommentScreen({ route, navigation }) {
                 }}
               >
                 <TouchableOpacity
-                  style={{ flexDirection: "row", alignItems: "center" }}
+                  style={{ flexDirection: "row", alignItems: "center"}}
                   activeOpacity={0.7}
-                  onPress={() => navigation.navigate("Reaction")}
+                  onPress={() => navigation.navigate("Reaction", {postId: route?.params?.postId, reactions: reactions})}
                 >
-                  <Image
-                    source={require("../assets/facebook-like.png")}
-                    style={{ width: 24, height: 24 }}
-                  />
-                  <Image
-                    source={require("../assets/facebook-haha.png")}
-                    style={{ width: 24, height: 24 }}
-                  />
-                  <Image
-                    source={require("../assets/facebook-heart.jpg")}
-                    style={{ width: 24, height: 24 }}
-                  />
-                  <Text numberOfLines={1} style={{ width: 200 }}>
-                    You, Nguyễn Đông and 127.191 other
+                  {reactions.slice(1, 4).map(
+                    (reaction, index) =>
+                      reaction.number > 0 && (
+                        <Image
+                          key={index}
+                          source={icons[reaction.type]}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            marginLeft: index > 0 ? 2 : 0,
+                            marginRight: 8
+                          }}
+                        />
+                      )
+                  )}
+                  <Text numberOfLines={1} style={{ alignSelf: 'flex-start' }}>
+                    {reactions[0].number}
                   </Text>
                   <Entypo name="chevron-small-right" size={24} color="black" />
                 </TouchableOpacity>
@@ -334,10 +348,8 @@ export default function CommentScreen({ route, navigation }) {
                   }}
                 />
               </View>
-            )
-              
-          }
-          }
+            );
+          }}
         />
         <View
           style={{
@@ -375,6 +387,7 @@ export default function CommentScreen({ route, navigation }) {
               <TouchableOpacity
                 onPress={() => {
                   setIsReplying(false);
+                  setCommentText("");
                   setCommentIdReplying(null);
                 }}
               >

@@ -48,15 +48,15 @@ import {
   export default function PostDetailScreen({ route, navigation }) {
     const [userPost, setUserPost] = useState([]);
     
-    const [commentText, setCommentText] = useState("");
+    const [commentText, setCommentText] = useState((route?.params?.commentId != null) ? `${route?.params?.nameSender} ` : "");
     const [commentImage, setCommentImage] = useState(null);
     const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
     const [isSelectImage, setIsSelectImage] = useState(false);
     const [isCommentValid, setIsCommentValid] = useState(false);
-    const [idUserReplying, setIdUserReplying] = useState("");
-    const [isReplying, setIsReplying] = useState(false);
+    const [idUserReplying, setIdUserReplying] = useState((route?.params?.commentId != null) ? route?.params?.senderId : null);
+    const [isReplying, setIsReplying] = useState((route?.params?.commentId != null) ? true : false);
     const [commentIdReplying, setCommentIdReplying] = useState(route?.params?.commentId);
-    const [nameReplying, setNameReplying] = useState("");
+    const [nameReplying, setNameReplying] = useState(route?.params?.nameSender);
     const [commentList, setCommentList] = useState([]);
     // focus vào TextInput để viết comment khi isReplying là true
     const commentInputRef = useRef(null);
@@ -78,19 +78,9 @@ import {
   
     useEffect(() => {
       if (isReplying || isCommentTextFocus) {
-        // Kiểm tra xem ref có tồn tại không trước khi gọi focus()
-        if (commentInputRef.current) {
-          commentInputRef.current.focus();
-        } else {
-          commentInputRef.current.blur();
-        }
+        commentInputRef.current?.focus();
       }
     }, [isReplying, isCommentTextFocus]);
-  
-    useEffect(() => {
-      // console.log(commentIdReplying);
-      // console.log(isReplying);
-    }, [commentIdReplying, isReplying]);
   
     const fetchComments = async () => {
       const response = await getCommentsByPostId(route?.params?.postId);
@@ -325,6 +315,7 @@ import {
                   onPress={() => {
                     setIsReplying(false);
                     setCommentIdReplying(null);
+                    setCommentText("")
                   }}
                 >
                   <Text
@@ -358,12 +349,9 @@ import {
               onFocus={() => setIsCommentTextFocus(true)}
               onBlur={() => {
                 setIsCommentTextFocus(false);
-  
-                // setIsReplying(false);
-                // setCommentIdReplying(null);
               }}
               ref={commentInputRef}
-              autoFocus={route?.params?.initialCommentFocus}
+              autoFocus={true}
             />
             {isCommentTextFocus && (
               <View

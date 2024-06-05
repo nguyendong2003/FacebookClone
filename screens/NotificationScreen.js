@@ -36,6 +36,18 @@ export default function NotificationScreen({ navigation }) {
   const [notificationList, setNotificationList] = useState(null)
   const { state } = useContext(AccountContext);
   const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    const response = await getNotificationByAccount(state.account.id)
+    setNotificationList(response)
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
+  
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
@@ -44,10 +56,6 @@ export default function NotificationScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await getNotificationByAccount(state.account.id)
-      setNotificationList(response)
-    }
     fetchData()
   }, [refreshing])
 
