@@ -108,7 +108,10 @@ export default function EditPostScreen({ navigation, route }) {
     if (!result.canceled) {
       let imageList = [];
       result.assets.forEach((image) => {
-        imageList.push(image.uri);
+        imageList.push({
+          id: 0,
+          image: image.uri,
+        });
       });
       if (imagePostList === null) {
         setImagePostList(imageList);
