@@ -46,6 +46,11 @@ const Comment = ({
   setNameReplying,
   setIdUserReplying,
   setCommentText,
+  setIsCommentTextFocus,
+  setIsCommentEditing,
+  commentIdEditing,
+  setCommentIdEditing,
+  setCommentImage,
   scrollToComment,
   coords,
   setCoords,
@@ -58,11 +63,7 @@ const Comment = ({
 
   //
   const [isPressingComment, setIsPressingComment] = useState(false);
-
-  // console.log('======================');
-  // console.log(item);
-  // console.log('======================');
-
+  //
   useEffect(() => {
     switch (valueReaction) {
       case 1:
@@ -218,10 +219,12 @@ const Comment = ({
               paddingLeft: 12,
               paddingRight: 12,
               backgroundColor:
-                item.id === commentIdReplying ? '#ccc' : '#f0f2f5',
+                item.id === commentIdReplying || item.id === commentIdEditing
+                  ? '#ccc'
+                  : '#f0f2f5',
             }}
             onLongPress={() => setIsPressingComment(true)}
-            delayLongPress={400}
+            delayLongPress={200}
           >
             <TouchableOpacity>
               <Text
@@ -281,14 +284,16 @@ const Comment = ({
                   onPress={() => {
                     setIsPressingComment(false);
 
-                    setIsReplying(true);
-                    setCommentIdReplying(item?.id);
-                    // setNameReplying(item.account_user.profile_name);
-                    setIdUserReplying(item.account_user.id);
+                    // Edit comment
+                    setIsCommentTextFocus(true);
+                    setIsCommentEditing(true);
+                    setCommentIdEditing(item?.id);
                     setCommentText(item?.content);
+                    setCommentImage(item?.image);
+
+                    //
 
                     scrollToComment(item?.id);
-                    // alert('Edit comment');
                   }}
                 >
                   <MaterialIcons name="mode-edit" size={24} color="#050505" />
@@ -624,6 +629,13 @@ const Comment = ({
             setCommentIdReplying={setCommentIdReplying}
             setNameReplying={setNameReplying}
             setIdUserReplying={setIdUserReplying}
+            // edit comment
+            setIsCommentTextFocus={setIsCommentTextFocus}
+            setIsCommentEditing={setIsCommentEditing}
+            commentIdEditing={commentIdEditing}
+            setCommentIdEditing={setCommentIdEditing}
+            setCommentImage={setCommentImage}
+            //
             scrollToComment={scrollToComment}
             coords={coords}
             setCoords={setCoords}

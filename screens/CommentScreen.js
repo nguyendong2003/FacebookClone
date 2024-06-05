@@ -72,6 +72,9 @@ export default function CommentScreen({ route, navigation }) {
   const [nameReplying, setNameReplying] = useState('');
   const [idUserReplying, setIdUserReplying] = useState('');
   const [commentList, setCommentList] = useState([]);
+  //
+  const [isCommentEditing, setIsCommentEditing] = useState(false);
+  const [commentIdEditing, setCommentIdEditing] = useState(null);
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
@@ -80,11 +83,7 @@ export default function CommentScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true); // Add loading state
   const [post, setPost] = useState(null);
   const [reactions, setReactions] = useState([]);
-  // useLayoutEffect(() => {
-  //     navigation.setOptions({
-  //         headerTitle: title || 'None',
-  //     });
-  // }, [navigation, title]);
+
   useEffect(() => {
     const fetchPost = async () => {
       const post = await getPostById(postId);
@@ -105,11 +104,6 @@ export default function CommentScreen({ route, navigation }) {
       }
     }
   }, [isReplying, isCommentTextFocus]);
-
-  useEffect(() => {
-    // console.log(commentIdReplying);
-    // console.log(isReplying);
-  }, [commentIdReplying, isReplying]);
 
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
@@ -274,6 +268,11 @@ export default function CommentScreen({ route, navigation }) {
               setIdUserReplying={setIdUserReplying}
               setCommentText={setCommentText}
               commentIdReplying={commentIdReplying}
+              setIsCommentTextFocus={setIsCommentTextFocus}
+              setIsCommentEditing={setIsCommentEditing}
+              commentIdEditing={commentIdEditing}
+              setCommentIdEditing={setCommentIdEditing}
+              setCommentImage={setCommentImage}
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
@@ -388,6 +387,39 @@ export default function CommentScreen({ route, navigation }) {
                   setIsReplying(false);
                   setCommentText('');
                   setCommentIdReplying(null);
+                }}
+              >
+                <Text
+                  style={{
+                    marginLeft: 16,
+                    fontWeight: 'bold',
+                    color: '#65676B',
+                    fontSize: 15,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {isCommentEditing && (
+            <View
+              style={{
+                flexDirection: 'row',
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#65676B', fontSize: 15 }}>Editing</Text>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setIsCommentTextFocus(false);
+                  setIsCommentEditing(false);
+                  setCommentIdEditing(null);
+                  setCommentText('');
                 }}
               >
                 <Text
