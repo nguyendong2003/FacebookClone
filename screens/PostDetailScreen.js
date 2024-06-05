@@ -40,6 +40,7 @@ import {
   import { getCommentsByPostId, createComment } from "../service/CommentService";
   import { Context as AccountContext } from "../context/AccountContext";
   import { Context as PostContext } from "../context/PostContext";
+  import {createNotification} from "../service/NotificationService";
   // Upload image
   import * as ImagePicker from "expo-image-picker";
   import { LogBox } from 'react-native';
@@ -52,9 +53,9 @@ import {
     const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
     const [isSelectImage, setIsSelectImage] = useState(false);
     const [isCommentValid, setIsCommentValid] = useState(false);
-    //
+    const [idUserReplying, setIdUserReplying] = useState("");
     const [isReplying, setIsReplying] = useState(false);
-    const [commentIdReplying, setCommentIdReplying] = useState(null);
+    const [commentIdReplying, setCommentIdReplying] = useState(route?.params?.commentId);
     const [nameReplying, setNameReplying] = useState("");
     const [commentList, setCommentList] = useState([]);
     // focus vào TextInput để viết comment khi isReplying là true
@@ -63,7 +64,6 @@ import {
     const { getPosts } = useContext(PostContext);
     // refactor lại listHeader của FlatList
     const [postId, setPostID] = useState(route?.params?.postId);
-    const [commentId, setCommentId] = useState(route?.params?.commentId);
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true); // Add loading state
   
@@ -173,13 +173,13 @@ import {
     const submitComment = async () => {
       if (isCommentValid) {
         formData = new FormData();
-  
         formData.append("id_account", state.account.id);
         if (commentIdReplying) {
           formData.append("to_comment_id", commentIdReplying);
         } 
-        else 
+        else {
           formData.append("id_post", route?.params?.postId);
+        }
   
         formData.append("content", commentText);
   
@@ -191,7 +191,14 @@ import {
           });
         }
   
-        await createComment(formData);
+        const response = await createComment(formData);
+        if (commentIdReplying) {
+          notificationHandler(idUserReplying, route?.params?.postId, commentIdReplying, response.id)
+        } 
+        else {
+          notificationHandler(post.user.id, route?.params?.postId, null, response.id)
+        }
+
         setCommentText("");
         setIsReplying(false);
         setCommentImage(null);
@@ -202,6 +209,23 @@ import {
         alert("Invalid comment");
       }
     };
+
+    const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id, send_comment_id) => {
+      try{
+        const response = await createNotification({
+          from_account_id: state.account.id,
+          to_account_id,
+          to_post_id,
+          to_comment_post_id,
+          send_comment_id,
+          notify_type: "comment"
+        })
+  
+        console.log(response);
+      }catch(error) {
+        console.log(error);
+      }
+    }
   
     if (loading) {
       return (
@@ -234,6 +258,7 @@ import {
                 setCommentIdReplying={setCommentIdReplying}
                 setNameReplying={setNameReplying}
                 scrollToComment={scrollToComment}
+                setIdUserReplying = {setIdUserReplying}
                 coords={coords}
                 setCoords={setCoords}
               />

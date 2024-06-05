@@ -186,11 +186,9 @@ export default function CommentScreen({ route, navigation }) {
       formData.append("id_account", state.account.id);
       if (commentIdReplying) {
         formData.append("to_comment_id", commentIdReplying);
-        notificationHandler(idUserReplying, null, commentIdReplying)
       } 
       else {
         formData.append("id_post", route?.params?.postId);
-        notificationHandler(post.user.id, route?.params?.postId, null)
       }
 
       formData.append("content", commentText);
@@ -203,7 +201,13 @@ export default function CommentScreen({ route, navigation }) {
         });
       }
       
-      await createComment(formData);
+      const response = await createComment(formData);
+      if (commentIdReplying) {
+        notificationHandler(idUserReplying, route?.params?.postId, commentIdReplying, response.id )
+      } 
+      else {
+        notificationHandler(post.user.id, route?.params?.postId, null, response.id)
+      }
       setCommentText("");
       setIsReplying(false);
       setCommentImage(null);
@@ -215,13 +219,14 @@ export default function CommentScreen({ route, navigation }) {
     }
   };
 
-  const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id) => {
+  const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id, send_comment_id) => {
     try{
       const response = await createNotification({
         from_account_id: state.account.id,
         to_account_id,
         to_post_id,
         to_comment_post_id,
+        send_comment_id,
         notify_type: "comment"
       })
 
@@ -230,6 +235,7 @@ export default function CommentScreen({ route, navigation }) {
       console.log(error);
     }
   }
+
   if (loading) {
     return (
         <View style={styles.loadingContainer}>
@@ -255,6 +261,7 @@ export default function CommentScreen({ route, navigation }) {
           data={commentList}
           renderItem={({ item, index }) => (
             <Comment
+              navigation={navigation}
               item={item}
               setIsReplying={setIsReplying}
               setCommentText={setCommentText}
