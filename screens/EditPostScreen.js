@@ -47,6 +47,10 @@ export default function EditPostScreen({ navigation, route }) {
   const { item } = route.params;
   //
   const [textPost, setTextPost] = useState(item?.content);
+  const [imagePostList, setImagePostList] = useState(item?.postImages);
+
+  const [isSubmit, setIsSubmit] = useState(false);
+
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
@@ -66,17 +70,38 @@ export default function EditPostScreen({ navigation, route }) {
     { label: 'Friend', value: '2' },
     { label: 'Private', value: '3' },
   ];
-  // useEffect(() => {
-  //   console.log(value);
-  // }, [value]);
 
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
   ]);
 
+  // Click remove image
+  const removeImage = (index) => {
+    if (imagePostList?.length > 0) {
+      setImagePostList((prevImageList) => {
+        const updatedImageList = [...prevImageList];
+        updatedImageList.splice(index, 1);
+        return updatedImageList;
+      });
+    } else if (imagePostList?.length === 0) {
+      setImagePostList(null);
+    }
+  };
+
+  //
+  useEffect(() => {
+    if (textPost.trim().length > 0 || imagePostList?.length > 0) {
+      setIsSubmit(true);
+    } else {
+      setIsSubmit(false);
+    }
+  }, [textPost, imagePostList]);
+
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
+
+  //
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -88,8 +113,6 @@ export default function EditPostScreen({ navigation, route }) {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
-
-  // console.log(item);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -216,27 +239,44 @@ export default function EditPostScreen({ navigation, route }) {
               alignItems: 'center',
             }}
           >
-            {item?.postImages?.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image.image }}
-                style={{
-                  marginHorizontal: 2,
-                  marginTop: 4,
-                  // borderRadius: 20,
-                }}
-                width={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                height={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                resizeMode="cover"
-              />
+            {imagePostList?.map((image, index) => (
+              <View key={index}>
+                <Image
+                  source={{ uri: image.image }}
+                  style={{
+                    marginHorizontal: 2,
+                    marginTop: 4,
+                    // borderRadius: 20,
+                  }}
+                  width={
+                    imagePostList?.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  height={
+                    imagePostList?.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  resizeMode="cover"
+                />
+                <Entypo
+                  style={{
+                    position: 'absolute',
+                    left:
+                      imagePostList.length % 2 === 1 && index === 0
+                        ? '90%'
+                        : '80%',
+                    top: 8,
+                  }}
+                  name="circle-with-cross"
+                  size={36}
+                  color="#ccc"
+                  onPress={() => {
+                    removeImage(index);
+                  }}
+                />
+              </View>
             ))}
           </View>
 
