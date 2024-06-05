@@ -185,7 +185,7 @@ export default function EditPostScreen({ navigation, route }) {
     let newPhoto = await cameraRef.current.takePictureAsync(options);
     setShowCamera(false);
     if (imagePostList === null) {
-      setImagePostList([newPhoto.uri]);
+      setImagePostList([{ id: 0, image: newPhoto.uri }]);
     } else {
       setImagePostList((prevImageList) => [
         ...prevImageList,
