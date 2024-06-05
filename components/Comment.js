@@ -59,6 +59,10 @@ const Comment = ({
   //
   const [isPressingComment, setIsPressingComment] = useState(false);
 
+  // console.log('======================');
+  // console.log(item);
+  // console.log('======================');
+
   useEffect(() => {
     switch (valueReaction) {
       case 1:
@@ -276,7 +280,15 @@ const Comment = ({
                   }}
                   onPress={() => {
                     setIsPressingComment(false);
-                    alert('Edit comment');
+
+                    setIsReplying(true);
+                    setCommentIdReplying(item?.id);
+                    // setNameReplying(item.account_user.profile_name);
+                    setIdUserReplying(item.account_user.id);
+                    setCommentText(item?.content);
+
+                    scrollToComment(item?.id);
+                    // alert('Edit comment');
                   }}
                 >
                   <MaterialIcons name="mode-edit" size={24} color="#050505" />

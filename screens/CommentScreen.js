@@ -269,11 +269,11 @@ export default function CommentScreen({ route, navigation }) {
             <Comment
               item={item}
               setIsReplying={setIsReplying}
-              setCommentText={setCommentText}
-              commentIdReplying={commentIdReplying}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
               setIdUserReplying={setIdUserReplying}
+              setCommentText={setCommentText}
+              commentIdReplying={commentIdReplying}
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
