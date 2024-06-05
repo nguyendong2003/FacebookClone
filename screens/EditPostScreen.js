@@ -45,12 +45,14 @@ import { LogBox } from 'react-native';
 export default function EditPostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
   const { item } = route.params;
+
+  console.log(item);
   //
   const [textPost, setTextPost] = useState(item?.content);
   const [imagePostList, setImagePostList] = useState(item?.postImages);
+  const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
 
-  const [isSubmit, setIsSubmit] = useState(false);
-
+  //
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
@@ -90,10 +92,12 @@ export default function EditPostScreen({ navigation, route }) {
 
   //
   useEffect(() => {
-    if (textPost.trim().length > 0 || imagePostList?.length > 0) {
-      setIsSubmit(true);
-    } else {
-      setIsSubmit(false);
+    if (item?.share_post == null) {
+      if (textPost.trim().length > 0 || imagePostList?.length > 0) {
+        setIsSubmit(true);
+      } else {
+        setIsSubmit(false);
+      }
     }
   }, [textPost, imagePostList]);
 
@@ -209,7 +213,8 @@ export default function EditPostScreen({ navigation, route }) {
               <Button
                 title="Edit"
                 color="#0866ff"
-                onPress={() => alert('Edited Post')}
+                disabled={!isSubmit}
+                onPress={() => {}}
               />
             </View>
           </View>
