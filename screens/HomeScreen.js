@@ -29,14 +29,8 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 
-import { useState, useEffect, useContext } from "react";
-import moment from "moment";
-
-import postList from "../data/post.json";
-import commentList from "../data/comment.json";
-import listFriend from "../data/listFriendProfile.json";
-
-import Comment from "../components/Comment";
+import { useState, useEffect, useContext, useRef } from "react";
+import { useScrollToTop } from "@react-navigation/native";
 import Post from "../components/Post";
 // Upload image
 import * as ImagePicker from "expo-image-picker";
@@ -62,6 +56,8 @@ export default function HomeScreen({ navigation }) {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
+  const ref = useRef(null);
+  useScrollToTop(ref);
 
   const updatePostById = async (id) => {
     await reloadPost(id);
@@ -76,6 +72,7 @@ export default function HomeScreen({ navigation }) {
               alignSelf: "flex-start",
               minWidth: "100%",
             }}
+            ref={ref}
             data={postState.posts}
             renderItem={({ item }) => (
               <Post item={item} navigation={navigation} onUpdatePost={updatePostById} postType="POST"/>

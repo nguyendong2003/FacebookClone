@@ -34,13 +34,13 @@ import {
   getFriendsByAccountId,
   getProfileStatus,
 } from "../service/FriendService";
-
+import { updateAvatar, updateCoverImage } from "../service/AccountService";
+import { ActivityIndicator } from "react-native-paper";
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
   const { state } = useContext(AccountContext);
-  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } =
-    useContext(FriendContext);
+  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } = useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
   const [isFriend, setIsFriend] = useState(statusFriend);
   const [isVisible, setIsVisible] = useState(isPersonalPage);
@@ -50,7 +50,9 @@ export default function ProfileScreen({ navigation, route }) {
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
   const [isShowModal, setIsShowModal] = useState(false);
-const [notificationId, setNotificationId] = useState(null);
+  const [notificationId, setNotificationId] = useState(null);  
+  const [isLoading, setIsLoading] = useState(true);
+
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
     setUserPost(data);
@@ -75,7 +77,6 @@ const [notificationId, setNotificationId] = useState(null);
   };
   useEffect(() => {
     fetchUserData();
-
     const subscription = DeviceEventEmitter.addListener(
       "fetchPost",
       fetchUserPost
@@ -122,11 +123,13 @@ const [notificationId, setNotificationId] = useState(null);
     
     if(type == "cover"){
       if (!result.canceled) {
-        setImageCover(result.assets[0].uri);
+        await updateCoverImage(result.assets[0].uri);
+        fetchUserData();
       }
     }else{
       if (!result.canceled) {
-        setImageAvatar(result.assets[0].uri);
+        await updateAvatar(result.assets[0].uri)
+        fetchUserData()
       }
     }
     // console.log(image)
@@ -453,7 +456,7 @@ const [notificationId, setNotificationId] = useState(null);
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
+        <FlatList
         style={{
           alignSelf: "flex-start",
           minWidth: "100%",
@@ -493,8 +496,8 @@ const [notificationId, setNotificationId] = useState(null);
               <Image
                 style={styles.coverPhoto}
                 source={
-                  imageCover
-                    ? { uri: imageCover }
+                  user.cover_image != null
+                    ? { uri: user.cover_image }
                     : require("../assets/coverPhoto.jpg")
                 }
               />

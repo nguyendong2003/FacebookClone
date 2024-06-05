@@ -203,13 +203,11 @@ const Comment = ({
         }}
       >
         <TouchableOpacity
-          onPress={() =>{
-            navigation.navigate("Profile", {
-              accountId: item?.account_user?.id,
-              isPersonalPage: false,
-            });
-          }}
-        >
+          onPress={
+            () => {
+              navigation.navigate("Profile", { accountId: item.account_user.id });
+            }
+          }>
           <Image
             source={item?.account_user?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: item?.account_user?.avatar }}
             style={{ width: 40, height: 40, borderRadius: 100 }}

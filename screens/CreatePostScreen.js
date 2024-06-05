@@ -17,6 +17,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -41,7 +42,6 @@ import { Camera, CameraType } from 'expo-camera/legacy';
 import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 
 import { useFocusEffect } from '@react-navigation/native';
-import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
 import { createPost } from '../service/PostService';
 import { LogBox } from 'react-native';
@@ -51,7 +51,7 @@ export default function CreatePostScreen({ navigation, route }) {
   const [imagePostList, setImagePostList] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
   const { state } = useContext(AccountContext);
-
+  const [isLoading, setIsLoading] = useState(false);
   // chọn chế độ bài viết
   const [value, setValue] = useState('1');
 
@@ -70,6 +70,7 @@ export default function CreatePostScreen({ navigation, route }) {
 
   const submitPost = async () => {
     if (textPost.trim().length > 0 || imagePostList?.length > 0) {
+      setIsLoading(true);
       await createPost({
         content: textPost,
         images: imagePostList,
@@ -81,6 +82,7 @@ export default function CreatePostScreen({ navigation, route }) {
       setTextPost('');
       setImagePostList(null);
       setIsSubmit(false);
+      setIsLoading(false);
       navigation.goBack();
     }
   };
@@ -353,12 +355,16 @@ export default function CreatePostScreen({ navigation, route }) {
             </View>
 
             <View>
+              {isLoading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
               <Button
-                title="Post"
-                color="#0866ff"
-                disabled={!isSubmit}
-                onPress={submitPost}
+              title="Post"
+              color="#0866ff"
+              disabled={!isSubmit}
+              onPress={submitPost}
               />
+            )}
             </View>
           </View>
           <View style={{ marginTop: 16, padding: 12 }}>
