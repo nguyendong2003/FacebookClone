@@ -95,7 +95,7 @@ export default function CommentScreen({ route, navigation }) {
   }, [postId]);
 
   useEffect(() => {
-    if (isReplying || isCommentTextFocus) {
+    if (isReplying || isCommentTextFocus || isCommentEditing) {
       // Kiểm tra xem ref có tồn tại không trước khi gọi focus()
       if (commentInputRef.current) {
         commentInputRef.current.focus();
@@ -103,7 +103,7 @@ export default function CommentScreen({ route, navigation }) {
         commentInputRef.current.blur();
       }
     }
-  }, [isReplying, isCommentTextFocus]);
+  }, [isReplying, isCommentTextFocus, isCommentEditing]);
 
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
@@ -384,6 +384,7 @@ export default function CommentScreen({ route, navigation }) {
 
               <TouchableOpacity
                 onPress={() => {
+                  setIsCommentTextFocus(true);
                   setIsReplying(false);
                   setCommentText('');
                   setCommentIdReplying(null);
@@ -418,7 +419,7 @@ export default function CommentScreen({ route, navigation }) {
 
               <TouchableOpacity
                 onPress={() => {
-                  setIsCommentTextFocus(false);
+                  setIsCommentTextFocus(true);
                   setIsCommentEditing(false);
                   setCommentIdEditing(null);
                   setCommentText('');
@@ -454,7 +455,9 @@ export default function CommentScreen({ route, navigation }) {
             onChangeText={(text) => {
               setCommentText(text);
             }}
-            onFocus={() => setIsCommentTextFocus(true)}
+            onFocus={() => {
+              setIsCommentTextFocus(true);
+            }}
             onBlur={() => {
               setIsCommentTextFocus(false);
 
