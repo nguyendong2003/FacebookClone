@@ -47,6 +47,7 @@ const Comment = ({
   scrollToComment,
   coords,
   setCoords,
+  navigation
 }) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -184,7 +185,12 @@ const Comment = ({
           // marginLeft: marginLeftValue,
         }}
       >
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={
+            () => {
+              navigation.navigate("Profile", { accountId: item.account_user.id });
+            }
+          }>
           <Image
             source={item?.account_user?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: item?.account_user?.avatar }}
             style={{ width: 40, height: 40, borderRadius: 100 }}
@@ -483,6 +489,7 @@ const Comment = ({
             scrollToComment={scrollToComment}
             coords={coords}
             setCoords={setCoords}
+            navigation={navigation}
           />
         ))}
       </View>

@@ -277,6 +277,7 @@ export default function CommentScreen({ route, navigation }) {
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
+              navigation={navigation}
             />
           )}
           keyExtractor={(item, index) => item.id.toString()}
