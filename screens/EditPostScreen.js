@@ -55,7 +55,6 @@ export default function EditPostScreen({ navigation, route }) {
   const [textPost, setTextPost] = useState(item?.content);
   const [imagePostList, setImagePostList] = useState(item?.postImages);
   const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
-  console.log(imagePostList);
   //
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
