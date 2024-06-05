@@ -36,11 +36,12 @@ import { Dropdown } from 'react-native-element-dropdown';
 
 import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import moment from 'moment';
-
+import { DeviceEventEmitter } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
 import { LogBox } from 'react-native';
+import { editPost } from '../service/PostService'
 
 export default function EditPostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
@@ -73,6 +74,21 @@ export default function EditPostScreen({ navigation, route }) {
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
   ]);
+
+  const editPostHandler = async () => {
+    try {
+      const response = await editPost({
+        postId: item.id,
+        view_mode: data[value - 1].label.toLowerCase(),
+        content: textPost,
+        images: item.postImages,
+      });
+      DeviceEventEmitter.emit('fetchPost');
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
@@ -186,7 +202,7 @@ export default function EditPostScreen({ navigation, route }) {
               <Button
                 title="Edit"
                 color="#0866ff"
-                onPress={() => alert('Edited Post')}
+                onPress={() => editPostHandler()}
               />
             </View>
           </View>
