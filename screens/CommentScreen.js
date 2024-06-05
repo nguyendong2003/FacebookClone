@@ -129,6 +129,7 @@ export default function CommentScreen({ route, navigation }) {
     if (!result.canceled) {
       setCommentImage(result.assets[0].uri);
     }
+    setIsSelectImage(false);
   };
 
   useEffect(() => {
