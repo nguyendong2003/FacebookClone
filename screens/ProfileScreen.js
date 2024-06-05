@@ -36,12 +36,11 @@ import {
 
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
-  const { isPersonalPage, statusFriend, listFriend } = route.params;
+  const { isPersonalPage } = route.params;
   const { state: accountState } = useContext(AccountContext);
   const { sendRequest, cancelFriendRequest, acceptFriendRequest } =
     useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
-  const [isFriend, setIsFriend] = useState(statusFriend);
   const [isVisible, setIsVisible] = useState(isPersonalPage);
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
@@ -607,8 +606,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     width: "33.33%",
     height: 130,
-    marginTop: 10,
-    marginBottom: 10,
+    // marginTop: 10,
+    marginBottom: 25,
     // alignItems:"stretch"
   },
   textInformation: {
@@ -621,7 +620,10 @@ const styles = StyleSheet.create({
   },
   rowInformation: {
     flexDirection: "row",
-    margin: 5,
+    marginTop: 5,
+    marginBottom: 5,
+    marginRight: 5,
+    marginLeft: 15
   },
   seperate: {
     width: "100%",
