@@ -34,6 +34,11 @@ import {
 
 import { Dropdown } from 'react-native-element-dropdown';
 
+// Upload image
+import * as ImagePicker from 'expo-image-picker';
+// Camera
+import { Camera, CameraType } from 'expo-camera/legacy';
+
 import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import moment from 'moment';
 
@@ -46,12 +51,12 @@ export default function EditPostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
   const { item } = route.params;
 
-  console.log(item);
   //
   const [textPost, setTextPost] = useState(item?.content);
   const [imagePostList, setImagePostList] = useState(item?.postImages);
   const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
 
+  console.log(imagePostList);
   //
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
@@ -87,6 +92,32 @@ export default function EditPostScreen({ navigation, route }) {
       });
     } else if (imagePostList?.length === 0) {
       setImagePostList(null);
+    }
+  };
+
+  // pick multiple image
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      // allowsEditing: true,
+      allowsMultipleSelection: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      let imageList = [];
+      result.assets.forEach((image) => {
+        imageList.push(image.uri);
+      });
+      if (imagePostList === null) {
+        setImagePostList(imageList);
+      } else {
+        setImagePostList((prevImageList) => [...prevImageList, ...imageList]);
+        // setImagePostList([...imagePostList, ...imageList]);
+      }
+
+      // console.log(imagePostList);
     }
   };
 
@@ -137,9 +168,9 @@ export default function EditPostScreen({ navigation, route }) {
             <View style={{ flexDirection: 'row' }}>
               <Image
                 source={
-                  state.account.avatar == null
+                  state?.account?.avatar == null
                     ? require('../assets/defaultProfilePicture.jpg')
-                    : { uri: state.account.avatar }
+                    : { uri: state?.account?.avatar }
                 }
                 style={{ width: 60, height: 60, borderRadius: 100 }}
               />
@@ -418,6 +449,19 @@ export default function EditPostScreen({ navigation, route }) {
                   />
                 ))}
               </View>
+            </View>
+          )}
+          {item?.share_post == null && (
+            <View style={{ marginTop: 12 }}>
+              <TouchableOpacity
+                style={styles.optionButtonContainer}
+                onPress={() => {
+                  pickImage();
+                }}
+              >
+                <FontAwesome6 name="image" size={24} color="#45bd62" />
+                <Text style={styles.textOptionButton}>Image</Text>
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>
