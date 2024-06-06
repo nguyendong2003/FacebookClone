@@ -83,44 +83,44 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       case 1:
         setColorReaction('#0866FF');
         setNameReaction('Like');
-        setSizeReaction(44 - 16);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/like.png'));
 
         break;
       case 2:
         setColorReaction('#F33E58');
         setNameReaction('Love');
-        setSizeReaction(40 - 16);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/love.png'));
         break;
       case 3:
         setColorReaction('#F7B125');
         setNameReaction('Care');
-        setSizeReaction(36 - 12);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/care.png'));
         break;
       case 4:
         setColorReaction('#F7B125');
         setNameReaction('Haha');
-        setSizeReaction(48 - 20);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/haha.png'));
         break;
       case 5:
         setColorReaction('#F7B125');
         setNameReaction('Wow');
-        setSizeReaction(36 - 12);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/wow.png'));
         break;
       case 6:
         setColorReaction('#E9710F');
         setNameReaction('Sad');
-        setSizeReaction(36 - 12);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/sad.png'));
         break;
       case 7:
         setColorReaction('#E9710F');
         setNameReaction('Angry');
-        setSizeReaction(36 - 12);
+        setSizeReaction(24);
         setSourceReaction(require('../iconfb/angry.png'));
         break;
 
