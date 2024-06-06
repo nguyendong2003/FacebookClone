@@ -30,9 +30,9 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef, useContext} from "react";
-import {createNotification} from "../service/NotificationService"
-import {getPostOfComment} from "../service/CommentService"
+import { useState, useEffect, useRef, useContext } from "react";
+import { createNotification } from "../service/NotificationService";
+import { getPostOfComment } from "../service/CommentService";
 import { Context as AccountContext } from "../context/AccountContext";
 import moment from "moment";
 import { reaction } from "../service/CommentService";
@@ -48,7 +48,7 @@ const Comment = ({
   setCommentText,
   scrollToComment,
   coords,
-  setCoords
+  setCoords,
 }) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -123,8 +123,6 @@ const Comment = ({
   }, []);
 
   const reactionHandler = async (type) => {
-    console.log(item.id)
-
     await reaction({
       id_account: accountState.account.id,
       id_comment: item.id,
@@ -132,7 +130,7 @@ const Comment = ({
     });
 
     setValueReaction(convertReactionValue(type));
-  }
+  };
   //
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
@@ -148,37 +146,37 @@ const Comment = ({
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
-  
-  const [post, setPost] = useState(null)
-  const getPostOfCommentHandler = async() => {
-        try {
-            const responsse = await getPostOfComment(item?.id)
-            setPost(responsse)
-        }catch(error) {
-            console.log(error);
-        }
-  }
+
+  const [post, setPost] = useState(null);
+  const getPostOfCommentHandler = async () => {
+    try {
+      const responsse = await getPostOfComment(item?.id);
+      setPost(responsse);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    getPostOfCommentHandler()
-  }, [])
+    getPostOfCommentHandler();
+  }, []);
 
   const ref = useRef();
-  const notificationHandler = async(notify_type) => {
-    try{
+  const notificationHandler = async (notify_type) => {
+    try {
       const response = await createNotification({
         from_account_id: accountState.account.id,
         to_account_id: item?.account_user.id,
         to_post_id: post.id,
         to_comment_post_id: item?.id,
-        notify_type
-      })
-    }catch(error) {
+        notify_type,
+      });
+    } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  scrollToComment(commentIdReplying)
+  scrollToComment(commentIdReplying);
   return (
     <View>
       <View
@@ -203,18 +201,21 @@ const Comment = ({
         }}
       >
         <TouchableOpacity
-          onPress={
-            () => {
-              navigation.navigate("Profile", { accountId: item.account_user.id });
-            }
-          }>
+          onPress={() => {
+            navigation.navigate("Profile", { accountId: item.account_user.id });
+          }}
+        >
           <Image
-            source={item?.account_user?.avatar == null ? require("../assets/defaultProfilePicture.jpg") : { uri: item?.account_user?.avatar }}
+            source={
+              item?.account_user?.avatar == null
+                ? require("../assets/defaultProfilePicture.jpg")
+                : { uri: item?.account_user?.avatar }
+            }
             style={{ width: 40, height: 40, borderRadius: 100 }}
           />
         </TouchableOpacity>
 
-        <View style={{maxWidth: '80%'}}>
+        <View style={{ maxWidth: "80%" }}>
           <View
             style={{
               flex: 1,
@@ -224,10 +225,16 @@ const Comment = ({
               paddingLeft: 12,
               paddingRight: 12,
               backgroundColor:
-                (item.id === commentIdReplying) ? "#ccc" :"#f0f2f5",
+                item.id === commentIdReplying ? "#ccc" : "#f0f2f5",
             }}
           >
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Profile", {
+                  accountId: item.account_user.id,
+                });
+              }}
+            >
               <Text
                 style={{
                   fontSize: 13,
@@ -299,10 +306,12 @@ const Comment = ({
                 onPress={() => {
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
-                    reactionHandler("NONE")
+                    reactionHandler("NONE");
+                    setNameReaction(null);
                   } else {
                     setValueReaction(1);
-                    notificationHandler("LIKE")
+                    reactionHandler("LIKE");
+                    notificationHandler("LIKE");
                   }
                 }}
                 onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -343,7 +352,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(1);
-                        notificationHandler("LIKE")
+                        reactionHandler("LIKE");
+                        notificationHandler("LIKE");
                       }}
                     >
                       <Image
@@ -355,7 +365,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(2);
-                        notificationHandler("LOVE")
+                        reactionHandler("LOVE");
+                        notificationHandler("LOVE");
                       }}
                     >
                       <Image
@@ -367,7 +378,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(3);
-                        notificationHandler("CARE")
+                        reactionHandler("CARE");
+                        notificationHandler("CARE");
                       }}
                     >
                       <Image
@@ -379,7 +391,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(4);
-                        notificationHandler("HAHA")
+                        reactionHandler("HAHA");
+                        notificationHandler("HAHA");
                       }}
                     >
                       <Image
@@ -391,7 +404,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(5);
-                        notificationHandler("WOW")
+                        reactionHandler("WOW");
+                        notificationHandler("WOW");
                       }}
                     >
                       <Image
@@ -404,7 +418,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(6);
-                        notificationHandler("SAD")
+                        reactionHandler("SAD");
+                        notificationHandler("SAD");
                       }}
                     >
                       <Image
@@ -417,7 +432,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(7);
-                        notificationHandler("ANGRY")
+                        reactionHandler("ANGRY");
+                        notificationHandler("ANGRY");
                       }}
                     >
                       <Image
@@ -502,7 +518,7 @@ const Comment = ({
             commentIdReplying={commentIdReplying}
             setCommentIdReplying={setCommentIdReplying}
             setNameReplying={setNameReplying}
-            setIdUserReplying = {setIdUserReplying}
+            setIdUserReplying={setIdUserReplying}
             scrollToComment={scrollToComment}
             coords={coords}
             setCoords={setCoords}
@@ -512,7 +528,7 @@ const Comment = ({
       </View>
     </View>
   );
-}
+};
 
 export default React.memo(Comment);
 

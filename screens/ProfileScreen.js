@@ -34,6 +34,7 @@ import { createNotification, deleteNotification, getSendNotificationFromFriendRe
 import {
   getFriendsByAccountId,
   getProfileStatus,
+  removeFriend,
 } from "../service/FriendService";
 import { updateAvatar, updateCoverImage } from "../service/AccountService";
 
@@ -364,7 +365,7 @@ export default function ProfileScreen({ navigation, route }) {
                         },
                         {
                           text: 'Yes',
-                          onPress: () => setStatus('STRANGER'),
+                          onPress: () => {removeFriend(route.params.accountId); fetchUserData(); setIsShowModal(false)},
                         },
                       ],
                       { cancelable: false },

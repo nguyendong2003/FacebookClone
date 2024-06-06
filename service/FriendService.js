@@ -16,3 +16,7 @@ export const getProfileStatus = async (id) => {
   const response = await SpringServer.get(`/friend/profileStatus/${id}`);
   return response.data;
 }
+
+export const removeFriend = async (friendId) => {
+  await SpringServer.delete(`/friend/removeFriend/${friendId}`);
+};
