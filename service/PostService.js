@@ -65,18 +65,24 @@ export const createPost = async ({ content, images, view_mode, share_id = 0 }) =
   return response.data;
 }
 
-export const editPost = async ({ postId, view_mode, content, images}) => {
+export const editPost = async ({ postId, view_mode, content, images, files}) => {
   const formData = new FormData();
   formData.append("content", content);
   formData.append("view_mode", view_mode);
   formData.append("id_post", postId);
   
   if (images != null) {
-    images.forEach((imageUri, index) => {
-      formData.append("images", {
+    images.forEach((imageUrl) => {
+      formData.append("images", imageUrl);
+    });
+  }
+
+  if (files != null) {
+    files.forEach((file, index) => {
+      formData.append("files", {
         name: `image${index}.jpg`,
         type: "image/jpeg",
-        uri: imageUri,
+        uri: file,
       });
     });
   }
