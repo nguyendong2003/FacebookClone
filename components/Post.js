@@ -848,8 +848,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-like.png')}
-                    style={{ width: 44, height: 44, marginLeft: 4 }}
+                    source={require('../iconfb/like.png')}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -860,8 +860,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-heart.jpg')}
-                    style={{ width: 40, height: 40 }}
+                    source={require('../iconfb/love.png')}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -872,7 +872,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-care2.jpg')}
+                    source={require('../iconfb/care.png')}
                     style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
@@ -884,8 +884,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-haha.png')}
-                    style={{ width: 48, height: 48 }}
+                    source={require('../iconfb/haha.png')}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -896,12 +896,11 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-wow.png')}
-                    style={{ width: 36, height: 36 }}
+                    source={require('../iconfb/wow.png')}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, 'SAD');
@@ -909,12 +908,11 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-sad.jpg')}
-                    style={{ width: 36, height: 36 }}
+                    source={require('../iconfb/sad.png')}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, 'ANGRY');
@@ -922,8 +920,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   }}
                 >
                   <Image
-                    source={require('../assets/facebook-angry.png')}
-                    style={{ width: 36, height: 36 }}
+                    source={require('../iconfb/angry.png')}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      marginLeft: 4,
+                      marginRight: 4,
+                    }}
                   />
                 </TouchableOpacity>
               </View>
