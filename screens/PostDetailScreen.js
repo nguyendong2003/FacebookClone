@@ -51,6 +51,11 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from "react-native";
 
 export default function PostDetailScreen({ route, navigation }) {
+  const [itemSend, setItemSend] = useState(() => {
+    console.log(route?.params);
+    return route?.params;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [commentText, setCommentText] = useState("");
@@ -149,10 +154,11 @@ export default function PostDetailScreen({ route, navigation }) {
   const flatListRef = useRef(null);
   const scrollToComment = (commentId) => {
     flatListRef?.current?.scrollToOffset({
-      offset: coords[commentId] + 22,
+      offset: coords[commentId] + 165,
       animated: true,
     });
-    // console.log(coords[commentId]);
+    console.log(coords[commentId]);
+    // console.log(coords);
   };
 
   //
@@ -270,7 +276,14 @@ export default function PostDetailScreen({ route, navigation }) {
 
   const ListHeader = (post) => {
     return post ? (
-      <Post postType="POST_DETAIL" item={post} navigation={navigation} />
+      <Post
+        postType="POST_DETAIL"
+        item={post}
+        navigation={navigation}
+        onLayout={(height) => {
+          console.log("height: ", height);
+        }}
+      />
     ) : (
       <ActivityIndicator size="large" color="#0000ff" />
     );
