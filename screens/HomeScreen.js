@@ -17,7 +17,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from "react-native";
-
+import { RefreshControl } from "react-native";
 import {
   MaterialCommunityIcons,
   AntDesign,
@@ -30,6 +30,7 @@ import {
 } from "@expo/vector-icons";
 
 import { useState, useEffect, useContext, useRef } from "react";
+import { useCallback } from "react";
 import { useScrollToTop } from "@react-navigation/native";
 import Post from "../components/Post";
 // Upload image
@@ -40,7 +41,7 @@ import { Context as PostContext } from "../context/PostContext";
 
 export default function HomeScreen({ navigation }) {
   const { state: accountState, getAccount } = useContext(AccountContext);
-  const { state: postState, reloadPost } = useContext(PostContext);
+  const { state: postState, reloadPost,getPosts } = useContext(PostContext);
 
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
@@ -59,9 +60,21 @@ export default function HomeScreen({ navigation }) {
   const ref = useRef(null);
   useScrollToTop(ref);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const updatePostById = async (id) => {
     await reloadPost(id);
   };
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    getPosts()
+  }, [refreshing])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,6 +106,9 @@ export default function HomeScreen({ navigation }) {
                 No post found
               </Text>
             } // display when empty data
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             ListHeaderComponent={
               <View
                 style={{
