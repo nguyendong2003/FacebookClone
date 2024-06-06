@@ -247,9 +247,9 @@ export default function CommentScreen({ route, navigation }) {
       // getPosts();
       fetchComments();
       
-      if (route?.params?.inProfile == false)
+  
         DeviceEventEmitter.emit("reloadHomeScreenPost", route?.params?.postId);
-      else
+
         DeviceEventEmitter.emit("reloadProfileScreenPost", route?.params?.postId);
     } else { 
       alert("Invalid comment");

@@ -111,7 +111,7 @@ export default function Reaction({
           >
             {name}
           </Text>
-          <Button title="Add friend" color={'#0866ff'} />
+          {/* <Button title="Add friend" color={'#0866ff'} /> */}
         </View>
         {/* <Text>{name} Screen Content</Text> */}
       </View>
