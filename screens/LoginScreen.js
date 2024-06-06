@@ -81,7 +81,6 @@ export default function LoginScreen({ navigation }) {
       setErrors({});
       signIn({ email, password }, navigation);
     }
-    console.log("Login");
   };
 
   return (

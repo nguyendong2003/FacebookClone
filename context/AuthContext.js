@@ -23,6 +23,7 @@ const signIn = (dispatch) => {
         username: email,
         password,
       });
+      
       await AsyncStorage.setItem("token", response.data.token);
 
       dispatch({ type: "SIGN_IN", payload: response.data.token });
@@ -38,11 +39,12 @@ const signIn = (dispatch) => {
 
 const checkLoggedIn = (dispatch) => {
   return async () => {
-    AsyncStorage.removeItem("token");
-
     const token = await AsyncStorage.getItem("token");
+
     if (token) {
-      dispatch({ type: "SIGN_IN", payload: token });
+      isExpired = await SpringServer.get(`/auth/checkTokenExpired?token=${token}`);
+
+      if (!isExpired.data) dispatch({ type: "SIGN_IN", payload: token });
     }
   };
 };
