@@ -8,7 +8,8 @@ import {
   Button,
   Pressable,
   Modal,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
@@ -35,7 +36,7 @@ import {
   getProfileStatus,
 } from "../service/FriendService";
 import { updateAvatar, updateCoverImage } from "../service/AccountService";
-import { ActivityIndicator } from "react-native-paper";
+
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
@@ -51,7 +52,8 @@ export default function ProfileScreen({ navigation, route }) {
   const [imageAvatar, setImageAvatar] = useState(null);
   const [isShowModal, setIsShowModal] = useState(false);
   const [notificationId, setNotificationId] = useState(null);  
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCover, setIsLoadingCover] = useState(false);
+  const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
 
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
@@ -74,6 +76,8 @@ export default function ProfileScreen({ navigation, route }) {
 
     const friendsData = await getFriendsByAccountId(route.params.accountId);
     setFriendList(friendsData);
+    setIsLoadingAvatar(false)
+    setIsLoadingCover(false)
   };
   useEffect(() => {
     fetchUserData();
@@ -123,13 +127,17 @@ export default function ProfileScreen({ navigation, route }) {
     
     if(type == "cover"){
       if (!result.canceled) {
+        setIsLoadingCover(true)
         await updateCoverImage(result.assets[0].uri);
         fetchUserData();
+        // setIsLoadingCover(false)
       }
     }else{
       if (!result.canceled) {
+        setIsLoadingAvatar(true)
         await updateAvatar(result.assets[0].uri)
         fetchUserData()
+        // setIsLoadingAvatar(false)
       }
     }
     // console.log(image)
@@ -489,20 +497,37 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
+
             <View
               style={styles.coverPhotoContainer}
             >
 
-              <Image
+              {/* <Image
                 style={styles.coverPhoto}
                 source={
                   user.cover_image != null
                     ? { uri: user.cover_image }
                     : require("../assets/coverPhoto.jpg")
                 }
-              />
+              /> */}
+              {isLoadingCover ? (
+                <View style={[styles.coverPhoto, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                  <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+                
+              ):(
+                <Image
+                style={styles.coverPhoto}
+                source={
+                  user.cover_image != null
+                    ? { uri: user.cover_image }
+                    : require("../assets/coverPhoto.jpg")
+                }
+                />
+              )}
               {renderCameraCover(status)}
             </View>
+            
             {/* CoverPhoto */}
 
             <View
@@ -510,16 +535,24 @@ export default function ProfileScreen({ navigation, route }) {
             >
               {/* Avatar */}
               <View style={styles.avatarContainer}>
-                <Image
-                  style={styles.avatar}
-                  source={
-                    imageAvatar == null
-                      ? user?.avatar == null
-                        ? require("../assets/defaultProfilePicture.jpg")
-                        : { uri: user.avatar }
-                      : { uri: imageAvatar }
-                  }
-                />
+
+                {isLoadingAvatar ? (
+                  <View style={[styles.avatar, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+
+                ):(
+                  <Image
+                    style={styles.avatar}
+                    source={
+                      imageAvatar == null
+                        ? user?.avatar == null
+                          ? require("../assets/defaultProfilePicture.jpg")
+                          : { uri: user.avatar }
+                        : { uri: imageAvatar }
+                    }
+                  />
+                )}
                 {renderCameraAvatar(status)}
               </View>
               {/* Avatar */}
