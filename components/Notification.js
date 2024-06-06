@@ -43,7 +43,7 @@ export default function Notification(
             case "WOW":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/wow.png')}/>)
                 break;
-            case "SORRY":
+            case "SAD":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/sad.png')}/>)
                 break;
             case "friend_request":

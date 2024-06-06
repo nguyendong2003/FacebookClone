@@ -56,6 +56,7 @@ const Comment = ({
   const [nameReaction, setNameReaction] = useState(null);
   const [countReaction, setCountReaction] = useState(item?.reaction_quantity)
   const [colorReaction, setColorReaction] = useState("#65676B");
+  const [myReaction, setMyReaction] = useState(item?.reaction)
   const { state: accountState } = useContext(AccountContext);
   const [reactions, setReactions] = useState([
     { type: "All", number: 0, users: [] },
@@ -173,8 +174,15 @@ const Comment = ({
       id_comment: item.id,
       reaction_type: type,
     });
-    if(type == "NONE") setCountReaction((count) => count - 1)
-    else setCountReaction((count) => count + 1)
+
+    if(myReaction == "NONE" && type != "NONE") {
+      setMyReaction(type)
+      setCountReaction((count) => count + 1)
+    }
+    else if(myReaction != "NONE" && type == "NONE") {
+      setMyReaction(type)
+      setCountReaction((count) => count - 1)
+    }
     setValueReaction(convertReactionValue(type));
     fetchReactions();
   }
@@ -218,8 +226,6 @@ const Comment = ({
         to_comment_post_id: item?.id,
         notify_type
       })
-
-      console.log(response)
     }catch(error) {
       console.log(error);
     }
@@ -350,6 +356,7 @@ const Comment = ({
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
                     reactionHandler("NONE")
+                    setNameReaction("Like")
                   } else {
                     reactionHandler("LIKE")
                     setValueReaction(1);
