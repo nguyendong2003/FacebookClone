@@ -151,18 +151,6 @@ export default function FriendScreen({ navigation }) {
             }}
             keyExtractor={(item, index) => item.id.toString()}
             ItemSeparatorComponent={<View style={{ height: 4 }}></View>}
-            ListEmptyComponent={
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 24,
-                  flex: 1,
-                  textAlign: "center",
-                }}
-              >
-                No friend request found
-              </Text>
-            } // display when empty data
             ListHeaderComponent={<View style={{ height: 4 }}></View>}
             // ListFooterComponent={<View style={{ height: 4 }}></View>}
             showsVerticalScrollIndicator={false} // tắt thanh scroll khi cuộn item trong FlatList

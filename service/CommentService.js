@@ -56,3 +56,10 @@ export const getPostOfComment = async(id) => {
   );
   return response.data;
 }
+
+export const getReactionsOfComment = async (commentId) => {
+  const response = await SpringServer.get(
+    `/facebook.api/commentpost/reactions/${commentId}`
+  );
+  return response.data;
+}

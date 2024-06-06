@@ -48,6 +48,7 @@ import { LogBox } from "react-native";
 
 export default function PostDetailScreen({ route, navigation }) {
   const [userPost, setUserPost] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
   const [commentText, setCommentText] = useState(
     route?.params?.commentId != null ? `${route?.params?.nameSender} ` : ""

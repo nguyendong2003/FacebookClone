@@ -17,6 +17,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -56,7 +57,7 @@ export default function EditPostScreen({ navigation, route }) {
   const [textPost, setTextPost] = useState(item?.content);
   const [imagePostList, setImagePostList] = useState(item?.postImages);
   const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
-  //
+  const [loading, setLoading] = useState(false)
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
@@ -132,20 +133,33 @@ export default function EditPostScreen({ navigation, route }) {
   }, [textPost, imagePostList]);
 
   const editPostHandler = async () => {
+    setLoading(true)
+    let fileImages = []
+    let postImages = []
+    imagePostList.forEach(item => {
+      if(item.id === 0) fileImages.push(item.image)
+      else postImages.push(item.image)
+    })
+
+    // console.log(fileImages, postImages)
     try {
       const response = await editPost({
         postId: item.id,
         view_mode: data[value - 1].label.toLowerCase(),
         content: textPost,
-        images: item.postImages,
+        images: postImages,
+        files: fileImages
       });
+      setLoading(false)
       DeviceEventEmitter.emit('fetchPost');
       navigation.goBack();
+      
     } catch (error) {
       console.log(error);
     }
   };
 
+  
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
@@ -279,7 +293,13 @@ export default function EditPostScreen({ navigation, route }) {
     );
   }
 
-  //
+  if (loading) {
+    return (
+        <View>
+            <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

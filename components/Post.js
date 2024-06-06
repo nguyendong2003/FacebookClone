@@ -83,45 +83,45 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       case 1:
         setColorReaction("#0866FF");
         setNameReaction("Like");
-        setSizeReaction(44 - 16);
-        setSourceReaction(require("../assets/facebook-like.png"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/like.png"));
 
         break;
       case 2:
         setColorReaction("#F33E58");
         setNameReaction("Love");
-        setSizeReaction(40 - 16);
-        setSourceReaction(require("../assets/facebook-heart.jpg"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/love.png"));
         break;
       case 3:
         setColorReaction("#F7B125");
         setNameReaction("Care");
-        setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-care2.jpg"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/care.png"));
         break;
       case 4:
         setColorReaction("#F7B125");
         setNameReaction("Haha");
-        setSizeReaction(48 - 20);
-        setSourceReaction(require("../assets/facebook-haha.png"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/haha.png"));
         break;
       case 5:
         setColorReaction("#F7B125");
         setNameReaction("Wow");
-        setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-wow.png"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/wow.png"));
         break;
       case 6:
         setColorReaction("#E9710F");
         setNameReaction("Sad");
-        setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-sad.jpg"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/sad.png"));
         break;
       case 7:
         setColorReaction("#E9710F");
         setNameReaction("Angry");
-        setSizeReaction(36 - 12);
-        setSourceReaction(require("../assets/facebook-angry.png"));
+        setSizeReaction(24);
+        setSourceReaction(require("../iconfb/angry.png"));
         break;
 
       default:
@@ -188,13 +188,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
   };
 
   const icons = {
-    like: require("../assets/facebook-like.png"),
-    love: require("../assets/facebook-heart.jpg"),
-    care: require("../assets/facebook-care2.jpg"),
-    haha: require("../assets/facebook-haha.png"),
-    wow: require("../assets/facebook-wow.png"),
-    sad: require("../assets/facebook-sad.jpg"),
-    angry: require("../assets/facebook-angry.png"),
+    like: require("../iconfb/like.png"),
+    love: require("../iconfb/love.png"),
+    care: require("../iconfb/care.png"),
+    haha: require("../iconfb/haha.png"),
+    wow: require("../iconfb/wow.png"),
+    sad: require("../iconfb/sad.png"),
+    angry: require("../iconfb/angry.png"),
   };
 
   useEffect(() => {
@@ -237,8 +237,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   key={index}
                   source={icons[reaction.type]}
                   style={{
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     marginLeft: index > 0 ? 2 : 0,
                   }}
                 />
@@ -248,7 +248,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
             <Text
               style={{
                 marginLeft: 3,
-                fontSize: 12,
+                fontSize: 15,
                 color: "#65676B",
               }}
             >
@@ -304,8 +304,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
             flexDirection: "row",
             alignItems: "center",
           }}
-          onPress={() => navigation.navigate("Reaction", {postId: item.id, reactions: reactions})}
-          >
+          onPress={() =>
+            navigation.navigate("Reaction", {
+              postId: item.id,
+              reactions: reactions,
+            })
+          }
+        >
           {reactions.slice(1, 4).map(
             (reaction, index) =>
               reaction.number > 0 && (
@@ -313,8 +318,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   key={index}
                   source={icons[reaction.type]}
                   style={{
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     marginLeft: index > 0 ? 2 : 0,
                   }}
                 />
@@ -324,7 +329,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
             <Text
               style={{
                 marginLeft: 3,
-                fontSize: 12,
+                fontSize: 14,
                 color: "#65676B",
               }}
             >
@@ -369,9 +374,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
         DeviceEventEmitter.emit("reloadHomeScreenPost", postId);
       else if (statusPost == "POST_DETAIL")
         DeviceEventEmitter.emit("reloadPostDetailScreenPost");
-        else
-        DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
-      
+      else DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
+
       fetchReactions();
     } catch (error) {
       console.log(error);
@@ -385,8 +389,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
     }, 800);
   }, [item?.reaction_quantity, item?.comment_quantity]);
 
-  const notificationHandler = async(notify_type) => {
-    try{
+  const notificationHandler = async (notify_type) => {
+    try {
       const response = await createNotification({
         from_account_id: state.account.id,
         to_account_id: item?.user.id,
@@ -419,7 +423,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.push('Profile', {
+                navigation.push("Profile", {
                   accountId: item.user.id,
                   isPersonalPage: false,
                 });
@@ -442,12 +446,12 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
 
             <View style={{ marginLeft: 8 }}>
               <TouchableOpacity
-              onPress={() => {
-                navigation.push('Profile', {
-                  accountId: item.user.id,
-                  isPersonalPage: false,
-                });
-              }}
+                onPress={() => {
+                  navigation.push("Profile", {
+                    accountId: item.user.id,
+                    isPersonalPage: false,
+                  });
+                }}
               >
                 <Text
                   style={{
@@ -680,13 +684,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
 
                 <View style={{ marginLeft: 8 }}>
                   <TouchableOpacity
-                  
-                  onPress={() => {
-                    navigation.push("Profile", {
-                      accountId: item.share_post.user.id,
-                      isPersonalPage: false,
-                    });
-                  }}>
+                    onPress={() => {
+                      navigation.push("Profile", {
+                        accountId: item.share_post.user.id,
+                        isPersonalPage: false,
+                      });
+                    }}
+                  >
                     <Text
                       style={{
                         color: "#050505",
@@ -794,11 +798,11 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                 reactionHandler(item?.id, "NONE");
               } else {
                 reactionHandler(item?.id, "LIKE");
-                notificationHandler("LIKE")
+                notificationHandler("LIKE");
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
-            delayLongPress={400}
+            delayLongPress={200}
           >
             {sourceReaction && (
               <Image
@@ -846,35 +850,35 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LIKE");
-                    notificationHandler("LIKE")
+                    notificationHandler("LIKE");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-like.png")}
-                    style={{ width: 44, height: 44, marginLeft: 4 }}
+                    source={require("../iconfb/like.png")}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "LOVE");
-                    notificationHandler("LOVE")
+                    notificationHandler("LOVE");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-heart.jpg")}
-                    style={{ width: 40, height: 40 }}
+                    source={require("../iconfb/love.png")}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "CARE");
-                    notificationHandler("CARE")
+                    notificationHandler("CARE");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-care2.jpg")}
+                    source={require("../iconfb/care.png")}
                     style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
@@ -882,50 +886,53 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "HAHA");
-                    notificationHandler("HAHA")
+                    notificationHandler("HAHA");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-haha.png")}
-                    style={{ width: 48, height: 48 }}
+                    source={require("../iconfb/haha.png")}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "WOW");
-                    notificationHandler("WOW")
+                    notificationHandler("WOW");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-wow.png")}
-                    style={{ width: 36, height: 36 }}
+                    source={require("../iconfb/wow.png")}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "SAD");
-                    notificationHandler("SAD")
+                    notificationHandler("SAD");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-sad.jpg")}
-                    style={{ width: 36, height: 36 }}
+                    source={require("../iconfb/sad.png")}
+                    style={{ width: 36, height: 36, marginLeft: 4 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ marginLeft: 4 }}
                   onPress={() => {
                     setIsPressingLike(false);
                     reactionHandler(item?.id, "ANGRY");
-                    notificationHandler("ANGRY")
+                    notificationHandler("ANGRY");
                   }}
                 >
                   <Image
-                    source={require("../assets/facebook-angry.png")}
-                    style={{ width: 36, height: 36 }}
+                    source={require("../iconfb/angry.png")}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      marginLeft: 4,
+                      marginRight: 4,
+                    }}
                   />
                 </TouchableOpacity>
               </View>
