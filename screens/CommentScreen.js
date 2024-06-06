@@ -37,13 +37,18 @@ import Comment from '../components/Comment';
 import Post from '../components/Post';
 
 // import commentList from '../data/comment.json';
-import { getCommentsByPostId, createComment } from '../service/CommentService';
-import { createNotification } from '../service/NotificationService';
-import { Context as AccountContext } from '../context/AccountContext';
-import { Context as PostContext } from '../context/PostContext';
+import {
+  getCommentsByPostId,
+  createComment,
+  editComment,
+} from "../service/CommentService";
+import { createNotification } from "../service/NotificationService";
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as PostContext } from "../context/PostContext";
 // Upload image
-import * as ImagePicker from 'expo-image-picker';
-import { LogBox } from 'react-native';
+import * as ImagePicker from "expo-image-picker";
+import { LogBox } from "react-native";
+import { DeviceEventEmitter } from "react-native";
 
 export default function CommentScreen({ route, navigation }) {
   // const [typeCommentScreen, setTypeCommentScreen] = useState(route?.params?.typeCommentScreen);
@@ -74,6 +79,9 @@ export default function CommentScreen({ route, navigation }) {
   const [nameReplying, setNameReplying] = useState('');
   const [idUserReplying, setIdUserReplying] = useState('');
   const [commentList, setCommentList] = useState([]);
+  //
+  const [isCommentEditing, setIsCommentEditing] = useState(false);
+  const [commentIdEditing, setCommentIdEditing] = useState(null);
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
@@ -82,23 +90,20 @@ export default function CommentScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true); // Add loading state
   const [post, setPost] = useState(null);
   const [reactions, setReactions] = useState([]);
-  // useLayoutEffect(() => {
-  //     navigation.setOptions({
-  //         headerTitle: title || 'None',
-  //     });
-  // }, [navigation, title]);
+
+  const fetchPost = async () => {
+    const post = await getPostById(postId);
+    setPost(post);
+    // setLoading(false); // Set loading to false after data is fetched
+  };
+
   useEffect(() => {
-    const fetchPost = async () => {
-      const post = await getPostById(postId);
-      setPost(post);
-      // setLoading(false); // Set loading to false after data is fetched
-    };
     setReactions(route?.params?.reactions);
     fetchPost();
   }, [postId]);
 
   useEffect(() => {
-    if (isReplying || isCommentTextFocus) {
+    if (isReplying || isCommentTextFocus || isCommentEditing) {
       // Kiểm tra xem ref có tồn tại không trước khi gọi focus()
       if (commentInputRef.current) {
         commentInputRef.current.focus();
@@ -106,12 +111,7 @@ export default function CommentScreen({ route, navigation }) {
         commentInputRef.current.blur();
       }
     }
-  }, [isReplying, isCommentTextFocus]);
-
-  useEffect(() => {
-    // console.log(commentIdReplying);
-    // console.log(isReplying);
-  }, [commentIdReplying, isReplying]);
+  }, [isReplying, isCommentTextFocus, isCommentEditing]);
 
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
@@ -122,7 +122,7 @@ export default function CommentScreen({ route, navigation }) {
   useEffect(() => {
     fetchComments();
   }, []);
-  // image
+
   const pickImage = async () => {
     // no permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -137,6 +137,7 @@ export default function CommentScreen({ route, navigation }) {
     if (!result.canceled) {
       setCommentImage(result.assets[0].uri);
     }
+    setIsSelectImage(false);
   };
 
   useEffect(() => {
@@ -198,9 +199,9 @@ export default function CommentScreen({ route, navigation }) {
 
       formData.append('id_account', state.account.id);
       if (commentIdReplying) {
-        formData.append('to_comment_id', commentIdReplying);
+        formData.append("to_comment_id", commentIdReplying);
       } else {
-        formData.append('id_post', route?.params?.postId);
+        formData.append("id_post", route?.params?.postId);
       }
 
       formData.append('content', commentText);
@@ -213,31 +214,45 @@ export default function CommentScreen({ route, navigation }) {
         });
       }
 
-      const response = await createComment(formData);
-      if (commentIdReplying) {
-        notificationHandler(
-          idUserReplying,
-          route?.params?.postId,
-          commentIdReplying,
-          response.id
-        );
+      let response = null;
+
+      if (!isCommentEditing) response = await createComment(formData);
+      else await editComment(commentIdEditing, commentText);
+
+      if (!isCommentEditing) {
+        if (commentIdReplying) {
+          notificationHandler(
+            idUserReplying,
+            route?.params?.postId,
+            commentIdReplying,
+            response.id
+          );
+        } else {
+          notificationHandler(
+            post.user.id,
+            route?.params?.postId,
+            null,
+            response.id
+          );
+        }
       } else {
-        notificationHandler(
-          post.user.id,
-          route?.params?.postId,
-          null,
-          response.id
-        );
+        setCommentIdEditing(null);
+        setIsCommentEditing(false);
       }
-      setCommentText('');
+
+      setCommentText("");
       setIsReplying(false);
       setCommentIdReplying(null);
       setCommentImage(null);
-      getPosts();
+      // getPosts();
       fetchComments();
-      await route?.params?.onUpdatePost(route?.params?.postId);
-    } else {
-      alert('Invalid comment');
+      
+      if (route?.params?.inProfile == false)
+        DeviceEventEmitter.emit("reloadHomeScreenPost", route?.params?.postId);
+      else
+        DeviceEventEmitter.emit("reloadProfileScreenPost", route?.params?.postId);
+    } else { 
+      alert("Invalid comment");
     }
     setIsLoading(false);
   };
@@ -255,10 +270,8 @@ export default function CommentScreen({ route, navigation }) {
         to_post_id,
         to_comment_post_id,
         send_comment_id,
-        notify_type: 'comment',
+        notify_type: "comment",
       });
-
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -291,12 +304,19 @@ export default function CommentScreen({ route, navigation }) {
             <Comment
               navigation={navigation}
               item={item}
+              fetchComments={fetchComments}
               setIsReplying={setIsReplying}
-              setCommentText={setCommentText}
-              commentIdReplying={commentIdReplying}
+              inProfile={route?.params?.inProfile}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
               setIdUserReplying={setIdUserReplying}
+              setCommentText={setCommentText}
+              commentIdReplying={commentIdReplying}
+              setIsCommentTextFocus={setIsCommentTextFocus}
+              setIsCommentEditing={setIsCommentEditing}
+              commentIdEditing={commentIdEditing}
+              setCommentIdEditing={setCommentIdEditing}
+              setCommentImage={setCommentImage}
               scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
@@ -320,10 +340,11 @@ export default function CommentScreen({ route, navigation }) {
                 }}
               >
                 <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center" }}
                   style={{ flexDirection: 'row', alignItems: 'center', justifyContent:"center" }}
                   activeOpacity={0.7}
                   onPress={() =>
-                    navigation.navigate('Reaction', {
+                    navigation.navigate("Reaction", {
                       postId: route?.params?.postId,
                       reactions: reactions,
                     })
@@ -346,7 +367,7 @@ export default function CommentScreen({ route, navigation }) {
                   )}
                   <Text
                     numberOfLines={1}
-                    style={{ alignSelf: 'flex-start', marginLeft: 4, fontSize: 16}}
+                    style={{ alignSelf: "flex-start", marginLeft: 4, fontSize: 16}}
                   >
                     {reactions[0].number}
                   </Text>
@@ -399,9 +420,47 @@ export default function CommentScreen({ route, navigation }) {
 
               <TouchableOpacity
                 onPress={() => {
+                  setIsCommentTextFocus(true);
                   setIsReplying(false);
-                  setCommentText('');
+                  setCommentText("");
                   setCommentIdReplying(null);
+                  setCommentImage(null);
+                }}
+              >
+                <Text
+                  style={{
+                    marginLeft: 16,
+                    fontWeight: "bold",
+                    color: "#65676B",
+                    fontSize: 15,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {isCommentEditing && (
+            <View
+              style={{
+                flexDirection: "row",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#65676B", fontSize: 15 }}>
+                Editing comment
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setIsCommentTextFocus(true);
+                  setIsCommentEditing(false);
+                  setCommentIdEditing(null);
+                  setCommentText("");
+                  setCommentImage(null);
                 }}
               >
                 <Text
@@ -426,13 +485,17 @@ export default function CommentScreen({ route, navigation }) {
               borderRadius: 24,
               color: '#050505',
               fontSize: 16,
+              maxHeight: 148,
             }}
+            multiline={true}
             placeholder="Enter your comment"
             value={commentText}
             onChangeText={(text) => {
               setCommentText(text);
             }}
-            onFocus={() => setIsCommentTextFocus(true)}
+            onFocus={() => {
+              setIsCommentTextFocus(true);
+            }}
             onBlur={() => {
               setIsCommentTextFocus(false);
 
@@ -442,7 +505,7 @@ export default function CommentScreen({ route, navigation }) {
             ref={commentInputRef}
             autoFocus={route?.params?.initialCommentFocus}
           />
-          {isCommentTextFocus && (
+          {isCommentTextFocus || isReplying || isCommentEditing ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -500,7 +563,7 @@ export default function CommentScreen({ route, navigation }) {
               )}
 
             </View>
-          )}
+          ) : null}
         </View>
         {/* </View> */}
       </KeyboardAvoidingView>

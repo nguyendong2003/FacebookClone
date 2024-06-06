@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   TouchableOpacity,
+  Pressable,
   Button,
   Alert,
   KeyboardAvoidingView,
@@ -24,19 +25,21 @@ import {
   FontAwesome,
   FontAwesome5,
   Feather,
+  MaterialIcons,
   Ionicons,
   Fontisto,
   Entypo,
 } from '@expo/vector-icons';
 
 import React from 'react';
-import { useState, useEffect, useRef, useContext, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { createNotification } from '../service/NotificationService';
-import { getPostOfComment, getReactionsOfComment } from '../service/CommentService';
+import { useState, useEffect, useRef, useContext, useCallback  } from 'react';
+import {  useFocusEffect } from '@react-navigation/native';
+import { createNotification  } from '../service/NotificationService';;
+import {  deleteComment, getPostOfComment, getReactionsOfComment  } from '../service/CommentService';;
 import { Context as AccountContext } from '../context/AccountContext';
 import moment from 'moment';
 import { reaction } from '../service/CommentService';
+import { DeviceEventEmitter } from "react-native";
 
 const Comment = ({
   navigation,
@@ -47,9 +50,17 @@ const Comment = ({
   setNameReplying,
   setIdUserReplying,
   setCommentText,
+  setIsCommentTextFocus,
+  setIsCommentEditing,
+  commentIdEditing,
+  setCommentIdEditing,
+  setCommentImage,
   scrollToComment,
   coords,
   setCoords,
+  fetchComments,
+  fetchPost, 
+  inProfile
 }) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -101,6 +112,9 @@ const Comment = ({
   };
 
 
+  //
+  const [isPressingComment, setIsPressingComment] = useState(false);
+  //
   useEffect(() => {
     switch (valueReaction) {
       case 1:
@@ -262,10 +276,8 @@ const Comment = ({
           />
         </TouchableOpacity>
 
-        <View style={{
-          maxWidth: '80%'
-        }}>
-          <View
+        <View style={{ maxWidth: "86%" }}>
+          <Pressable
             style={{
               flex: 1,
               marginHorizontal: 8,
@@ -274,10 +286,20 @@ const Comment = ({
               paddingLeft: 12,  
               paddingRight: 12,
               backgroundColor:
-                item.id === commentIdReplying ? '#ccc' : '#f0f2f5',
+                item.id === commentIdReplying || item.id === commentIdEditing
+                  ? "#ccc"
+                  : "#f0f2f5",
             }}
+            onLongPress={() => setIsPressingComment(accountState.account.id === item.account_user.id ? true : false)}
+            delayLongPress={200}
           >
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Profile", {
+                  accountId: item.account_user.id,
+                });
+              }}
+            >
               <Text
                 style={{
                   fontSize: 13,
@@ -292,7 +314,115 @@ const Comment = ({
             <Text style={{ fontSize: 15, color: '#050505' }}>
               {item?.content}
             </Text>
-          </View>
+          </Pressable>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isPressingComment}
+            onRequestClose={() => {
+              setIsPressingComment(!isPressingComment);
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <Pressable
+                style={{
+                  height: "80%",
+                  width: "100%",
+                }}
+                onPress={() => setIsPressingComment(false)}
+              />
+              <View
+                style={{
+                  height: "20%",
+                  width: "100%",
+                  backgroundColor: "white",
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 20,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    padding: 12,
+                  }}
+                  onPress={() => {
+                      setIsPressingComment(false);
+
+                      // Remove Reply comment
+                      setIsReplying(false);
+                      setCommentIdReplying(null);
+                      setNameReplying(null);
+                      setIdUserReplying(null);
+
+                      // Edit comment
+                      setIsCommentTextFocus(true);
+                      setIsCommentEditing(true);
+                      setCommentIdEditing(item?.id);
+                      setCommentText(item?.content);
+                      setCommentImage(item?.image);
+
+                      //
+
+                      scrollToComment(item?.id);
+                  }}
+                >
+                  <MaterialIcons name="mode-edit" size={24} color="#050505" />
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: "#050505",
+                      fontWeight: "bold",
+                      marginLeft: 12,
+                    }}
+                  >
+                    Edit this comment
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    padding: 12,
+                    borderTopColor: "#ccc",
+                    borderTopWidth: 1,
+                  }}
+                  onPress={async () => {
+                    await deleteComment(item?.id);
+
+                    if (inProfile == false)
+                      DeviceEventEmitter.emit("reloadHomeScreenPost", post.id);
+                    else
+                      DeviceEventEmitter.emit("reloadProfileScreenPost", post.id);
+                    
+                    fetchComments();
+                    setIsPressingComment(false);
+                  }}
+                >
+                  <Feather name="trash-2" size={24} color="#050505" />
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: "#050505",
+                      fontWeight: "bold",
+                      marginLeft: 12,
+                    }}
+                  >
+                    Delete this comment
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           <View
             style={{
               flex: 1,
@@ -349,11 +479,12 @@ const Comment = ({
                 onPress={() => {
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
-                    reactionHandler('NONE');
+                    reactionHandler("NONE");
+                    setNameReaction(null);
                   } else {
                     reactionHandler("LIKE")
                     setValueReaction(1);
-                    notificationHandler('LIKE');
+                    notificationHandler("LIKE");
                   }
                 }}
                 onLongPress={() => setIsPressingLike(!isPressingLike)}
@@ -394,8 +525,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(1);
-                        reactionHandler("LIKE")
-                        notificationHandler('LIKE');
+                        reactionHandler("LIKE");
+                        notificationHandler("LIKE");
                       }}
                     >
                       <Image
@@ -407,8 +538,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(2);
-                        reactionHandler("LOVE")
-                        notificationHandler('LOVE');
+                        reactionHandler("LOVE");
+                        notificationHandler("LOVE");
                       }}
                     >
                       <Image
@@ -420,8 +551,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(3);
-                        reactionHandler("CARE")
-                        notificationHandler('CARE');
+                        reactionHandler("CARE");
+                        notificationHandler("CARE");
                       }}
                     >
                       <Image
@@ -433,8 +564,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(4);
-                        reactionHandler("HAHA")
-                        notificationHandler('HAHA');
+                        reactionHandler("HAHA");
+                        notificationHandler("HAHA");
                       }}
                     >
                       <Image
@@ -446,8 +577,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(5);
-                        reactionHandler("WOW")
-                        notificationHandler('WOW');
+                        reactionHandler("WOW");
+                        notificationHandler("WOW");
                       }}
                     >
                       <Image
@@ -459,8 +590,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(6);
-                        reactionHandler("SAD")
-                        notificationHandler('SAD');
+                        reactionHandler("SAD");
+                        notificationHandler("SAD");
                       }}
                     >
                       <Image
@@ -472,8 +603,8 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(7);
-                        reactionHandler("ANGRY")
-                        notificationHandler('ANGRY');
+                        reactionHandler("ANGRY");
+                        notificationHandler("ANGRY");
                       }}
                     >
                       <Image
@@ -493,6 +624,13 @@ const Comment = ({
               <TouchableOpacity
                 style={{ marginLeft: 8 }}
                 onPress={() => {
+                  // remove edit comment
+                  setIsCommentTextFocus(false);
+                  setIsCommentEditing(false);
+                  setCommentIdEditing(null);
+                  setCommentImage(null);
+
+                  // Reply comment
                   setIsReplying(true);
                   setCommentIdReplying(item?.id);
                   setNameReplying(item.account_user.profile_name);
@@ -605,6 +743,13 @@ const Comment = ({
             setCommentIdReplying={setCommentIdReplying}
             setNameReplying={setNameReplying}
             setIdUserReplying={setIdUserReplying}
+            // edit comment
+            setIsCommentTextFocus={setIsCommentTextFocus}
+            setIsCommentEditing={setIsCommentEditing}
+            commentIdEditing={commentIdEditing}
+            setCommentIdEditing={setCommentIdEditing}
+            setCommentImage={setCommentImage}
+            //
             scrollToComment={scrollToComment}
             coords={coords}
             setCoords={setCoords}
