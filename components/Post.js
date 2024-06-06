@@ -370,11 +370,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       });
       setValueReaction(convertReactionValue(response.type));
 
-      if ((item.user.id == state.account.id) == false)
+      if (statusPost == "POST") {
+        DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
         DeviceEventEmitter.emit("reloadHomeScreenPost", postId);
-      else if (statusPost == "POST_DETAIL")
-        DeviceEventEmitter.emit("reloadPostDetailScreenPost");
-      else DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
+      }
+      else if (statusPost == "POST_DETAIL") {
+        DeviceEventEmitter.emit("reloadPostDetailScreenPost", postId);
+      }
 
       fetchReactions();
     } catch (error) {

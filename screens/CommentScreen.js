@@ -340,7 +340,6 @@ export default function CommentScreen({ route, navigation }) {
                 }}
               >
                 <TouchableOpacity
-                  style={{ flexDirection: "row", alignItems: "center" }}
                   style={{ flexDirection: 'row', alignItems: 'center', justifyContent:"center" }}
                   activeOpacity={0.7}
                   onPress={() =>
