@@ -16,6 +16,7 @@ import {
   FlatList,
   Modal,
   TouchableWithoutFeedback,
+  DeviceEventEmitter,
 } from "react-native";
 import { RefreshControl } from "react-native";
 import {
@@ -65,6 +66,16 @@ export default function HomeScreen({ navigation }) {
   const updatePostById = async (id) => {
     await reloadPost(id);
   };
+  
+  
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener('reloadHomeScreenPost', updatePostById);
+  
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {

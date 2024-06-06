@@ -9,9 +9,9 @@ import {
   Pressable,
   Modal,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -30,18 +30,29 @@ import { Context as AccountContext } from "../context/AccountContext";
 import { Context as UserPostContext } from "../context/UserPostContext";
 import { getUserPosts, getPostById } from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
-import { createNotification, deleteNotification, getSendNotificationFromFriendRequest, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
+import {
+  createNotification,
+  deleteNotification,
+  getSendNotificationFromFriendRequest,
+  getReceiveNotificationFromFriendRequest,
+} from "../service/NotificationService";
 import {
   getFriendsByAccountId,
   getProfileStatus,
+  removeFriend,
 } from "../service/FriendService";
 import { updateAvatar, updateCoverImage } from "../service/AccountService";
 
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
   const { isPersonalPage, statusFriend, listFriend } = route.params;
-  const { state } = useContext(AccountContext);
-  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } = useContext(FriendContext);
+  const { state, getAccount } = useContext(AccountContext);
+  const {
+    sendRequest,
+    cancelFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+  } = useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
   const [isFriend, setIsFriend] = useState(statusFriend);
   const [isVisible, setIsVisible] = useState(isPersonalPage);
@@ -51,7 +62,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
   const [isShowModal, setIsShowModal] = useState(false);
-  const [notificationId, setNotificationId] = useState(null);  
+  const [notificationId, setNotificationId] = useState(null);
   const [isLoadingCover, setIsLoadingCover] = useState(false);
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
 
@@ -76,8 +87,8 @@ export default function ProfileScreen({ navigation, route }) {
 
     const friendsData = await getFriendsByAccountId(route.params.accountId);
     setFriendList(friendsData);
-    setIsLoadingAvatar(false)
-    setIsLoadingCover(false)
+    setIsLoadingAvatar(false);
+    setIsLoadingCover(false);
   };
   useEffect(() => {
     fetchUserData();
@@ -92,28 +103,51 @@ export default function ProfileScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    if(notificationId == null) {
-      if(status == "IN_REQUEST_SENDER") {
-        handleGetSendNotification(route.params.accountId)
-      }else if (status == "IN_REQUEST_RECEIVER") {
-        handleGetReceiveNotification(route.params.accountId)
+    if (notificationId == null) {
+      if (status == "IN_REQUEST_SENDER") {
+        handleGetSendNotification(route.params.accountId);
+      } else if (status == "IN_REQUEST_RECEIVER") {
+        handleGetReceiveNotification(route.params.accountId);
       }
     }
-  }, [status])
-  
+  }, [status]);
+
   const updatePostById = async (postId) => {
     const update_post = await getPostById(postId);
-    setUserPost(
-      userPost.map((post) => (post.id === postId ? update_post : post))
+
+    list_update = userPost.map((post) =>
+      post.id === postId ? update_post : post
     );
+    setUserPost(list_update);
   };
+
+  useEffect(() => {
+    const updatePostById = async (postId) => {
+      const update_post = await getPostById(postId);
+
+      const list_update = userPost.map((post) =>
+        post.id === postId ? update_post : post
+      );
+      setUserPost(list_update);
+    };
+  
+    const subscription = DeviceEventEmitter.addListener(
+      "reloadProfileScreenPost",
+      updatePostById
+    );
+  
+    return () => {
+      subscription.remove();
+    };
+  }, [userPost]);
 
   const pickImage = async (type) => {
     // Hỏi quyền truy cập thư viện ảnh
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
+      alert("Permission to access camera roll is required!");
       return;
     }
 
@@ -124,87 +158,88 @@ export default function ProfileScreen({ navigation, route }) {
       aspect: [4, 3],
       quality: 1,
     });
-    
-    if(type == "cover"){
+
+    if (type == "cover") {
       if (!result.canceled) {
-        setIsLoadingCover(true)
+        setIsLoadingCover(true);
         await updateCoverImage(result.assets[0].uri);
         fetchUserData();
         // setIsLoadingCover(false)
       }
-    }else{
+    } else {
       if (!result.canceled) {
-        setIsLoadingAvatar(true)
-        await updateAvatar(result.assets[0].uri)
-        fetchUserData()
+        setIsLoadingAvatar(true);
+        await updateAvatar(result.assets[0].uri);
+        fetchUserData();
+        getAccount()
         // setIsLoadingAvatar(false)
       }
     }
     // console.log(image)
   };
 
-  const handleCreateNotification = async(to_account_id, notify_type) => {
-    try{
+  const handleCreateNotification = async (to_account_id, notify_type) => {
+    try {
       const response = await createNotification({
         from_account_id: state.account.id,
         to_account_id,
         to_post_id: null,
         to_comment_post_id: null,
-        notify_type
-      })
-    }catch(error) {
+        notify_type,
+      });
+    } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  const handleGetSendNotification = async(receiverId) => {
-    try{ 
-      const response = await getSendNotificationFromFriendRequest(receiverId)
-      setNotificationId(response.id)
-    } catch(error) {
-      console.log(error);
-    }
-  }
-  const handleGetReceiveNotification = async(senderId) => {
-    try{ 
-      const response = await getReceiveNotificationFromFriendRequest(senderId)
-      setNotificationId(response.id)
-    } catch(error) {
-      console.log(error);
-    }
-  }
-
-  const handleDeleteNotification = async() => {
+  const handleGetSendNotification = async (receiverId) => {
     try {
-        const response = await deleteNotification(notificationId)
-    }catch(error) {
-        console.log(error);
+      const response = await getSendNotificationFromFriendRequest(receiverId);
+      setNotificationId(response.id);
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
+  const handleGetReceiveNotification = async (senderId) => {
+    try {
+      const response = await getReceiveNotificationFromFriendRequest(senderId);
+      setNotificationId(response.id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteNotification = async () => {
+    try {
+      const response = await deleteNotification(notificationId);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const sendRequestHandler = async () => {
     await sendRequest(route.params.accountId);
     getProfileStatus(route.params.accountId).then((data) => {
       setStatus(data);
     });
-    handleCreateNotification(route.params.accountId, "friend_request")
+    handleCreateNotification(route.params.accountId, "friend_request");
   };
 
   const cancelRequestHandler = async () => {
     await cancelFriendRequest(route.params.accountId);
-    await handleDeleteNotification()
+    await handleDeleteNotification();
     fetchProfileStatus();
   };
 
   const rejectRequestHandler = async () => {
     await rejectFriendRequest(route.params.accountId);
-    await handleDeleteNotification()
+    await handleDeleteNotification();
     fetchProfileStatus();
   };
 
   const acceptRequestHandler = async () => {
     await acceptFriendRequest(route.params.accountId);
-    await handleDeleteNotification()
+    await handleDeleteNotification();
     fetchProfileStatus();
   };
 
@@ -212,7 +247,7 @@ export default function ProfileScreen({ navigation, route }) {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() => navigation.navigate("CreatePost", {onFetchPost: fetchUserPost})}
+        onPress={() => navigation.navigate("CreatePost", { inProfile: true })}
       >
         <Image
           source={
@@ -272,7 +307,7 @@ export default function ProfileScreen({ navigation, route }) {
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
               onPress={() => {
-                rejectRequestHandler()
+                rejectRequestHandler();
               }}
             >
               <AntDesign name="close" size={13} color="black" />
@@ -303,7 +338,7 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
-              onPress={()=> setIsShowModal(true)}
+              onPress={() => setIsShowModal(true)}
             >
               <Ionicons name="person" size={13} color="black" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "black" }}>
@@ -311,81 +346,93 @@ export default function ProfileScreen({ navigation, route }) {
               </Text>
             </TouchableOpacity>
             <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isShowModal}
-            onRequestClose={() => {
-              // Alert.alert('Modal has been closed.');
-              // setIsPressingMore(!isPressingMore);
-              setIsShowModal(!isShowModal)
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0,0.5)',
+              animationType="slide"
+              transparent={true}
+              visible={isShowModal}
+              onRequestClose={() => {
+                // Alert.alert('Modal has been closed.');
+                // setIsPressingMore(!isPressingMore);
+                setIsShowModal(!isShowModal);
               }}
             >
-              <Pressable
-                style={{
-                  height: '90%',
-                  width: '100%',
-                }}
-                onPress={() => setIsShowModal(false)}
-              />
               <View
                 style={{
-                  height: '10%',
-                  width: '100%',
-                  backgroundColor: 'white',
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
-                  padding: 20,
+                  flex: 1,
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  backgroundColor: "rgba(0,0,0,0.5)",
                 }}
               >
-                <TouchableOpacity
+                <Pressable
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    
+                    height: "90%",
+                    width: "100%",
                   }}
-                  onPress={() => {
-                    setIsShowModal(false);
-                    Alert.alert(
-                      'Confirmation',
-                      'Are you sure?',
-                      [
-                        {
-                          text: 'No',
-                          onPress: () => console.log('No pressed'),
-                          style: 'cancel',
-                        },
-                        {
-                          text: 'Yes',
-                          onPress: () => setStatus('STRANGER'),
-                        },
-                      ],
-                      { cancelable: false },
-                    );
+                  onPress={() => setIsShowModal(false)}
+                />
+                <View
+                  style={{
+                    height: "10%",
+                    width: "100%",
+                    backgroundColor: "white",
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
+                    padding: 20,
                   }}
                 >
-                  <MaterialIcons style={{backgroundColor: "#dcdfe3", borderRadius: 30, padding:5}} name="person-off" size={24} color="black" />
-                  <Text
+                  <TouchableOpacity
                     style={{
-                      fontSize: 15,
-                      color: '#050505',
-                      fontWeight: 'bold',
-                      marginLeft: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                    onPress={() => {
+                      setIsShowModal(false);
+                      Alert.alert(
+                        "Confirmation",
+                        "Are you sure?",
+                        [
+                          {
+                            text: "No",
+                            onPress: () => console.log("No pressed"),
+                            style: "cancel",
+                          },
+                          {
+                            text: "Yes",
+                            onPress: () => {
+                              removeFriend(route.params.accountId);
+                              fetchUserData();
+                              setIsShowModal(false);
+                            },
+                          },
+                        ],
+                        { cancelable: false }
+                      );
                     }}
                   >
-                    Unfriend
-                  </Text>
-                </TouchableOpacity>
+                    <MaterialIcons
+                      style={{
+                        backgroundColor: "#dcdfe3",
+                        borderRadius: 30,
+                        padding: 5,
+                      }}
+                      name="person-off"
+                      size={24}
+                      color="black"
+                    />
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        color: "#050505",
+                        fontWeight: "bold",
+                        marginLeft: 12,
+                      }}
+                    >
+                      Unfriend
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </Modal>
+            </Modal>
           </View>
         );
         break;
@@ -425,58 +472,35 @@ export default function ProfileScreen({ navigation, route }) {
 
   const renderCameraCover = (status) => {
     return status == "PERSONAL" ? (
-      
       <Pressable
-      style={[
-        styles.cameraContainer,
-        { top: "80%", right: "3%", zIndex: 3 },
-      ]}
-      onPress={() => pickImage("cover")}
-    >
-      <Ionicons
-        style={styles.camera}
-        name="camera"
-        size={20}
-        color="black"
-      />
-    </Pressable>
-    ): null
-  }
+        style={[styles.cameraContainer, { top: "80%", right: "3%", zIndex: 3 }]}
+        onPress={() => pickImage("cover")}
+      >
+        <Ionicons style={styles.camera} name="camera" size={20} color="black" />
+      </Pressable>
+    ) : null;
+  };
   const renderCameraAvatar = (status) => {
     return status == "PERSONAL" ? (
-      
       <Pressable
-      style={[
-        styles.cameraContainer,
-        { bottom: "3%", right: "3%" },
-      ]}
-      onPress={() => pickImage("avatar")}
-    >
-      <Ionicons
-        style={styles.camera}
-        name="camera"
-        size={20}
-        color="black"
-      />
-    </Pressable>
-    ): null
-  }
+        style={[styles.cameraContainer, { bottom: "3%", right: "3%" }]}
+        onPress={() => pickImage("avatar")}
+      >
+        <Ionicons style={styles.camera} name="camera" size={20} color="black" />
+      </Pressable>
+    ) : null;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-        <FlatList
+      <FlatList
         style={{
           alignSelf: "flex-start",
           minWidth: "100%",
         }}
         data={userPost}
         renderItem={({ item }) => (
-          <Post
-            item={item}
-            navigation={navigation}
-            onUpdatePost={updatePostById}
-            postType="POST"
-          />
+          <Post item={item} navigation={navigation} postType="POST" />
         )}
         keyExtractor={(item, index) => item.id.toString()}
         ItemSeparatorComponent={
@@ -498,10 +522,7 @@ export default function ProfileScreen({ navigation, route }) {
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
 
-            <View
-              style={styles.coverPhotoContainer}
-            >
-
+            <View style={styles.coverPhotoContainer}>
               {/* <Image
                 style={styles.coverPhoto}
                 source={
@@ -511,23 +532,31 @@ export default function ProfileScreen({ navigation, route }) {
                 }
               /> */}
               {isLoadingCover ? (
-                <View style={[styles.coverPhoto, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                <View
+                  style={[
+                    styles.coverPhoto,
+                    {
+                      backgroundColor: "#e3d8d8",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  ]}
+                >
                   <ActivityIndicator size="large" color="#0000ff" />
                 </View>
-                
-              ):(
+              ) : (
                 <Image
-                style={styles.coverPhoto}
-                source={
-                  user.cover_image != null
-                    ? { uri: user.cover_image }
-                    : require("../assets/coverPhoto.jpg")
-                }
+                  style={styles.coverPhoto}
+                  source={
+                    user.cover_image != null
+                      ? { uri: user.cover_image }
+                      : require("../assets/coverPhoto.jpg")
+                  }
                 />
               )}
               {renderCameraCover(status)}
             </View>
-            
+
             {/* CoverPhoto */}
 
             <View
@@ -535,13 +564,20 @@ export default function ProfileScreen({ navigation, route }) {
             >
               {/* Avatar */}
               <View style={styles.avatarContainer}>
-
                 {isLoadingAvatar ? (
-                  <View style={[styles.avatar, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                  <View
+                    style={[
+                      styles.avatar,
+                      {
+                        backgroundColor: "#e3d8d8",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      },
+                    ]}
+                  >
                     <ActivityIndicator size="large" color="#0000ff" />
                   </View>
-
-                ):(
+                ) : (
                   <Image
                     style={styles.avatar}
                     source={
@@ -571,9 +607,7 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>
-                  {user.description}
-                </Text>
+                <Text style={{ fontSize: 15 }}>{user.description}</Text>
               </View>
               {/* description */}
             </View>
@@ -620,10 +654,9 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(
-                      user.birth_date,
-                      "YYYY-MM-DD "
-                    ).format("DD/MM/yyyy")}
+                    {moment(user.birth_date, "YYYY-MM-DD ").format(
+                      "DD/MM/yyyy"
+                    )}
                   </Text>
                 </Text>
               </View>
@@ -718,7 +751,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
     marginRight: 5,
-    marginLeft: 15
+    marginLeft: 15,
   },
   seperate: {
     width: "100%",

@@ -126,7 +126,7 @@ export default function Notification(
                 if(item.type == "friend_request") {
                     navigation.navigate("Friend")
                 }else {
-                    navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: item.send_comment_id, senderId: item.sender_id, nameSender: item.name_sender, onUpdatePost: updatePostById})
+                    navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: item.send_comment_id, senderId: item.sender_id, nameSender: item.name_sender})
                 }
             }}
             >
@@ -316,9 +316,9 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         alignItems:"center",
         borderRadius:20,
-        position: "absolute",
-        bottom: 0,
-        right: 0
+        position: "relative",
+        bottom: 20,
+        left: 50,
     },
     container: {
         flex: 1,

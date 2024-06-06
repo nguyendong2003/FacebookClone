@@ -15,7 +15,7 @@ import {
   Platform,
   Dimensions,
   FlatList,
-} from "react-native";
+} from 'react-native';
 
 import {
   MaterialCommunityIcons,
@@ -23,26 +23,26 @@ import {
   FontAwesome,
   Fontisto,
   Entypo,
-} from "@expo/vector-icons";
+} from '@expo/vector-icons';
 
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
-import { useState, useEffect } from "react";
-import Reaction from "../components/Reaction";
+import { useState, useEffect } from 'react';
+import Reaction from '../components/Reaction';
 
-import reactionList from "../data/reaction.json";
-import { getReactionsOfPost } from "../service/PostService";
+import reactionList from '../data/reaction.json';
+import { getReactionsOfPost } from '../service/PostService';
 const Tab = createMaterialTopTabNavigator();
 
 export default function ReactionScreen({ navigation, route }) {
   //
   const [reactions, setReactions] = useState(null);
   const [dimensions, setDimensions] = useState({
-    window: Dimensions.get("window"),
+    window: Dimensions.get('window'),
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setDimensions({ window });
     });
     return () => subscription?.remove();
@@ -51,77 +51,76 @@ export default function ReactionScreen({ navigation, route }) {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
-  
+
   const icons = {
-    like: require("../assets/facebook-like.png"),
-    love: require("../assets/facebook-heart.jpg"),
-    care: require("../assets/facebook-care2.jpg"),
-    haha: require("../assets/facebook-haha.png"),
-    wow: require("../assets/facebook-wow.png"),
-    sad: require("../assets/facebook-sad.jpg"),
-    angry: require("../assets/facebook-angry.png"),
+    like: require('../iconfb/like.png'),
+    love: require('../iconfb/love.png'),
+    care: require('../iconfb/care.png'),
+    haha: require('../iconfb/haha.png'),
+    wow: require('../iconfb/wow.png'),
+    sad: require('../iconfb/sad.png'),
+    angry: require('../iconfb/angry.png'),
   };
-  
+
   const screens = [
     {
-      name: "All",
+      name: 'All',
       value: 0,
-      icon: "",
+      icon: '',
       // icon: require('../assets/facebook-like.png'),
       size: 44 - 22,
       number: 94570,
     },
     {
-      name: "Like",
+      name: 'Like',
       value: 1,
-      icon: require("../assets/facebook-like.png"),
+      icon: require('../assets/facebook-like.png'),
       size: 40 - 16,
       number: 1600,
     },
     {
-      name: "Love",
+      name: 'Love',
       value: 2,
-      icon: require("../assets/facebook-heart.jpg"),
+      icon: require('../assets/facebook-heart.jpg'),
       size: 36 - 12,
       number: 5500,
     },
     {
-      name: "Care",
+      name: 'Care',
       value: 3,
-      icon: require("../assets/facebook-care2.jpg"),
+      icon: require('../assets/facebook-care2.jpg'),
       size: 36 - 12,
       number: 6000,
     },
     {
-      name: "Haha",
+      name: 'Haha',
       value: 4,
-      icon: require("../assets/facebook-haha.png"),
+      icon: require('../assets/facebook-haha.png'),
       size: 48 - 20,
       number: 7000,
     },
     {
-      name: "Wow",
+      name: 'Wow',
       value: 5,
-      icon: require("../assets/facebook-wow.png"),
+      icon: require('../assets/facebook-wow.png'),
       size: 36 - 12,
       number: 8000,
     },
     {
-      name: "Sad",
+      name: 'Sad',
       value: 6,
-      icon: require("../assets/facebook-sad.jpg"),
+      icon: require('../assets/facebook-sad.jpg'),
       size: 36 - 12,
       number: 500,
     },
     {
-      name: "Angry",
+      name: 'Angry',
       value: 7,
-      icon: require("../assets/facebook-angry.png"),
+      icon: require('../assets/facebook-angry.png'),
       size: 36 - 12,
       number: 50,
     },
   ];
-
 
   useEffect(() => {
     setReactions(route.params.reactions);
@@ -129,7 +128,7 @@ export default function ReactionScreen({ navigation, route }) {
   const ReactionTabScreen = ({ route }) => {
     // Trích xuất giá trị của màn hình từ route.params nếu cần
     const { name, icon, size, value } = route.params;
-    
+
     const renderReactionList =
       value === 0
         ? reactionList
@@ -180,8 +179,8 @@ export default function ReactionScreen({ navigation, route }) {
         <Text>{name} Screen Content</Text> */}
         <FlatList
           style={{
-            alignSelf: "flex-start",
-            minWidth: "100%",
+            alignSelf: 'flex-start',
+            minWidth: '100%',
           }}
           data={reactions.filter((reaction) => reaction.type === name)[0].users}
           renderItem={({ item }) => (
@@ -203,10 +202,10 @@ export default function ReactionScreen({ navigation, route }) {
           ListEmptyComponent={
             <Text
               style={{
-                color: "red",
+                color: 'red',
                 fontSize: 24,
                 flex: 1,
-                textAlign: "center",
+                textAlign: 'center',
               }}
             >
               No reaction found
@@ -219,68 +218,69 @@ export default function ReactionScreen({ navigation, route }) {
     );
   };
 
-  useEffect(() => {
-  }, [reactions]);
-  
+  useEffect(() => {}, [reactions]);
+
   if (reactions == null) {
-    return (
-      <></>
-    );
+    return <></>;
   }
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarLabelPosition: "beside-icon",
+        tabBarLabelPosition: 'beside-icon',
         // tabBarShowLabel: false,
-        tabBarInactiveTintColor: "#65676b", // đổi màu chữ của tab item không được click
+        tabBarInactiveTintColor: '#65676b', // đổi màu chữ của tab item không được click
         tabBarScrollEnabled: true,
       }}
-      style={{ borderTopWidth: 1, borderTopColor: "#ccc" }}
+      style={{ borderTopWidth: 1, borderTopColor: '#ccc' }}
     >
-      {reactions.
-        filter((reaction) => reaction.number != null).
-        map((reaction) => (
-        <Tab.Screen
-          key={reaction.type}
-          name={reaction.type}
-          component={ReactionTabScreen}
-          initialParams={{
-            name: reaction.type,
-            icon: icons[reaction.type],
-            size: 44 - 22,
-            value: 0,
-          }}
-          options={{
-            headerShown: false,
-            tabBarLabel: reaction.number.toString(),
-            tabBarIcon: ({ color }) => {
-              return icons[reaction.type] ? (
-                <Image
-                  source={icons[reaction.type]}
-                  color={color}
-                  style={{
-                    width: 44 - 22,
-                    height:   44 - 22,
-                    borderRadius: 200,
-                  }}
-                />
-              ) : (
-                <Text
-                  style={{ fontSize: 18, color: "#0866ff", fontWeight: "bold" }}
-                >
-                  All
-                </Text>
-              );
-            },
-            tabBarLabelStyle: {
-              fontSize: 14,
-              fontWeight: "bold",
-            },
-            tabBarActiveTintColor: "#0866ff",
-            unmountOnBlur: true,
-          }}
-        />
-      ))}
+      {reactions
+        .filter((reaction) => reaction.number != null)
+        .map((reaction) => (
+          <Tab.Screen
+            key={reaction.type}
+            name={reaction.type}
+            component={ReactionTabScreen}
+            initialParams={{
+              name: reaction.type,
+              icon: icons[reaction.type],
+              size: 24,
+              value: 0,
+            }}
+            options={{
+              headerShown: false,
+              tabBarLabel: reaction.number.toString(),
+              tabBarIcon: ({ color }) => {
+                return icons[reaction.type] ? (
+                  <Image
+                    source={icons[reaction.type]}
+                    color={color}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 200,
+                    }}
+                  />
+                ) : (
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: '#0866ff',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    All
+                  </Text>
+                );
+              },
+              tabBarLabelStyle: {
+                fontSize: 14,
+                fontWeight: 'bold',
+              },
+              tabBarActiveTintColor: '#0866ff',
+              unmountOnBlur: true,
+            }}
+          />
+        ))}
     </Tab.Navigator>
   );
 }
@@ -288,25 +288,25 @@ export default function ReactionScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    backgroundColor: "white",
+    alignItems: 'center',
+    backgroundColor: 'white',
     // paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
-    alignItems: "center",
+    alignItems: 'center',
     padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   //
   card: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
@@ -316,22 +316,22 @@ const styles = StyleSheet.create({
     // marginTop: 8,
     marginLeft: 10,
     fontSize: 20,
-    textAlign: "center",
-    fontWeight: "bold",
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   //
   inputSearch: {
     marginLeft: 8,
     fontSize: 22,
-    width: "90%",
+    width: '90%',
   },
 
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
 
     height: 40,
-    borderColor: "black",
+    borderColor: 'black',
     borderWidth: 1,
     marginTop: 20,
     paddingHorizontal: 10,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   dropdown: {
     margin: 16,
     height: 50,
-    borderBottomColor: "gray",
+    borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
   },
   icon: {
