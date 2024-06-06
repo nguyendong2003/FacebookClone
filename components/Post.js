@@ -84,44 +84,44 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
         setColorReaction('#0866FF');
         setNameReaction('Like');
         setSizeReaction(44 - 16);
-        setSourceReaction(require('../assets/facebook-like.png'));
+        setSourceReaction(require('../iconfb/like.png'));
 
         break;
       case 2:
         setColorReaction('#F33E58');
         setNameReaction('Love');
         setSizeReaction(40 - 16);
-        setSourceReaction(require('../assets/facebook-heart.jpg'));
+        setSourceReaction(require('../iconfb/love.png'));
         break;
       case 3:
         setColorReaction('#F7B125');
         setNameReaction('Care');
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-care2.jpg'));
+        setSourceReaction(require('../iconfb/care.png'));
         break;
       case 4:
         setColorReaction('#F7B125');
         setNameReaction('Haha');
         setSizeReaction(48 - 20);
-        setSourceReaction(require('../assets/facebook-haha.png'));
+        setSourceReaction(require('../iconfb/haha.png'));
         break;
       case 5:
         setColorReaction('#F7B125');
         setNameReaction('Wow');
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-wow.png'));
+        setSourceReaction(require('../iconfb/wow.png'));
         break;
       case 6:
         setColorReaction('#E9710F');
         setNameReaction('Sad');
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-sad.jpg'));
+        setSourceReaction(require('../iconfb/sad.png'));
         break;
       case 7:
         setColorReaction('#E9710F');
         setNameReaction('Angry');
         setSizeReaction(36 - 12);
-        setSourceReaction(require('../assets/facebook-angry.png'));
+        setSourceReaction(require('../iconfb/angry.png'));
         break;
 
       default:
