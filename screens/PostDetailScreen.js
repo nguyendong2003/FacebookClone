@@ -254,6 +254,7 @@ import {
                 setIdUserReplying = {setIdUserReplying}
                 coords={coords}
                 setCoords={setCoords}
+                navigation={navigation}
               />
             )}
             keyExtractor={(item, index) => item.id.toString()}

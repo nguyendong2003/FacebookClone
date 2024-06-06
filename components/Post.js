@@ -791,7 +791,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
               }
             }}
             onLongPress={() => setIsPressingLike(!isPressingLike)}
-            delayLongPress={400}
+            delayLongPress={200}
           >
             {sourceReaction && (
               <Image
