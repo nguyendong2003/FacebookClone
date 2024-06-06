@@ -243,7 +243,7 @@ export default function ReactionScreen({ navigation, route }) {
             initialParams={{
               name: reaction.type,
               icon: icons[reaction.type],
-              size: 44 - 22,
+              size: 24,
               value: 0,
             }}
             options={{
