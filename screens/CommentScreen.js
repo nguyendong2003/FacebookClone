@@ -61,6 +61,8 @@ export default function CommentScreen({ route, navigation }) {
     angry: require("../assets/facebook-angry.png"),
   };
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
@@ -190,6 +192,7 @@ export default function CommentScreen({ route, navigation }) {
   // };
 
   const submitComment = async () => {
+    setIsLoading(true);
     if (isCommentValid) {
       formData = new FormData();
 
@@ -228,6 +231,7 @@ export default function CommentScreen({ route, navigation }) {
     } else {
       alert("Invalid comment");
     }
+    setIsLoading(false);
   };
 
   const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id, send_comment_id) => {
@@ -289,18 +293,6 @@ export default function CommentScreen({ route, navigation }) {
           // ItemSeparatorComponent={
           //   <View style={{ height: 4, backgroundColor: '#ccc' }}></View>
           // }
-          ListEmptyComponent={
-            <Text
-              style={{
-                color: "red",
-                fontSize: 24,
-                flex: 1,
-                textAlign: "center",
-              }}
-            >
-              No comment found
-            </Text>
-          } // display when empty data
           ListHeaderComponent={() => {
             return (
               <View
@@ -473,14 +465,19 @@ export default function CommentScreen({ route, navigation }) {
                 </View>
               )}
 
-              <FontAwesome
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#0000ff" />
+              ):(
+                <FontAwesome
                 name={isCommentValid ? "send" : "send-o"}
                 size={24}
                 color={isCommentValid ? "#0866ff" : "#65676B"}
                 onPress={() => {
-                  submitComment();
+                  submitComment();////
                 }}
-              />
+                />
+              )}
+
             </View>
           )}
         </View>

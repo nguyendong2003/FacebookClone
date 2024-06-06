@@ -47,6 +47,7 @@ import {
   
   export default function PostDetailScreen({ route, navigation }) {
     const [userPost, setUserPost] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     
     const [commentText, setCommentText] = useState((route?.params?.commentId != null) ? `${route?.params?.nameSender} ` : "");
     const [commentImage, setCommentImage] = useState(null);
@@ -161,6 +162,7 @@ import {
     };
   
     const submitComment = async () => {
+      setIsLoading(true);
       if (isCommentValid) {
         formData = new FormData();
         formData.append("id_account", state.account.id);
@@ -198,6 +200,7 @@ import {
       } else {
         alert("Invalid comment");
       }
+      setIsLoading(false)
     };
 
     const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id, send_comment_id) => {
@@ -397,14 +400,19 @@ import {
                   </View>
                 )}
   
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#0000ff" />
+              ):(
                 <FontAwesome
-                  name={isCommentValid ? "send" : "send-o"}
-                  size={24}
-                  color={isCommentValid ? "#0866ff" : "#65676B"}
-                  onPress={() => {
-                    submitComment();
-                  }}
+                name={isCommentValid ? "send" : "send-o"}
+                size={24}
+                color={isCommentValid ? "#0866ff" : "#65676B"}
+                onPress={() => {
+                  submitComment();////
+                }}
                 />
+              )}
+
               </View>
             )}
           </View>
