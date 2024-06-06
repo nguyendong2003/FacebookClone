@@ -20,6 +20,18 @@ export const createComment = async (formData) => {
   return response.data
 };
 
+export const editComment = async (id, content) => {
+  await SpringServer.patch(
+    `/facebook.api/post/comments/updateComment?id_comment=${id}&content=${content}`,
+  );
+}
+
+export const deleteComment = async (id) => {
+  await SpringServer.delete(
+    `/facebook.api/post/comments/deleteComment/${id}`
+  );
+}
+
 export const reaction = async ({ id_account, id_comment, reaction_type }) => {
   formData = new FormData();
   formData.append("id_account", id_account);

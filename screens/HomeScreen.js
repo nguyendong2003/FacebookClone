@@ -65,6 +65,7 @@ export default function HomeScreen({ navigation }) {
   const updatePostById = async (id) => {
     await reloadPost(id);
   };
+  
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
