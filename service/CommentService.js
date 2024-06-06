@@ -8,7 +8,7 @@ export const getCommentsByPostId = async (id) => {
 };
 
 export const createComment = async (formData) => {
-  return await SpringServer.post(
+  const response =  await SpringServer.post(
     `/facebook.api/post/comments/createComment`,
     formData,
     {
@@ -17,6 +17,7 @@ export const createComment = async (formData) => {
       },
     }
   );
+  return response.data
 };
 
 export const reaction = async ({ id_account, id_comment, reaction_type }) => {

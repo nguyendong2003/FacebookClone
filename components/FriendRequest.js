@@ -41,6 +41,7 @@ import Comment from './Comment';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Context as FriendContext } from '../context/FriendContext';
+import { deleteNotification, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
 
 export default function FriendRequest({
   item,
@@ -51,6 +52,11 @@ export default function FriendRequest({
   size,
   value,
 }) {
+  
+  const [notificationId, setNotificationId] = useState(null);
+  useEffect(() => {
+    handleGetReceiveNotification(item?.id)
+  }, [])
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
@@ -67,15 +73,34 @@ export default function FriendRequest({
   const windowHeight = window.height;
 
   const { acceptFriendRequest, getFriendRequests, rejectFriendRequest } = useContext(FriendContext);
+  const handleGetReceiveNotification = async(senderId) => {
+    try{ 
+      const response = await getReceiveNotificationFromFriendRequest(senderId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteNotification = async() => {
+    try {
+        const response = await deleteNotification(notificationId)
+    }catch(error) {
+        console.log(error);
+    }
+  }
+  
   const acceptClickHandler = () => {
     acceptFriendRequest(item?.id).then(() => {
       getFriendRequests();
+      handleDeleteNotification()
     });
   }
 
   const rejectClickHandler = () => {
     rejectFriendRequest(item?.id).then(() => {
       getFriendRequests();
+      handleDeleteNotification()
     }
   )};
 

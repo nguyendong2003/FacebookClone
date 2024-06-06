@@ -17,7 +17,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from "react-native";
-
+import { RefreshControl } from "react-native";
 import {
   MaterialCommunityIcons,
   AntDesign,
@@ -29,14 +29,9 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 
-import { useState, useEffect, useContext } from "react";
-import moment from "moment";
-
-import postList from "../data/post.json";
-import commentList from "../data/comment.json";
-import listFriend from "../data/listFriendProfile.json";
-
-import Comment from "../components/Comment";
+import { useState, useEffect, useContext, useRef } from "react";
+import { useCallback } from "react";
+import { useScrollToTop } from "@react-navigation/native";
 import Post from "../components/Post";
 // Upload image
 import * as ImagePicker from "expo-image-picker";
@@ -46,7 +41,7 @@ import { Context as PostContext } from "../context/PostContext";
 
 export default function HomeScreen({ navigation }) {
   const { state: accountState, getAccount } = useContext(AccountContext);
-  const { state: postState, reloadPost } = useContext(PostContext);
+  const { state: postState, reloadPost,getPosts } = useContext(PostContext);
 
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get("window"),
@@ -62,10 +57,24 @@ export default function HomeScreen({ navigation }) {
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
+  const ref = useRef(null);
+  useScrollToTop(ref);
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const updatePostById = async (id) => {
     await reloadPost(id);
   };
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    getPosts()
+  }, [refreshing])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -76,6 +85,7 @@ export default function HomeScreen({ navigation }) {
               alignSelf: "flex-start",
               minWidth: "100%",
             }}
+            ref={ref}
             data={postState.posts}
             renderItem={({ item }) => (
               <Post item={item} navigation={navigation} onUpdatePost={updatePostById} postType="POST"/>
@@ -96,6 +106,9 @@ export default function HomeScreen({ navigation }) {
                 No post found
               </Text>
             } // display when empty data
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             ListHeaderComponent={
               <View
                 style={{

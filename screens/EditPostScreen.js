@@ -34,19 +34,29 @@ import {
 
 import { Dropdown } from 'react-native-element-dropdown';
 
+// Upload image
+import * as ImagePicker from 'expo-image-picker';
+// Camera
+import { Camera, CameraType } from 'expo-camera/legacy';
+
 import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import moment from 'moment';
-
+import { DeviceEventEmitter } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Context as PostContext } from '../context/PostContext';
 import { Context as AccountContext } from '../context/AccountContext';
 import { LogBox } from 'react-native';
+import { editPost } from '../service/PostService'
 
 export default function EditPostScreen({ navigation, route }) {
   // Lấy item từ Post.js truyền sang
   const { item } = route.params;
+
   //
   const [textPost, setTextPost] = useState(item?.content);
+  const [imagePostList, setImagePostList] = useState(item?.postImages);
+  const [isSubmit, setIsSubmit] = useState(item?.share_post ? true : false);
+  //
   const { createPost } = useContext(PostContext);
   const { state } = useContext(AccountContext);
 
@@ -66,17 +76,81 @@ export default function EditPostScreen({ navigation, route }) {
     { label: 'Friend', value: '2' },
     { label: 'Private', value: '3' },
   ];
-  // useEffect(() => {
-  //   console.log(value);
-  // }, [value]);
 
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
   ]);
 
+  // Click remove image
+  const removeImage = (index) => {
+    if (imagePostList?.length > 0) {
+      setImagePostList((prevImageList) => {
+        const updatedImageList = [...prevImageList];
+        updatedImageList.splice(index, 1);
+        return updatedImageList;
+      });
+    } else if (imagePostList?.length === 0) {
+      setImagePostList(null);
+    }
+  };
+
+  // pick multiple image
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      // allowsEditing: true,
+      allowsMultipleSelection: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      let imageList = [];
+      result.assets.forEach((image) => {
+        imageList.push({
+          id: 0,
+          image: image.uri,
+        });
+      });
+      if (imagePostList === null) {
+        setImagePostList(imageList);
+      } else {
+        setImagePostList((prevImageList) => [...prevImageList, ...imageList]);
+      }
+    }
+  };
+
+  //
+  useEffect(() => {
+    if (item?.share_post == null) {
+      if (textPost.trim().length > 0 || imagePostList?.length > 0) {
+        setIsSubmit(true);
+      } else {
+        setIsSubmit(false);
+      }
+    }
+  }, [textPost, imagePostList]);
+
+  const editPostHandler = async () => {
+    try {
+      const response = await editPost({
+        postId: item.id,
+        view_mode: data[value - 1].label.toLowerCase(),
+        content: textPost,
+        images: item.postImages,
+      });
+      DeviceEventEmitter.emit('fetchPost');
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
+
+  //
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -89,7 +163,123 @@ export default function EditPostScreen({ navigation, route }) {
   const windowWidth = window.width;
   const windowHeight = window.height;
 
-  // console.log(item);
+  // Camera
+  let cameraRef = useRef();
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [type, setType] = useState(CameraType.back);
+
+  useEffect(() => {
+    async function requestCameraPermission() {
+      const cameraPermission = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraPermission.status === 'granted');
+    }
+
+    requestCameraPermission();
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({ headerShown: !showCamera });
+    }, [navigation, showCamera])
+  );
+
+  function toggleCameraType() {
+    setType((current) =>
+      current === CameraType.back ? CameraType.front : CameraType.back
+    );
+  }
+
+  let takePicture = async () => {
+    let options = {
+      quality: 1,
+      base64: true,
+      exif: false,
+    };
+
+    let newPhoto = await cameraRef.current.takePictureAsync(options);
+    setShowCamera(false);
+    if (imagePostList === null) {
+      setImagePostList([{ id: 0, image: newPhoto.uri }]);
+    } else {
+      setImagePostList((prevImageList) => [
+        ...prevImageList,
+        { id: 0, image: newPhoto.uri },
+      ]);
+    }
+    setIsSubmit(true);
+  };
+  let openCamera = async () => {
+    // const cameraPermission = await Camera.requestCameraPermissionsAsync();
+    // setHasCameraPermission(cameraPermission.status === 'granted');
+    setShowCamera(true);
+  };
+
+  if (showCamera) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Camera
+          // style={{ flex: 1 }}
+          type={type}
+          ref={cameraRef}
+          ratio="16:9"
+          style={{
+            flex: 1,
+            height: Math.round((windowWidth * 16) / 9),
+            width: '100%',
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              margin: 30,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => setShowCamera(false)}
+            >
+              <AntDesign name="back" size={40} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => takePicture()}
+            >
+              <FontAwesome
+                name="camera"
+                style={{ color: '#fff', fontSize: 40 }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignSelf: 'flex-end',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+              onPress={() => toggleCameraType()}
+            >
+              <MaterialCommunityIcons
+                name="camera-switch"
+                style={{ color: '#fff', fontSize: 40 }}
+              />
+            </TouchableOpacity>
+          </View>
+        </Camera>
+      </View>
+    );
+  }
+
+  //
 
   return (
     <SafeAreaView style={styles.container}>
@@ -110,9 +300,9 @@ export default function EditPostScreen({ navigation, route }) {
             <View style={{ flexDirection: 'row' }}>
               <Image
                 source={
-                  state.account.avatar == null
+                  state?.account?.avatar == null
                     ? require('../assets/defaultProfilePicture.jpg')
-                    : { uri: state.account.avatar }
+                    : { uri: state?.account?.avatar }
                 }
                 style={{ width: 60, height: 60, borderRadius: 100 }}
               />
@@ -186,7 +376,8 @@ export default function EditPostScreen({ navigation, route }) {
               <Button
                 title="Edit"
                 color="#0866ff"
-                onPress={() => alert('Edited Post')}
+                disabled={!isSubmit}
+                onPress={() => editPostHandler()}
               />
             </View>
           </View>
@@ -216,27 +407,44 @@ export default function EditPostScreen({ navigation, route }) {
               alignItems: 'center',
             }}
           >
-            {item?.postImages?.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image.image }}
-                style={{
-                  marginHorizontal: 2,
-                  marginTop: 4,
-                  // borderRadius: 20,
-                }}
-                width={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                height={
-                  item?.postImages.length % 2 === 1 && index === 0
-                    ? windowWidth - 4
-                    : windowWidth / 2 - 4
-                }
-                resizeMode="cover"
-              />
+            {imagePostList?.map((image, index) => (
+              <View key={index}>
+                <Image
+                  source={{ uri: image.image }}
+                  style={{
+                    marginHorizontal: 2,
+                    marginTop: 4,
+                    // borderRadius: 20,
+                  }}
+                  width={
+                    imagePostList?.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  height={
+                    imagePostList?.length % 2 === 1 && index === 0
+                      ? windowWidth - 4
+                      : windowWidth / 2 - 4
+                  }
+                  resizeMode="cover"
+                />
+                <Entypo
+                  style={{
+                    position: 'absolute',
+                    left:
+                      imagePostList.length % 2 === 1 && index === 0
+                        ? '90%'
+                        : '80%',
+                    top: 8,
+                  }}
+                  name="circle-with-cross"
+                  size={36}
+                  color="#ccc"
+                  onPress={() => {
+                    removeImage(index);
+                  }}
+                />
+              </View>
             ))}
           </View>
 
@@ -373,6 +581,27 @@ export default function EditPostScreen({ navigation, route }) {
                   />
                 ))}
               </View>
+            </View>
+          )}
+          {item?.share_post == null && (
+            <View style={{ marginTop: 12 }}>
+              <TouchableOpacity
+                style={styles.optionButtonContainer}
+                onPress={() => {
+                  pickImage();
+                }}
+              >
+                <FontAwesome6 name="image" size={24} color="#45bd62" />
+                <Text style={styles.textOptionButton}>Image</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.optionButtonContainer}
+                onPress={() => openCamera()}
+              >
+                <Entypo name="camera" size={24} color="#0866ff" />
+                <Text style={styles.textOptionButton}>Camera</Text>
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>

@@ -186,7 +186,6 @@ export default function TabNavigationHome({ navigation }) {
             },
             tabBarActiveTintColor: '#0866ff',
             unmountOnBlur: true,
-            
           }}
         />
         <Tab.Screen

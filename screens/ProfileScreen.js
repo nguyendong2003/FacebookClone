@@ -8,7 +8,8 @@ import {
   Button,
   Pressable,
   Modal,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
@@ -29,18 +30,21 @@ import { Context as AccountContext } from "../context/AccountContext";
 import { Context as UserPostContext } from "../context/UserPostContext";
 import { getUserPosts, getPostById } from "../service/PostService";
 import { getAccountById } from "../service/AccountService";
+import { createNotification, deleteNotification, getSendNotificationFromFriendRequest, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
 import {
   getFriendsByAccountId,
   getProfileStatus,
+  removeFriend,
 } from "../service/FriendService";
+import { updateAvatar, updateCoverImage } from "../service/AccountService";
 
 export default function ProfileScreen({ navigation, route }) {
   // stranger, waitAccept, realFriend, personalPage
-  const { isPersonalPage } = route.params;
-  const { state: accountState } = useContext(AccountContext);
-  const { sendRequest, cancelFriendRequest, acceptFriendRequest } =
-    useContext(FriendContext);
+  const { isPersonalPage, statusFriend, listFriend } = route.params;
+  const { state } = useContext(AccountContext);
+  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } = useContext(FriendContext);
   const [userPost, setUserPost] = useState([]);
+  const [isFriend, setIsFriend] = useState(statusFriend);
   const [isVisible, setIsVisible] = useState(isPersonalPage);
   const [user, setUser] = useState({});
   const [friendList, setFriendList] = useState([]);
@@ -48,6 +52,9 @@ export default function ProfileScreen({ navigation, route }) {
   const [imageCover, setImageCover] = useState(null);
   const [imageAvatar, setImageAvatar] = useState(null);
   const [isShowModal, setIsShowModal] = useState(false);
+  const [notificationId, setNotificationId] = useState(null);  
+  const [isLoadingCover, setIsLoadingCover] = useState(false);
+  const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
 
   const fetchUserPost = async () => {
     const data = await getUserPosts(route.params.accountId);
@@ -70,10 +77,11 @@ export default function ProfileScreen({ navigation, route }) {
 
     const friendsData = await getFriendsByAccountId(route.params.accountId);
     setFriendList(friendsData);
+    setIsLoadingAvatar(false)
+    setIsLoadingCover(false)
   };
   useEffect(() => {
     fetchUserData();
-
     const subscription = DeviceEventEmitter.addListener(
       "fetchPost",
       fetchUserPost
@@ -84,6 +92,16 @@ export default function ProfileScreen({ navigation, route }) {
     };
   }, []);
 
+  useEffect(() => {
+    if(notificationId == null) {
+      if(status == "IN_REQUEST_SENDER") {
+        handleGetSendNotification(route.params.accountId)
+      }else if (status == "IN_REQUEST_RECEIVER") {
+        handleGetReceiveNotification(route.params.accountId)
+      }
+    }
+  }, [status])
+  
   const updatePostById = async (postId) => {
     const update_post = await getPostById(postId);
     setUserPost(
@@ -93,11 +111,10 @@ export default function ProfileScreen({ navigation, route }) {
 
   const pickImage = async (type) => {
     // Hỏi quyền truy cập thư viện ảnh
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
+      alert('Permission to access camera roll is required!');
       return;
     }
 
@@ -108,36 +125,87 @@ export default function ProfileScreen({ navigation, route }) {
       aspect: [4, 3],
       quality: 1,
     });
-
-    if (type == "cover") {
+    
+    if(type == "cover"){
       if (!result.canceled) {
-        setImageCover(result.assets[0].uri);
+        setIsLoadingCover(true)
+        await updateCoverImage(result.assets[0].uri);
+        fetchUserData();
+        // setIsLoadingCover(false)
       }
-    } else {
+    }else{
       if (!result.canceled) {
-        setImageAvatar(result.assets[0].uri);
+        setIsLoadingAvatar(true)
+        await updateAvatar(result.assets[0].uri)
+        fetchUserData()
+        // setIsLoadingAvatar(false)
       }
     }
     // console.log(image)
   };
 
+  const handleCreateNotification = async(to_account_id, notify_type) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id: null,
+        to_comment_post_id: null,
+        notify_type
+      })
+    }catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetSendNotification = async(receiverId) => {
+    try{ 
+      const response = await getSendNotificationFromFriendRequest(receiverId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+  const handleGetReceiveNotification = async(senderId) => {
+    try{ 
+      const response = await getReceiveNotificationFromFriendRequest(senderId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteNotification = async() => {
+    try {
+        const response = await deleteNotification(notificationId)
+    }catch(error) {
+        console.log(error);
+    }
+  }
+
   const sendRequestHandler = async () => {
     await sendRequest(route.params.accountId);
-
     getProfileStatus(route.params.accountId).then((data) => {
       setStatus(data);
     });
+    handleCreateNotification(route.params.accountId, "friend_request")
   };
 
   const cancelRequestHandler = async () => {
     await cancelFriendRequest(route.params.accountId);
+    await handleDeleteNotification()
+    fetchProfileStatus();
+  };
 
+  const rejectRequestHandler = async () => {
+    await rejectFriendRequest(route.params.accountId);
+    await handleDeleteNotification()
     fetchProfileStatus();
   };
 
   const acceptRequestHandler = async () => {
     await acceptFriendRequest(route.params.accountId);
-
+    await handleDeleteNotification()
     fetchProfileStatus();
   };
 
@@ -145,9 +213,7 @@ export default function ProfileScreen({ navigation, route }) {
     return isVisible ? (
       <TouchableOpacity
         style={styles.headerPost}
-        onPress={() =>
-          navigation.navigate("CreatePost", { onFetchPost: fetchUserPost })
-        }
+        onPress={() => navigation.navigate("CreatePost", {onFetchPost: fetchUserPost})}
       >
         <Image
           source={
@@ -206,7 +272,9 @@ export default function ProfileScreen({ navigation, route }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.Button, { backgroundColor: "#CFECEC", flex: 1 }]}
-              onPress={() => setIsFriend("stranger")}
+              onPress={() => {
+                rejectRequestHandler()
+              }}
             >
               <AntDesign name="close" size={13} color="black" />
               <Text style={{ marginLeft: 10, fontSize: 15, color: "black" }}>
@@ -297,7 +365,7 @@ export default function ProfileScreen({ navigation, route }) {
                         },
                         {
                           text: 'Yes',
-                          onPress: () => setStatus('STRANGER'),
+                          onPress: () => {removeFriend(route.params.accountId); fetchUserData(); setIsShowModal(false)},
                         },
                       ],
                       { cancelable: false },
@@ -397,7 +465,7 @@ export default function ProfileScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
+        <FlatList
         style={{
           alignSelf: "flex-start",
           minWidth: "100%",
@@ -430,20 +498,37 @@ export default function ProfileScreen({ navigation, route }) {
         ListHeaderComponent={
           <View style={styles.headerProfile}>
             {/* Cover Photo */}
+
             <View
               style={styles.coverPhotoContainer}
             >
 
-              <Image
+              {/* <Image
                 style={styles.coverPhoto}
                 source={
-                  imageCover
-                    ? { uri: imageCover }
+                  user.cover_image != null
+                    ? { uri: user.cover_image }
                     : require("../assets/coverPhoto.jpg")
                 }
-              />
+              /> */}
+              {isLoadingCover ? (
+                <View style={[styles.coverPhoto, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                  <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+                
+              ):(
+                <Image
+                style={styles.coverPhoto}
+                source={
+                  user.cover_image != null
+                    ? { uri: user.cover_image }
+                    : require("../assets/coverPhoto.jpg")
+                }
+                />
+              )}
               {renderCameraCover(status)}
             </View>
+            
             {/* CoverPhoto */}
 
             <View
@@ -451,16 +536,24 @@ export default function ProfileScreen({ navigation, route }) {
             >
               {/* Avatar */}
               <View style={styles.avatarContainer}>
-                <Image
-                  style={styles.avatar}
-                  source={
-                    imageAvatar == null
-                      ? user?.avatar == null
-                        ? require("../assets/defaultProfilePicture.jpg")
-                        : { uri: user.avatar }
-                      : { uri: imageAvatar }
-                  }
-                />
+
+                {isLoadingAvatar ? (
+                  <View style={[styles.avatar, {backgroundColor:"#e3d8d8", justifyContent:"center", alignItems:"center"}]}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+
+                ):(
+                  <Image
+                    style={styles.avatar}
+                    source={
+                      imageAvatar == null
+                        ? user?.avatar == null
+                          ? require("../assets/defaultProfilePicture.jpg")
+                          : { uri: user.avatar }
+                        : { uri: imageAvatar }
+                    }
+                  />
+                )}
                 {renderCameraAvatar(status)}
               </View>
               {/* Avatar */}
@@ -479,7 +572,9 @@ export default function ProfileScreen({ navigation, route }) {
 
               {/* description */}
               <View style={styles.descriptionContainer}>
-                <Text style={{ fontSize: 15 }}>{user.description}</Text>
+                <Text style={{ fontSize: 15 }}>
+                  {user.description}
+                </Text>
               </View>
               {/* description */}
             </View>
@@ -526,9 +621,10 @@ export default function ProfileScreen({ navigation, route }) {
                   <Text
                     style={[styles.textInformation, { fontWeight: "bold" }]}
                   >
-                    {moment(user.birth_date, "YYYY-MM-DD ").format(
-                      "DD/MM/yyyy"
-                    )}
+                    {moment(
+                      user.birth_date,
+                      "YYYY-MM-DD "
+                    ).format("DD/MM/yyyy")}
                   </Text>
                 </Text>
               </View>

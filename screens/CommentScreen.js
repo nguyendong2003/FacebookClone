@@ -190,11 +190,10 @@ export default function CommentScreen({ route, navigation }) {
 
       formData.append('id_account', state.account.id);
       if (commentIdReplying) {
-        formData.append('to_comment_id', commentIdReplying);
-        notificationHandler(idUserReplying, null, commentIdReplying);
-      } else {
-        formData.append('id_post', route?.params?.postId);
-        notificationHandler(post.user.id, route?.params?.postId, null);
+        formData.append("to_comment_id", commentIdReplying);
+      } 
+      else {
+        formData.append("id_post", route?.params?.postId);
       }
 
       formData.append('content', commentText);
@@ -206,9 +205,15 @@ export default function CommentScreen({ route, navigation }) {
           uri: commentImage,
         });
       }
-
-      await createComment(formData);
-      setCommentText('');
+      
+      const response = await createComment(formData);
+      if (commentIdReplying) {
+        notificationHandler(idUserReplying, route?.params?.postId, commentIdReplying, response.id )
+      } 
+      else {
+        notificationHandler(post.user.id, route?.params?.postId, null, response.id)
+      }
+      setCommentText("");
       setIsReplying(false);
       setCommentIdReplying(null);
       setCommentImage(null);
@@ -220,23 +225,23 @@ export default function CommentScreen({ route, navigation }) {
     }
   };
 
-  const notificationHandler = async (
-    to_account_id,
-    to_post_id,
-    to_comment_post_id
-  ) => {
-    try {
+  const notificationHandler = async(to_account_id, to_post_id, to_comment_post_id, send_comment_id) => {
+    try{
       const response = await createNotification({
         from_account_id: state.account.id,
         to_account_id,
         to_post_id,
         to_comment_post_id,
-        notify_type: 'comment',
-      });
-    } catch (error) {
+        send_comment_id,
+        notify_type: "comment"
+      })
+
+      console.log(response);
+    }catch(error) {
       console.log(error);
     }
-  };
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -262,6 +267,7 @@ export default function CommentScreen({ route, navigation }) {
           data={commentList}
           renderItem={({ item, index }) => (
             <Comment
+              navigation={navigation}
               item={item}
               setIsReplying={setIsReplying}
               setCommentIdReplying={setCommentIdReplying}

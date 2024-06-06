@@ -24,20 +24,30 @@ import {
   Fontisto,
   Entypo,
 } from '@expo/vector-icons';
-import { useState, useEffect, useContext, React, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 // import notificationList from '../data/dataNotify.json'
 // import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import Notification from '../components/Notification';
 
 import { Context as AccountContext } from "../context/AccountContext";
 import {getNotificationByAccount} from "../service/NotificationService"
-
+import { useFocusEffect } from '@react-navigation/native';
 export default function NotificationScreen({ navigation }) {
   const [notificationList, setNotificationList] = useState(null)
   const { state } = useContext(AccountContext);
-
   const [refreshing, setRefreshing] = useState(false);
 
+  const fetchData = async () => {
+    const response = await getNotificationByAccount(state.account.id)
+    setNotificationList(response)
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
+  
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
@@ -46,13 +56,12 @@ export default function NotificationScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await getNotificationByAccount(state.account.id)
-      setNotificationList(response)
-    }
     fetchData()
   }, [refreshing])
 
+  const handleDeleteNotification = (id) => {
+    setNotificationList((prevList) => prevList.filter((item) => item.id !== id));
+  };
   return (
     <View 
       style={styles.container}>
@@ -60,7 +69,7 @@ export default function NotificationScreen({ navigation }) {
       <FlatList
       data={notificationList}
       renderItem={({item})=>(
-        <Notification navigation={navigation} item={item} key={item.id}/>
+        <Notification navigation={navigation} item={item} key={item.id} onDelete={handleDeleteNotification}/>
       )}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -65,6 +65,39 @@ export const createPost = async ({ content, images, view_mode, share_id = 0 }) =
   return response.data;
 }
 
+export const editPost = async ({ postId, view_mode, content, images}) => {
+  const formData = new FormData();
+  formData.append("content", content);
+  formData.append("view_mode", view_mode);
+  formData.append("id_post", postId);
+  
+  if (images != null) {
+    images.forEach((imageUri, index) => {
+      formData.append("images", {
+        name: `image${index}.jpg`,
+        type: "image/jpeg",
+        uri: imageUri,
+      });
+    });
+  }
+
+  const response = await SpringServer.patch(
+    `/facebook.api/posts/updatePost`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data;
+}
+
+export const deletePost = async (postId) => {
+  const response = await SpringServer.delete(`/facebook.api/posts/deletePost/${postId}`);
+  return response.data;
+}
+
 export const getReactionsOfPost = async (postId) => {
   const response = await SpringServer.get(
     `/facebook.api/post/reactions/${postId}`
