@@ -18,6 +18,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 
 import {
@@ -77,7 +78,9 @@ export default function CreatePostScreen({ navigation, route }) {
         view_mode: data[value - 1].label.toLowerCase(),
         share_id: 0,
       });
-      if (route?.params?.onFetchPost) route.params.onFetchPost();
+      
+      if (route.params?.inProfile == true) 
+        DeviceEventEmitter.emit('fetchPost')
 
       setTextPost('');
       setImagePostList(null);

@@ -19,6 +19,7 @@ import {
   TouchableWithoutFeedback,
   PanResponder,
   Animated,
+  DeviceEventEmitter,
 } from "react-native";
 
 import {
@@ -54,7 +55,6 @@ import { Context as AccountContext } from "../context/AccountContext";
 import { Context as UserPostContext } from "../context/UserPostContext";
 import React from "react";
 import { deletePost } from "../service/PostService";
-import { DeviceEventEmitter } from "react-native";
 
 const Post = ({ item, navigation, onUpdatePost, postType }) => {
   // Reaction
@@ -154,10 +154,11 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
 
   const deletePostHandler = async (postId) => {
     await deletePost(postId);
-    DeviceEventEmitter.emit("fetchPost");
+    DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
     setIsPressingMore(false);
   };
   const updatePostHandler = async (postId) => {
+    console.log("update post");
     await onUpdatePost(postId);
   };
 
@@ -262,7 +263,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
               navigation.navigate("Comment", {
                 postId: item?.id,
                 reactions: reactions,
-                onUpdatePost: updatePostHandler,
+                inProfile: state.account.id === item.user.id,
                 typeCommentScreen: "POST",
               });
             }}
@@ -364,7 +365,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       });
       setValueReaction(convertReactionValue(response.type));
 
-      await onUpdatePost(postId);
+      if ((item.user.id == state.account.id) == false)
+        DeviceEventEmitter.emit("reloadHomeScreenPost", postId);
+      else if (statusPost == "POST_DETAIL")
+        DeviceEventEmitter.emit("reloadPostDetailScreenPost");
+        else
+        DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
+      
       fetchReactions();
     } catch (error) {
       console.log(error);
@@ -931,8 +938,8 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
               navigation.navigate("Comment", {
                 initialCommentFocus: true,
                 postId: item?.id,
+                inProfile: state.account.id === item.user.id,
                 reactions: reactions,
-                onUpdatePost: updatePostHandler,
               });
             }}
           >

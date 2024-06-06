@@ -121,14 +121,6 @@ export default function CommentScreen({ route, navigation }) {
     fetchComments();
   }, []);
 
-  useEffect(() => {
-    const subscription = DeviceEventEmitter.addListener('reloadPost', route?.params?.onUpdatePost);
-  
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
   const pickImage = async () => {
     // no permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -251,8 +243,12 @@ export default function CommentScreen({ route, navigation }) {
       setCommentImage(null);
       // getPosts();
       fetchComments();
-      await route?.params?.onUpdatePost(route?.params?.postId);
-    } else {
+      
+      if (route?.params?.inProfile == false)
+        DeviceEventEmitter.emit("reloadHomeScreenPost", route?.params?.postId);
+      else
+        DeviceEventEmitter.emit("reloadProfileScreenPost", route?.params?.postId);
+    } else { 
       alert("Invalid comment");
     }
   };
@@ -306,6 +302,7 @@ export default function CommentScreen({ route, navigation }) {
               item={item}
               fetchComments={fetchComments}
               setIsReplying={setIsReplying}
+              inProfile={route?.params?.inProfile}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
               setIdUserReplying={setIdUserReplying}

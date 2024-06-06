@@ -17,6 +17,7 @@ import {
   Dimensions,
   FlatList,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from "react-native";
 
 import {
@@ -81,6 +82,15 @@ export default function PostDetailScreen({ route, navigation }) {
       setPost(post);
     };
     fetchPost();
+
+    const subscription = DeviceEventEmitter.addListener(
+      "reloadPostDetailScreenPost",
+      fetchPost
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, [postId]);
 
   useEffect(() => {
@@ -208,7 +218,11 @@ export default function PostDetailScreen({ route, navigation }) {
       setCommentImage(null);
       getPosts();
       fetchComments();
-      await route?.params?.onUpdatePost(route?.params?.postId);
+
+      if (route?.params?.inProfile == false)
+        DeviceEventEmitter.emit("reloadHomeScreenPost", route?.params?.postId);
+      else
+        DeviceEventEmitter.emit("reloadProfileScreenPost", route?.params?.postId);
     } else {
       alert("Invalid comment");
     }
@@ -242,7 +256,6 @@ export default function PostDetailScreen({ route, navigation }) {
         postType="POST_DETAIL"
         item={post}
         navigation={navigation}
-        onUpdatePost={updatePostById}
       />
     ) : (
       <ActivityIndicator size="large" color="#0000ff" />

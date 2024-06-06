@@ -58,7 +58,8 @@ const Comment = ({
   coords,
   setCoords,
   fetchComments,
-  fetchPost
+  fetchPost, 
+  inProfile
 }) => {
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -350,8 +351,13 @@ const Comment = ({
                   }}
                   onPress={async () => {
                     await deleteComment(item?.id);
+
+                    if (inProfile == false)
+                      DeviceEventEmitter.emit("reloadHomeScreenPost", post.id);
+                    else
+                      DeviceEventEmitter.emit("reloadProfileScreenPost", post.id);
+                    
                     fetchComments();
-                    DeviceEventEmitter.emit("reloadPost");
                     setIsPressingComment(false);
                   }}
                 >
