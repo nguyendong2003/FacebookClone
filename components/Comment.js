@@ -30,9 +30,10 @@ import {
 } from "@expo/vector-icons";
 
 import React from "react";
-import { useState, useEffect, useRef, useContext} from "react";
+import { useState, useEffect, useRef, useContext, useCallback} from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {createNotification} from "../service/NotificationService"
-import {getPostOfComment} from "../service/CommentService"
+import {getPostOfComment, getReactionsOfComment} from "../service/CommentService"
 import { Context as AccountContext } from "../context/AccountContext";
 import moment from "moment";
 import { reaction } from "../service/CommentService";
@@ -53,8 +54,52 @@ const Comment = ({
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
   const [nameReaction, setNameReaction] = useState(null);
+  const [countReaction, setCountReaction] = useState(item?.reaction_quantity)
   const [colorReaction, setColorReaction] = useState("#65676B");
   const { state: accountState } = useContext(AccountContext);
+  const [reactions, setReactions] = useState([
+    { type: "All", number: 0, users: [] },
+  ]);
+
+  const fetchReactions = async () => {
+    const response = await getReactionsOfComment(item?.id);
+
+    let reactions_arr = Object.keys(response).map((key) => ({
+      type: key,
+      number: response[key] ? response[key].length : null,
+      users: response[key],
+    }));
+
+    const total_reaction = reactions_arr.reduce(
+      (sum, reaction) => sum + (reaction.number || 0),
+      0
+    );
+
+    const users = reactions_arr.reduce(
+      (sum, reaction) => sum.concat(reaction.users || []),
+      []
+    );
+    reactions_arr = [
+      { type: "All", number: total_reaction, users: users },
+      ...reactions_arr,
+    ];
+    setReactions(reactions_arr.sort((a, b) => b.number - a.number));
+  };
+
+  useEffect(() => {
+    fetchReactions();
+  }, []);
+
+  const icons = {
+    like: require("../iconfb/like.png"),
+    love: require("../iconfb/love.png"),
+    care: require("../iconfb/care.png"),
+    haha: require("../iconfb/haha.png"),
+    wow: require("../iconfb/wow.png"),
+    sad: require("../iconfb/sad.png"),
+    angry: require("../iconfb/angry.png"),
+  };
+
 
   useEffect(() => {
     switch (valueReaction) {
@@ -123,15 +168,15 @@ const Comment = ({
   }, []);
 
   const reactionHandler = async (type) => {
-    console.log(item.id)
-
     await reaction({
       id_account: accountState.account.id,
       id_comment: item.id,
       reaction_type: type,
     });
-
+    if(type == "NONE") setCountReaction((count) => count - 1)
+    else setCountReaction((count) => count + 1)
     setValueReaction(convertReactionValue(type));
+    fetchReactions();
   }
   //
   const [dimensions, setDimensions] = useState({
@@ -173,10 +218,13 @@ const Comment = ({
         to_comment_post_id: item?.id,
         notify_type
       })
+
+      console.log(response)
     }catch(error) {
       console.log(error);
     }
   }
+
 
   scrollToComment(commentIdReplying)
   return (
@@ -214,14 +262,16 @@ const Comment = ({
           />
         </TouchableOpacity>
 
-        <View style={{maxWidth: '80%'}}>
+        <View style={{
+          maxWidth: '80%'
+        }}>
           <View
             style={{
               flex: 1,
               marginHorizontal: 8,
               borderRadius: 20,
               padding: 8,
-              paddingLeft: 12,
+              paddingLeft: 12,  
               paddingRight: 12,
               backgroundColor:
                 (item.id === commentIdReplying) ? "#ccc" :"#f0f2f5",
@@ -301,6 +351,7 @@ const Comment = ({
                   if (valueReaction > 0) {
                     reactionHandler("NONE")
                   } else {
+                    reactionHandler("LIKE")
                     setValueReaction(1);
                     notificationHandler("LIKE")
                   }
@@ -343,6 +394,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(1);
+                        reactionHandler("LIKE")
                         notificationHandler("LIKE")
                       }}
                     >
@@ -355,6 +407,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(2);
+                        reactionHandler("LOVE")
                         notificationHandler("LOVE")
                       }}
                     >
@@ -367,6 +420,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(3);
+                        reactionHandler("CARE")
                         notificationHandler("CARE")
                       }}
                     >
@@ -379,6 +433,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(4);
+                        reactionHandler("HAHA")
                         notificationHandler("HAHA")
                       }}
                     >
@@ -391,6 +446,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(5);
+                        reactionHandler("WOW")
                         notificationHandler("WOW")
                       }}
                     >
@@ -404,6 +460,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(6);
+                        reactionHandler("SAD")
                         notificationHandler("SAD")
                       }}
                     >
@@ -417,6 +474,7 @@ const Comment = ({
                       onPress={() => {
                         setIsPressingLike(false);
                         setValueReaction(7);
+                        reactionHandler("ANGRY")
                         notificationHandler("ANGRY")
                       }}
                     >
@@ -450,6 +508,46 @@ const Comment = ({
                   Reply
                 </Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 10
+                }}
+                onPress={() => {
+                  navigation.navigate("Reaction", {
+                    postId: item?.id,
+                    reactions: reactions,
+                  });
+                }}
+              >
+                {reactions.slice(1, 3).map(
+                  (reaction, index) =>
+                    reaction.number > 0 && (
+                      <Image
+                        key={index}
+                        source={icons[reaction.type]}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          marginLeft: index > 0 ? 2 : 0,
+                        }}
+                      />
+                    )
+                )}
+                {countReaction > 0 && (
+                  <Text
+                    style={{
+                      marginLeft: 3,
+                      fontSize: 12,
+                      color: "#65676B",
+                    }}
+                  >
+                    {countReaction}
+                  </Text>
+                )}
+            </TouchableOpacity>
             </View>
             <View
               style={{
@@ -490,6 +588,7 @@ const Comment = ({
             </View>
           </View>
         </View>
+        
       </View>
 
       <View style={{ marginLeft: 30 }}>
