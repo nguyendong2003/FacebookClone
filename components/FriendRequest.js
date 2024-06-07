@@ -41,8 +41,8 @@ import Comment from './Comment';
 import * as ImagePicker from 'expo-image-picker';
 
 import { Context as FriendContext } from '../context/FriendContext';
-import { deleteNotification, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
-
+import { deleteNotification, getReceiveNotificationFromFriendRequest, createNotification } from "../service/NotificationService";
+import {Context as AccountContext} from "../context/AccountContext"
 export default function FriendRequest({
   item,
   navigation,
@@ -53,6 +53,7 @@ export default function FriendRequest({
   value,
 }) {
   
+  const { state: accountState, getAccount } = useContext(AccountContext);
   const [notificationId, setNotificationId] = useState(null);
   useEffect(() => {
     handleGetReceiveNotification(item?.id)
@@ -89,10 +90,25 @@ export default function FriendRequest({
         console.log(error);
     }
   }
+
+  const handleCreateNotification = async (to_account_id, notify_type) => {
+    try {
+      const response = await createNotification({
+        from_account_id: accountState.account.id,
+        to_account_id,
+        to_post_id: null,
+        to_comment_post_id: null,
+        notify_type,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   
   const acceptClickHandler = () => {
     acceptFriendRequest(item?.id).then(() => {
       getFriendRequests();
+      handleCreateNotification(item?.id, "accept_friend")
       handleDeleteNotification()
     });
   }

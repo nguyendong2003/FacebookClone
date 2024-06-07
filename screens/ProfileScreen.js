@@ -239,6 +239,7 @@ export default function ProfileScreen({ navigation, route }) {
 
   const acceptRequestHandler = async () => {
     await acceptFriendRequest(route.params.accountId);
+    await handleCreateNotification(route.params.accountId, "accept_friend")
     await handleDeleteNotification();
     fetchProfileStatus();
   };

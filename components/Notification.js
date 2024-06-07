@@ -2,15 +2,16 @@ import { Image ,View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Feat
 import { useEffect, useState,useContext } from "react";
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import B from "../components/B";
-import {deleteNotification, updateNotification} from "../service/NotificationService"
+import {deleteNotification, updateNotification, createNotification} from "../service/NotificationService"
 import {getPostOfComment} from "../service/CommentService"
-import moment from "moment";
+import moment from "moment"; 
+import {Context as AccountContext} from "../context/AccountContext"
 import { Context as PostContext } from "../context/PostContext";
 import { Context as FriendContext } from '../context/FriendContext';
 export default function Notification(
     {navigation, item, onDelete}
 ){
-    
+    const { state: accountState, getAccount } = useContext(AccountContext);
     const { state: postState, reloadPost } = useContext(PostContext);
     const [isRead, setIsRead] = useState(item._read)
     const [type, setType] = useState(item.type)
@@ -49,6 +50,9 @@ export default function Notification(
             case "friend_request":
                 return (<Image style={{width:32, height:32}} source={require('../iconfb/friend.png')}/>)
                 break;
+            case "accept_friend":
+                return (<Image style={{width:32, height:32}} source={require('../iconfb/friend.png')}/>)
+                 break;
             default:
                 break;
         }
@@ -105,9 +109,24 @@ export default function Notification(
         }
     }
 
+    const handleCreateNotification = async (to_account_id, notify_type) => {
+        try {
+          const response = await createNotification({
+            from_account_id: accountState.account.id,
+            to_account_id,
+            to_post_id: null,
+            to_comment_post_id: null,
+            notify_type,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
     const { acceptFriendRequest, getFriendRequests, rejectFriendRequest} = useContext(FriendContext);
     const acceptClickHandler = () => {
         acceptFriendRequest(item?.sender_id).then(() => {
+            handleCreateNotification(item?.sender_id, "accept_friend")
             handleDeleteNotification()
         });
     }
@@ -125,12 +144,20 @@ export default function Notification(
                 updateNotificationHandler()
                 if(item.type == "friend_request") {
                     navigation.navigate("Friend")
-                }else {
+                } else if(item.type == "accept_friend") {
+                    navigation.push("Profile", {
+                        accountId: item.sender_id,
+                        isPersonalPage: false,
+                    });
+                } else {
                     navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: item.send_comment_id, senderId: item.sender_id, nameSender: item.name_sender})
                 }
             }}
             >
-                <View>
+                <View style = {{
+                    width: 75,
+                    height:75
+                }}>
                     <Image
                         style={styles.avartarNotify}
                         source={ item.avatar_sender? {uri: item.avatar_sender}: require("../assets/defaultProfilePicture.jpg")}
@@ -316,14 +343,13 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         alignItems:"center",
         borderRadius:20,
-        position: "relative",
-        bottom: 20,
-        left: 50,
+        position:"absolute",
+        right:0,
+        bottom:0
     },
     container: {
         flex: 1,
         justifyContent:"center"
-        // "#CAE5E8"
     },
     notifyContainer: {
         flexDirection: "row",
@@ -338,7 +364,6 @@ const styles = StyleSheet.create({
         width: 75,
         height: 75,
         borderRadius: 100,
-        // margin: 10
     },
     contentContainer: {
         width: "85%",
@@ -348,7 +373,6 @@ const styles = StyleSheet.create({
     },
     titleNotification: {
         fontSize: 18,
-        flexWrap: "wrap",
         marginLeft: 10,
         marginRight: 10
     },
