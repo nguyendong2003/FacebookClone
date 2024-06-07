@@ -150,16 +150,36 @@ export default function PostDetailScreen({ route, navigation }) {
   }, [commentText, commentImage]);
 
   // Scroll to comment when reply
-  const [coords, setCoords] = useState({});
+  const [postHeight, setPostHeight] = useState(0);
+  const [coords, setCoords] = useState([]);
+
   const flatListRef = useRef(null);
   const scrollToComment = (commentId) => {
-    flatListRef?.current?.scrollToOffset({
-      offset: coords[commentId] + 165,
-      animated: true,
-    });
-    console.log(coords[commentId]);
+    const commentScroll = coords.find((item, index) => item.id === commentId);
+    // console.log("item: =========", commentScroll);
+    if (commentScroll) {
+      flatListRef?.current?.scrollToOffset({
+        offset: commentScroll.y + postHeight - 90,
+        animated: true,
+      });
+    }
+    // coords.map((item, index) => {
+    //   if (item.id === commentId) {
+    //     flatListRef?.current?.scrollToOffset({
+    //       offset: item.y + postHeight - 90,
+    //       animated: true,
+    //     });
+    //   }
+    // });
+    // console.log(coords[commentId]);
     // console.log(coords);
   };
+
+  useEffect(() => {
+    if (route?.params?.commentId) {
+      scrollToComment(route.params.commentId);
+    }
+  }, [coords]);
 
   //
   const [dimensions, setDimensions] = useState({
@@ -281,7 +301,7 @@ export default function PostDetailScreen({ route, navigation }) {
         item={post}
         navigation={navigation}
         onLayout={(height) => {
-          console.log("height: ", height);
+          setPostHeight(height);
         }}
       />
     ) : (

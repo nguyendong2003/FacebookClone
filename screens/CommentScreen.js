@@ -155,14 +155,29 @@ export default function CommentScreen({ route, navigation }) {
   }, [commentText, commentImage]);
 
   // Scroll to comment when reply
-  const [coords, setCoords] = useState({});
+  const [coords, setCoords] = useState([]);
   const flatListRef = useRef(null);
+  // const scrollToComment = (commentId) => {
+  //   flatListRef?.current?.scrollToOffset({
+  //     offset: coords[commentId] - 40 + 50,
+  //     animated: true,
+  //   });
+  //   // console.log(coords[commentId]);
+  //   // console.log(coords);
+  // };
   const scrollToComment = (commentId) => {
-    flatListRef?.current?.scrollToOffset({
-      offset: coords[commentId] - 40,
-      animated: true,
+    coords.map((item, index) => {
+      // console.log(commentId + 1000);
+      if (item.id === commentId) {
+        // console.log(item.y + postHeight);
+        flatListRef?.current?.scrollToOffset({
+          offset: item.y - 300,
+          animated: true,
+        });
+      }
     });
     // console.log(coords[commentId]);
+    // console.log(coords);
   };
 
   //
