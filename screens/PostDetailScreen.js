@@ -37,7 +37,6 @@ import { getPostById } from "../service/PostService";
 import Comment from "../components/Comment";
 import Post from "../components/Post";
 
-// import commentList from '../data/comment.json';
 import {
   getCommentsByPostId,
   createComment,
@@ -51,10 +50,10 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from "react-native";
 
 export default function PostDetailScreen({ route, navigation }) {
-  const [itemSend, setItemSend] = useState(() => {
-    console.log(route?.params);
-    return route?.params;
-  });
+  // const [itemSend, setItemSend] = useState(() => {
+  //   console.log(route?.params);
+  //   return route?.params;
+  // });
 
   const [isLoading, setIsLoading] = useState(false);
 
