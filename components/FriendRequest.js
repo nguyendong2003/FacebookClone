@@ -30,6 +30,7 @@ import {
 } from '@expo/vector-icons';
 
 import { useState, useEffect, useContext } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 
 import postList from '../data/post.json';
@@ -45,7 +46,6 @@ import { deleteNotification, getReceiveNotificationFromFriendRequest, createNoti
 import {Context as AccountContext} from "../context/AccountContext"
 export default function FriendRequest({
   item,
-  navigation,
   name,
   avatar,
   icon,
@@ -54,6 +54,7 @@ export default function FriendRequest({
 }) {
   
   const { state: accountState, getAccount } = useContext(AccountContext);
+  const navigation = useNavigation();
   const [notificationId, setNotificationId] = useState(null);
   useEffect(() => {
     handleGetReceiveNotification(item?.id)
@@ -130,7 +131,7 @@ export default function FriendRequest({
         // backgroundColor: 'red',
       }}
       onPress={() => {
-        alert(`Click ${item?.name}`);
+        navigation.navigate('Profile', {accountId: item?.id, isPersonalPage: false});
       }}
     >
       <Image

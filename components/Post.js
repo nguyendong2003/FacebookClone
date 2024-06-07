@@ -56,7 +56,16 @@ import { Context as UserPostContext } from "../context/UserPostContext";
 import React from "react";
 import { deletePost } from "../service/PostService";
 
-const Post = ({ item, navigation, onUpdatePost, postType }) => {
+const Post = ({
+  item,
+  navigation,
+  onUpdatePost,
+  postType,
+  onLayout = () => {},
+}) => {
+  // Get height of post to scroll in PostDetailScreen
+  const postRef = useRef(null);
+
   // Reaction
   const [isPressingLike, setIsPressingLike] = useState(false);
   const [valueReaction, setValueReaction] = useState(0);
@@ -373,8 +382,7 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
       if (statusPost == "POST") {
         DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
         DeviceEventEmitter.emit("reloadHomeScreenPost", postId);
-      }
-      else if (statusPost == "POST_DETAIL") {
+      } else if (statusPost == "POST_DETAIL") {
         DeviceEventEmitter.emit("reloadPostDetailScreenPost", postId);
       }
 
@@ -406,7 +414,13 @@ const Post = ({ item, navigation, onUpdatePost, postType }) => {
   };
 
   return (
-    <View>
+    <View
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout;
+        onLayout(height);
+      }}
+      ref={postRef}
+    >
       <View style={styles.card} key={item.id}>
         <View
           style={{

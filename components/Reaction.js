@@ -164,7 +164,7 @@ export default function Reaction({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("Profile", { accountId: item.id });
+        navigation.push("Profile", { accountId: item.id});
       }}
     >
       <View style={styles.container}>

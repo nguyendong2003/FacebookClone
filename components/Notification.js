@@ -1,6 +1,15 @@
-import { Image ,View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Feather } from "react-native"
-import { useEffect, useState,useContext } from "react";
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import {
+  Image,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  Feather,
+} from "react-native";
+import { useEffect, useState, useContext } from "react";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import B from "../components/B";
 import {deleteNotification, updateNotification, createNotification} from "../service/NotificationService"
 import {getPostOfComment} from "../service/CommentService"
@@ -58,56 +67,56 @@ export default function Notification(
         }
     }
 
-    const remainTime = (time)=> {
-        const createDate = new Date(time);
-        const now = new Date();
+  const remainTime = (time) => {
+    const createDate = new Date(time);
+    const now = new Date();
 
-        const diffInSeconds = Math.floor((now - createDate) / 1000);
-        const diffInMinutes = Math.floor(diffInSeconds / 60);
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        const diffInDays = Math.floor(diffInHours / 24);
-        const diffInMonths = Math.floor(diffInDays / 30);
-        const diffInYears = Math.floor(diffInMonths / 12);
+    const diffInSeconds = Math.floor((now - createDate) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInMonths / 12);
 
-        if (diffInYears > 0) {
-            return `${diffInYears} years ago`;
-        } else if (diffInMonths > 0) {
-            return `${diffInMonths} months ago`;
-        } else if (diffInDays > 0) {
-            return `${diffInDays} days ago`;
-        } else if (diffInHours > 0) {
-            return `${diffInHours} hours ago`;
-        } else if (diffInMinutes > 0) {
-            return `${diffInMinutes} minutes ago`;
-        } else {
-            return "just now";
-        }
+    if (diffInYears > 0) {
+      return `${diffInYears} years ago`;
+    } else if (diffInMonths > 0) {
+      return `${diffInMonths} months ago`;
+    } else if (diffInDays > 0) {
+      return `${diffInDays} days ago`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hours ago`;
+    } else if (diffInMinutes > 0) {
+      return `${diffInMinutes} minutes ago`;
+    } else {
+      return "just now";
     }
+  };
 
-    const updateNotificationHandler = async() => {
-        try {
-            if(!isRead) {
-                const response = await updateNotification(item.id)
-                // console.log(response)
-                setIsRead(true)
-            }
-        }catch(error) {
-            console.log(error);
-        }
+  const updateNotificationHandler = async () => {
+    try {
+      if (!isRead) {
+        const response = await updateNotification(item.id);
+        // console.log(response)
+        setIsRead(true);
+      }
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    const updatePostById = async (id) => {
-        await reloadPost(id);
-    };
+  const updatePostById = async (id) => {
+    await reloadPost(id);
+  };
 
-    const handleDeleteNotification = async() => {
-        try {
-            const response = await deleteNotification(item?.id)
-            onDelete(item?.id)
-        }catch(error) {
-            console.log(error);
-        }
+  const handleDeleteNotification = async () => {
+    try {
+      const response = await deleteNotification(item?.id);
+      onDelete(item?.id);
+    } catch (error) {
+      console.log(error);
     }
+  };
 
     const handleCreateNotification = async (to_account_id, notify_type) => {
         try {
@@ -150,7 +159,7 @@ export default function Notification(
                         isPersonalPage: false,
                     });
                 } else {
-                    navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: item.send_comment_id, senderId: item.sender_id, nameSender: item.name_sender})
+                    navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: (item.send_comment_id != null) ? item.send_comment_id : (item.to_comment_post_id != null ?  item.to_comment_post_id : null), senderId: item.sender_id, nameSender: item.name_sender})
                 }
             }}
             >
@@ -200,139 +209,150 @@ export default function Notification(
                             </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={{
-                            flex: 1,
-                            backgroundColor: '#e4e6eb',
-                            padding: 6,
-                            borderRadius: 8,
-                            marginLeft: 8,
-                            }}
-                            onPress={rejectClickHandler}
-                        >
-                            <Text
-                            style={{
-                                fontSize: 16,
-                                color: '#050505',
-                                textAlign: 'center',
-                                fontWeight: '500'
-                            }}
-                            >
-                            Delete
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    }          
-                </View>
-
-                <View style = {{
-                    flexDirection:'column',
-                    justifyContent: 'center',
-                }}>
-                    <TouchableOpacity
-                        style={{
-                            padding: 8,
-                        }}
-                        onPress={() => setIsPressingMore(!isPressingMore)}
-                        >
-                        <MaterialIcons name="more-horiz" size={24} color="#65676B" />
-                    </TouchableOpacity>
-                </View>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isPressingMore}
-                    onRequestClose={() => {
-                    // Alert.alert('Modal has been closed.');
-                    setIsPressingMore(!isPressingMore);
-                    }}
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: "#e4e6eb",
+                  padding: 6,
+                  borderRadius: 8,
+                  marginLeft: 8,
+                }}
+                onPress={rejectClickHandler}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: "#050505",
+                    textAlign: "center",
+                    fontWeight: "500",
+                  }}
                 >
-                    <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                    }}
-                    >
-                    <Pressable
-                        style={{
-                        height: "75%",
-                        width: "100%",
-                        }}
-                        onPress={() => setIsPressingMore(false)}
-                    />
-                    <View
-                        style={{
-                        height: "25%",
-                        width: "100%",
-                        backgroundColor: "white",
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                        padding: 20,
-                        }}
-                    >
-                        <View style = {{
-                            flexDirection: "column",
-                            alignItems: "center",
-                        }}>
-                            <View>
-                                <Image
-                                    style={styles.avartarNotify}
-                                    source={{uri: item?.avatar_sender}}
-                                />
-                                <View style={styles.commentIconContainer}>
-                                    {renderIcon(item.type)}
-                                </View>
-                            
-                            </View>
-                            <View style = {{
-                                marginTop: 5,
-                                marginBottom: 10
-                            }}>
-                                <Text numberOfLines={3} style={styles.titleNotification}>{user}{rest}</Text>
-                            </View>
-                        </View>
-
-                        <TouchableOpacity
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                paddingVertical: 12,
-                                borderTopColor: "#ccc",
-                                borderTopWidth: 1,
-                            }}
-                            onPress={handleDeleteNotification}
-                            >
-                            <View style = {{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 32,
-                                backgroundColor: "#e4e6eb",
-                                justifyContent: "center",
-                                alignItems:"center"
-                            }}>
-                                <Image style={{width:20, height:20}} source={require('../iconfb/remove.png')}/>
-                            </View> 
-                            <Text
-                                style={{
-                                fontSize: 18,
-                                color: "black",
-                                fontWeight: "500",
-                                marginLeft: 12,
-                                }}
-                            >
-                            Remove this notification
-                            </Text>
-                        </TouchableOpacity>
-                        
-                    </View>
-                </View>
-                </Modal>
-            </TouchableOpacity>
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            </View>
+          }
         </View>
 
-    );
+        <View
+          style={{
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              padding: 8,
+            }}
+            onPress={() => setIsPressingMore(!isPressingMore)}
+          >
+            <MaterialIcons name="more-horiz" size={24} color="#65676B" />
+          </TouchableOpacity>
+        </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isPressingMore}
+          onRequestClose={() => {
+            // Alert.alert('Modal has been closed.');
+            setIsPressingMore(!isPressingMore);
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <Pressable
+              style={{
+                height: "75%",
+                width: "100%",
+              }}
+              onPress={() => setIsPressingMore(false)}
+            />
+            <View
+              style={{
+                height: "25%",
+                width: "100%",
+                backgroundColor: "white",
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                padding: 20,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <View>
+                  <Image
+                    style={styles.avartarNotify}
+                    source={{ uri: item?.avatar_sender }}
+                  />
+                  <View style={styles.commentIconContainer}>
+                    {renderIcon(item.type)}
+                  </View>
+                </View>
+                <View
+                  style={{
+                    marginTop: 5,
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text numberOfLines={3} style={styles.titleNotification}>
+                    {user}
+                    {rest}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 12,
+                  borderTopColor: "#ccc",
+                  borderTopWidth: 1,
+                }}
+                onPress={handleDeleteNotification}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 32,
+                    backgroundColor: "#e4e6eb",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    style={{ width: 20, height: 20 }}
+                    source={require("../iconfb/remove.png")}
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "black",
+                    fontWeight: "500",
+                    marginLeft: 12,
+                  }}
+                >
+                  Remove this notification
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
