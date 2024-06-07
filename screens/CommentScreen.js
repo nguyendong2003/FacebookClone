@@ -355,6 +355,8 @@ export default function CommentScreen({ route, navigation }) {
                   paddingHorizontal: 12,
                   marginBottom: 16,
                   backgroundColor: "white",
+                  borderBottomColor: "#ccc",
+                  borderBottomWidth: 1,
                 }}
               >
                 <TouchableOpacity
@@ -394,18 +396,10 @@ export default function CommentScreen({ route, navigation }) {
                       fontSize: 16,
                     }}
                   >
-                    {reactions[0].number}
+                    {reactions[0].number === 0 ? "" : reactions[0].number}
                   </Text>
                   <Entypo name="chevron-small-right" size={24} color="black" />
                 </TouchableOpacity>
-                <AntDesign
-                  name="like2"
-                  size={24}
-                  color="black"
-                  onPress={() => {
-                    // route?.params.setValueReaction(1);
-                  }}
-                />
               </View>
             );
           }}
@@ -561,7 +555,7 @@ export default function CommentScreen({ route, navigation }) {
                       borderRadius: 20,
                     }}
                   />
-                  <Entypo
+                  {/* <Entypo
                     style={{ position: "absolute", left: "100%" }}
                     name="circle-with-cross"
                     size={24}
@@ -570,7 +564,7 @@ export default function CommentScreen({ route, navigation }) {
                       setIsSelectImage(false);
                       setCommentImage(null);
                     }}
-                  />
+                  /> */}
                 </View>
               )}
 
