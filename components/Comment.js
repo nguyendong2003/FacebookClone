@@ -253,25 +253,10 @@ const Comment = ({
         ref={ref}
         onLayout={(event) => {
           const { x, y, width, height } = event.nativeEvent.layout;
-          // console.log(x, y, width, height);
-          // const coords = [];
           setCoords((prev) => {
             const prevY = prev.length > 0 ? prev[prev.length - 1].y : 0;
             return [...prev, { id: item.id, y: prevY + height }];
           });
-
-          // if (Object.keys(coords).length === 0) {
-          //   coords[item.id] = y;
-          //   console.log(coords);
-          // } else {
-          //   const previousKey =
-          //     Object.keys(coords)[Object.keys(coords).length - 1];
-          //   const previousValue = coords[previousKey];
-          //   coords[item.id] = previousValue + height;
-          //   console.log(coords);
-          // }
-          // setCoords(coords);
-          // console.log(coords);
         }}
         style={{
           flexDirection: "row",

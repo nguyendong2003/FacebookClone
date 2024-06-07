@@ -156,23 +156,12 @@ export default function PostDetailScreen({ route, navigation }) {
   const flatListRef = useRef(null);
   const scrollToComment = (commentId) => {
     const commentScroll = coords.find((item, index) => item.id === commentId);
-    // console.log("item: =========", commentScroll);
     if (commentScroll) {
       flatListRef?.current?.scrollToOffset({
         offset: commentScroll.y + postHeight - 90,
         animated: true,
       });
     }
-    // coords.map((item, index) => {
-    //   if (item.id === commentId) {
-    //     flatListRef?.current?.scrollToOffset({
-    //       offset: item.y + postHeight - 90,
-    //       animated: true,
-    //     });
-    //   }
-    // });
-    // console.log(coords[commentId]);
-    // console.log(coords);
   };
 
   useEffect(() => {
@@ -180,6 +169,7 @@ export default function PostDetailScreen({ route, navigation }) {
       scrollToComment(route.params.commentId);
     }
   }, [coords]);
+  //
 
   //
   const [dimensions, setDimensions] = useState({
