@@ -161,21 +161,6 @@ export default function SearchScreen({ navigation }) {
             // ItemSeparatorComponent={
             //   <View style={{ height: 4, backgroundColor: '#ccc' }}></View>
             // }
-            ListEmptyComponent={
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 24,
-                  flex: 1,
-                  textAlign: "center",
-                }}
-              >
-                No search found
-              </Text>
-            } // display when empty data
-            // ListHeaderComponent={
-            // }
-            // ListFooterComponent={<View style={{ height: 4 }}></View>}
             showsVerticalScrollIndicator={false}
           />
         </View>

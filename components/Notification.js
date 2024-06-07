@@ -43,7 +43,7 @@ export default function Notification(
             case "WOW":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/wow.png')}/>)
                 break;
-            case "SORRY":
+            case "SAD":
                 return (<Image style={{width:24, height:24}} source={require('../iconfb/sad.png')}/>)
                 break;
             case "friend_request":
@@ -130,7 +130,7 @@ export default function Notification(
                 }
             }}
             >
-                <View>
+                <View style={{width:75, height:75}}>
                     <Image
                         style={styles.avartarNotify}
                         source={ item.avatar_sender? {uri: item.avatar_sender}: require("../assets/defaultProfilePicture.jpg")}

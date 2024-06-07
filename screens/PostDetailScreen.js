@@ -177,6 +177,7 @@ export default function PostDetailScreen({ route, navigation }) {
   };
 
   const submitComment = async () => {
+    setIsLoading(true);
     if (isCommentValid) {
       formData = new FormData();
       formData.append("id_account", state.account.id);
@@ -227,6 +228,7 @@ export default function PostDetailScreen({ route, navigation }) {
     } else {
       alert("Invalid comment");
     }
+    setIsLoading(false);
   };
 
   const notificationHandler = async (
@@ -436,15 +438,19 @@ export default function PostDetailScreen({ route, navigation }) {
                   />
                 </View>
               )}
-
-              <FontAwesome
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#0000ff" />
+              ):(
+                <FontAwesome
                 name={isCommentValid ? "send" : "send-o"}
                 size={24}
                 color={isCommentValid ? "#0866ff" : "#65676B"}
                 onPress={() => {
                   submitComment();
                 }}
-              />
+                />
+              )}
+
             </View>
           )}
         </View>
