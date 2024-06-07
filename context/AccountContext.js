@@ -44,7 +44,6 @@ const updateDetail = (dispatch) => {
 const updateDescription = (dispatch) => {
   return async (data) => {
     try {
-  console.log(data);
 
       await SpringServer.put("/account/updateDescription", data);
       getAccount(dispatch)();

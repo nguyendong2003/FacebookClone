@@ -161,11 +161,7 @@ export default function LoginScreen({ navigation }) {
                 {errors["passwordEmptyError"]}
               </Text>
             ) : null}
-
-            <TouchableOpacity onPress={() => Alert.alert("hello")}>
-              <Text style={styles.forgotPassword}>Forgot password?</Text>
-            </TouchableOpacity>
-
+            
             <TouchableOpacity
               style={styles.button}
               onPress={() => handleRegister()}

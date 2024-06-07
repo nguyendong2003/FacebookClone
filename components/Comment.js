@@ -281,10 +281,10 @@ const Comment = ({
         <View style={{ maxWidth: "86%" }}>
           <Pressable
             style={{
-              flex: 1,
+              alignSelf: "flex-start",
               marginHorizontal: 8,
               borderRadius: 20,
-              padding: 8,
+              padding: 5,
               paddingLeft: 12,
               paddingRight: 12,
               backgroundColor:
@@ -450,8 +450,7 @@ const Comment = ({
                   borderRadius: 20,
                   // width: 200,
                   height: 200,
-                  width: "80%",
-                  aspectRatio: 1,
+                  width: "95%",
                   resizeMode: "cover",
                   // marginTop: 8,
                   marginBottom: 6,
@@ -762,6 +761,7 @@ const Comment = ({
             coords={coords}
             setCoords={setCoords}
             navigation={navigation}
+            fetchComments={fetchComments}
           />
         ))}
       </View>

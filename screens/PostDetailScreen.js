@@ -83,6 +83,7 @@ export default function PostDetailScreen({ route, navigation }) {
   useEffect(() => {
     const fetchPost = async () => {
       const post = await getPostById(postId);
+
       setPost(post);
     };
     fetchPost();

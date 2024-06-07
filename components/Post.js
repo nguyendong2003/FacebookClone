@@ -163,7 +163,7 @@ const Post = ({
 
   const deletePostHandler = async (postId) => {
     await deletePost(postId);
-    DeviceEventEmitter.emit("reloadProfileScreenPost", postId);
+    DeviceEventEmitter.emit("fetchPost");
     setIsPressingMore(false);
   };
   const updatePostHandler = async (postId) => {
@@ -560,6 +560,7 @@ const Post = ({
                     setIsPressingMore(false);
                     navigation.navigate("EditPost", {
                       item: item,
+                      statusPost: statusPost,
                     });
                   }}
                 >

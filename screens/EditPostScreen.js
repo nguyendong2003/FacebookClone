@@ -151,7 +151,11 @@ export default function EditPostScreen({ navigation, route }) {
         files: fileImages
       });
       setLoading(false)
-      DeviceEventEmitter.emit('fetchPost');
+      
+      if(route.params.statusPost === 'POST') 
+        DeviceEventEmitter.emit('fetchPost');
+      else if (route.params.statusPost === 'POST_DETAIL')
+        DeviceEventEmitter.emit('reloadPostDetailScreenPost');
       navigation.goBack();
       
     } catch (error) {

@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, StyleSheet, View, TextInput, Pressable } from "react-native";
+import { Text, StyleSheet, View, TextInput, Pressable, DeviceEventEmitter } from "react-native";
 import { useRef, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -39,7 +39,8 @@ export default function EditProfileDetailScreen({ navigation, route }) {
       birthdate: date.toISOString().slice(0, 10)
     };
     try {
-      updateDetail(data);
+      await updateDetail(data);
+      DeviceEventEmitter.emit('fetchProfile')
       navigation.goBack();
     } catch (error) {
       console.log(error);

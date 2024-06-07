@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { Text, View, StyleSheet, TextInput } from "react-native"
+import { Text, View, StyleSheet, TextInput, DeviceEventEmitter } from "react-native"
 import React, { useLayoutEffect } from 'react';
 import { useContext } from "react"
 import { Context as AccountContext } from "../context/AccountContext"
@@ -19,13 +19,14 @@ export default function EditDescriptionScreen(
         setCountDigit(newText.length)
     }
 
-    const updateDescriptionHandler = useCallback(() =>{
+    const updateDescriptionHandler = useCallback(async () =>{
         const data = {
             description: textDescription
         }
 
         try{
-            updateDescription(data)
+            await updateDescription(data)
+            DeviceEventEmitter.emit('fetchProfile')
             navigation.goBack()
         }
         catch(error){

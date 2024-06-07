@@ -84,7 +84,6 @@ export default function FriendScreen({ navigation }) {
             >
               Friends
             </Text>
-            <FontAwesome name="search" size={24} color="#65676B" />
           </View>
           {/* <View style={{ flexDirection: "row" }}>
             <TouchableOpacity

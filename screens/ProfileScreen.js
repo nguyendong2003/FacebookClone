@@ -79,9 +79,14 @@ export default function ProfileScreen({ navigation, route }) {
     }
     setStatus(data);
   };
-  const fetchUserData = async () => {
+
+  const fetchUser = async () => {
     const user = await getAccountById(route.params.accountId);
     setUser(user);
+  };
+
+  const fetchUserData = async () => {
+    fetchUser();
     fetchProfileStatus();
     fetchUserPost();
 
@@ -90,6 +95,18 @@ export default function ProfileScreen({ navigation, route }) {
     setIsLoadingAvatar(false);
     setIsLoadingCover(false);
   };
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      "fetchProfile",
+      fetchUser
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   useEffect(() => {
     fetchUserData();
     const subscription = DeviceEventEmitter.addListener(
@@ -130,12 +147,12 @@ export default function ProfileScreen({ navigation, route }) {
       );
       setUserPost(list_update);
     };
-  
+
     const subscription = DeviceEventEmitter.addListener(
       "reloadProfileScreenPost",
       updatePostById
     );
-  
+
     return () => {
       subscription.remove();
     };
@@ -171,7 +188,7 @@ export default function ProfileScreen({ navigation, route }) {
         setIsLoadingAvatar(true);
         await updateAvatar(result.assets[0].uri);
         fetchUserData();
-        getAccount()
+        getAccount();
         // setIsLoadingAvatar(false)
       }
     }
