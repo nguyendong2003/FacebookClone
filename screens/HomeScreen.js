@@ -105,18 +105,6 @@ export default function HomeScreen({ navigation }) {
             ItemSeparatorComponent={
               <View style={{ height: 4, backgroundColor: "#ccc" }}></View>
             }
-            ListEmptyComponent={
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 24,
-                  flex: 1,
-                  textAlign: "center",
-                }}
-              >
-                No post found
-              </Text>
-            } // display when empty data
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }

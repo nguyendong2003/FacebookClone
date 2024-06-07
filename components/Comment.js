@@ -71,6 +71,7 @@ const Comment = ({
   const [nameReaction, setNameReaction] = useState(null);
   const [countReaction, setCountReaction] = useState(item?.reaction_quantity);
   const [colorReaction, setColorReaction] = useState("#65676B");
+  const [myReaction, setMyReaction] = useState(item?.reaction);
   const { state: accountState } = useContext(AccountContext);
   const [reactions, setReactions] = useState([
     { type: "All", number: 0, users: [] },
@@ -190,8 +191,14 @@ const Comment = ({
       id_comment: item.id,
       reaction_type: type,
     });
-    if (type == "NONE") setCountReaction((count) => count - 1);
-    else setCountReaction((count) => count + 1);
+
+    if (myReaction == "NONE" && type != "NONE") {
+      setMyReaction(type);
+      setCountReaction((count) => count + 1);
+    } else if (myReaction != "NONE" && type == "NONE") {
+      setMyReaction(type);
+      setCountReaction((count) => count - 1);
+    }
     setValueReaction(convertReactionValue(type));
     fetchReactions();
   };
@@ -240,33 +247,25 @@ const Comment = ({
     }
   };
 
-  scrollToComment(commentIdReplying);
   return (
     <View>
       <View
         ref={ref}
         onLayout={(event) => {
           const { x, y, width, height } = event.nativeEvent.layout;
-          // console.log(x, y, width, height);
-          if (Object.keys(coords).length === 0) {
-            coords[item.id] = y;
-          } else {
-            const previousKey =
-              Object.keys(coords)[Object.keys(coords).length - 1];
-            const previousValue = coords[previousKey];
-            coords[item.id] = previousValue + height;
-          }
-          // console.log(coords);
+          setCoords((prev) => {
+            const prevY = prev.length > 0 ? prev[prev.length - 1].y : 0;
+            return [...prev, { id: item.id, y: prevY + height }];
+          });
         }}
         style={{
           flexDirection: "row",
           padding: 8,
-          // marginLeft: marginLeftValue,
         }}
       >
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Profile", { accountId: item.account_user.id });
+            navigation.push("Profile", { accountId: item.account_user.id });
           }}
         >
           <Image
@@ -302,7 +301,7 @@ const Comment = ({
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Profile", {
+                navigation.push("Profile", {
                   accountId: item.account_user.id,
                 });
               }}
@@ -489,7 +488,7 @@ const Comment = ({
                   setIsPressingLike(false);
                   if (valueReaction > 0) {
                     reactionHandler("NONE");
-                    setNameReaction(null);
+                    setNameReaction("Like");
                   } else {
                     reactionHandler("LIKE");
                     setValueReaction(1);
@@ -762,6 +761,7 @@ const Comment = ({
             coords={coords}
             setCoords={setCoords}
             navigation={navigation}
+            fetchComments={fetchComments}
           />
         ))}
       </View>
@@ -776,13 +776,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: "white",
-    // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
     backgroundColor: "white",
-    // padding: 16,
     paddingBottom: 8,
   },
   topContainer: {

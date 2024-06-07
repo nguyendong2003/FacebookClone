@@ -29,7 +29,7 @@ import {
   Entypo,
 } from '@expo/vector-icons';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 
 import postList from '../data/post.json';
@@ -39,7 +39,10 @@ import Comment from './Comment';
 
 // // Upload image
 import * as ImagePicker from 'expo-image-picker';
-
+import { Context as AccountContext } from "../context/AccountContext";
+import { Context as FriendContext } from "../context/FriendContext";
+import { createNotification, deleteNotification, getSendNotificationFromFriendRequest, getReceiveNotificationFromFriendRequest } from "../service/NotificationService";
+import {getProfileStatus} from "../service/FriendService"
 export default function Reaction({
   item,
   navigation,
@@ -49,6 +52,10 @@ export default function Reaction({
   size,
   value,
 }) {
+  const { state } = useContext(AccountContext);
+  const [notificationId, setNotificationId] = useState(null);  
+  const { sendRequest, cancelFriendRequest, acceptFriendRequest, rejectFriendRequest } = useContext(FriendContext);
+  const [status, setStatus] = useState(null)
   const [dimensions, setDimensions] = useState({
     window: Dimensions.get('window'),
   });
@@ -60,6 +67,96 @@ export default function Reaction({
     return () => subscription?.remove();
   });
 
+  useEffect(() => {
+    fetchStatus()
+  },[])
+
+  useEffect(() => {
+    if(notificationId == null) {
+      if(status == "IN_REQUEST_SENDER") {
+        handleGetSendNotification(item.id)
+      }
+    }
+  }, [status])
+
+  const fetchStatus = async() => {
+    try {
+      const response = await getProfileStatus(item.id)
+      setStatus(response)
+    }catch(error) {
+      console.log(error)
+    }
+  }
+  const handleGetSendNotification = async(receiverId) => {
+    try{ 
+      const response = await getSendNotificationFromFriendRequest(receiverId)
+      setNotificationId(response.id)
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteNotification = async() => {
+    try {
+        const response = await deleteNotification(notificationId)
+    }catch(error) {
+        console.log(error);
+    }
+  }
+
+  const handleCreateNotification = async(to_account_id, notify_type) => {
+    try{
+      const response = await createNotification({
+        from_account_id: state.account.id,
+        to_account_id,
+        to_post_id: null,
+        to_comment_post_id: null,
+        notify_type
+      })
+    }catch(error) {
+      console.log(error);
+    }
+  }
+
+  const sendRequestHandler = async () => {
+    await sendRequest(item.id);
+    getProfileStatus(item.id).then((data) => {
+      setStatus(data);
+    });
+    handleCreateNotification(item.id, "friend_request")
+  };
+
+  const cancelRequestHandler = async () => {
+    await cancelFriendRequest(item.id);
+    await handleDeleteNotification()
+    fetchStatus();
+  };
+  const renderUserReaction = () => {
+    switch(status) {
+      case 'STRANGER':
+        return (
+          <TouchableOpacity
+              style={[styles.button]}
+              onPress={() => sendRequestHandler()}
+            >
+              <Text style={{fontSize: 15, color: "white" }}>
+                Add friend
+              </Text>
+          </TouchableOpacity>
+        )
+      case "IN_REQUEST_SENDER":
+        return(
+          <TouchableOpacity
+              style={[styles.button]}
+              onPress={() => cancelRequestHandler()}
+            >
+              <Text style={{fontSize: 15, color: "white" }}>
+                Undo
+              </Text>
+          </TouchableOpacity>
+        )
+    }
+  }
   const { window } = dimensions;
   const windowWidth = window.width;
   const windowHeight = window.height;
@@ -67,7 +164,7 @@ export default function Reaction({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("Profile", { accountId: item.id });
+        navigation.push("Profile", { accountId: item.id});
       }}
     >
       <View style={styles.container}>
@@ -111,9 +208,9 @@ export default function Reaction({
           >
             {name}
           </Text>
-          {/* <Button title="Add friend" color={'#0866ff'} /> */}
+          {renderUserReaction()}
         </View>
-        {/* <Text>{name} Screen Content</Text> */}
+        
       </View>
     </TouchableOpacity>
   );
@@ -201,11 +298,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   //button bottom post
-  buttonBottomPost: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    // padding: 4,
+  button: {
+    flexDirection: "row",
+    backgroundColor: "#0866ff",
+    marginRight: 8,
+    paddingVertical:8,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 5,
   },
   textBottomPost: {
     fontSize: 12,

@@ -37,8 +37,11 @@ import { getPostById } from "../service/PostService";
 import Comment from "../components/Comment";
 import Post from "../components/Post";
 
-// import commentList from '../data/comment.json';
-import { getCommentsByPostId, createComment } from "../service/CommentService";
+import {
+  getCommentsByPostId,
+  createComment,
+  editComment,
+} from "../service/CommentService";
 import { Context as AccountContext } from "../context/AccountContext";
 import { Context as PostContext } from "../context/PostContext";
 import { createNotification } from "../service/NotificationService";
@@ -47,27 +50,27 @@ import * as ImagePicker from "expo-image-picker";
 import { LogBox } from "react-native";
 
 export default function PostDetailScreen({ route, navigation }) {
-  const [userPost, setUserPost] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+  // const [itemSend, setItemSend] = useState(() => {
+  //   console.log(route?.params);
+  //   return route?.params;
+  // });
 
-  const [commentText, setCommentText] = useState(
-    route?.params?.commentId != null ? `${route?.params?.nameSender} ` : ""
-  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [commentText, setCommentText] = useState("");
   const [commentImage, setCommentImage] = useState(null);
   const [isCommentTextFocus, setIsCommentTextFocus] = useState(false);
   const [isSelectImage, setIsSelectImage] = useState(false);
   const [isCommentValid, setIsCommentValid] = useState(false);
-  const [idUserReplying, setIdUserReplying] = useState(
-    route?.params?.commentId != null ? route?.params?.senderId : null
-  );
-  const [isReplying, setIsReplying] = useState(
-    route?.params?.commentId != null ? true : false
-  );
-  const [commentIdReplying, setCommentIdReplying] = useState(
-    route?.params?.commentId
-  );
-  const [nameReplying, setNameReplying] = useState(route?.params?.nameSender);
+  //
+  const [isReplying, setIsReplying] = useState(false);
+  const [commentIdReplying, setCommentIdReplying] = useState(route?.params?.commentId ? route?.params?.commentId : null);
+  const [nameReplying, setNameReplying] = useState("");
+  const [idUserReplying, setIdUserReplying] = useState(null);
   const [commentList, setCommentList] = useState([]);
+  //
+  const [isCommentEditing, setIsCommentEditing] = useState(false);
+  const [commentIdEditing, setCommentIdEditing] = useState(null);
   // focus vào TextInput để viết comment khi isReplying là true
   const commentInputRef = useRef(null);
   const { state } = useContext(AccountContext);
@@ -96,10 +99,15 @@ export default function PostDetailScreen({ route, navigation }) {
   }, [postId]);
 
   useEffect(() => {
-    if (isReplying || isCommentTextFocus) {
-      commentInputRef.current?.focus();
+    if (isReplying || isCommentTextFocus || isCommentEditing) {
+      // Kiểm tra xem ref có tồn tại không trước khi gọi focus()
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      } else {
+        commentInputRef.current.blur();
+      }
     }
-  }, [isReplying, isCommentTextFocus]);
+  }, [isReplying, isCommentTextFocus, isCommentEditing]);
 
   const fetchComments = async () => {
     const response = await getCommentsByPostId(route?.params?.postId);
@@ -140,17 +148,31 @@ export default function PostDetailScreen({ route, navigation }) {
       setIsCommentValid(false);
     }
   }, [commentText, commentImage]);
-  
+
   // Scroll to comment when reply
-  const [coords, setCoords] = useState({});
+  const [postHeight, setPostHeight] = useState(0);
+  const [coords, setCoords] = useState([]);
+  const [commentIdScroll, setCommentIdScroll] = useState(
+    route?.params?.commentId ? route?.params?.commentId : null
+  );
+
   const flatListRef = useRef(null);
   const scrollToComment = (commentId) => {
-    flatListRef?.current?.scrollToOffset({
-      offset: coords[commentId] + 22,
-      animated: true,
-    });
-    // console.log(coords[commentId]);
+    const commentScroll = coords.find((item, index) => item.id === commentId);
+    if (commentScroll) {
+      flatListRef?.current?.scrollToOffset({
+        offset: commentScroll.y + postHeight - 90,
+        animated: true,
+      });
+    }
   };
+
+  useEffect(() => {
+    if (commentIdScroll) {
+      scrollToComment(commentIdScroll);
+    }
+  }, [coords]);
+  //
 
   //
   const [dimensions, setDimensions] = useState({
@@ -178,8 +200,10 @@ export default function PostDetailScreen({ route, navigation }) {
   };
 
   const submitComment = async () => {
+    setIsLoading(true);
     if (isCommentValid) {
       formData = new FormData();
+
       formData.append("id_account", state.account.id);
       if (commentIdReplying) {
         formData.append("to_comment_id", commentIdReplying);
@@ -197,37 +221,50 @@ export default function PostDetailScreen({ route, navigation }) {
         });
       }
 
-      const response = await createComment(formData);
-      if (commentIdReplying) {
-        notificationHandler(
-          idUserReplying,
-          route?.params?.postId,
-          commentIdReplying,
-          response.id
-        );
+      let response = null;
+
+      if (!isCommentEditing) response = await createComment(formData);
+      else await editComment(commentIdEditing, commentText);
+
+      if (!isCommentEditing) {
+        if (commentIdReplying) {
+          notificationHandler(
+            idUserReplying,
+            route?.params?.postId,
+            commentIdReplying,
+            response.id
+          );
+        } else {
+          notificationHandler(
+            post.user.id,
+            route?.params?.postId,
+            null,
+            response.id
+          );
+        }
       } else {
-        notificationHandler(
-          post.user.id,
-          route?.params?.postId,
-          null,
-          response.id
-        );
+        setCommentIdEditing(null);
+        setIsCommentEditing(false);
       }
 
       setCommentText("");
       setIsReplying(false);
       setCommentIdReplying(null);
       setCommentImage(null);
-      getPosts();
+      // getPosts();
       fetchComments();
 
       if (route?.params?.inProfile == false)
         DeviceEventEmitter.emit("reloadHomeScreenPost", route?.params?.postId);
       else
-        DeviceEventEmitter.emit("reloadProfileScreenPost", route?.params?.postId);
+        DeviceEventEmitter.emit(
+          "reloadProfileScreenPost",
+          route?.params?.postId
+        );
     } else {
       alert("Invalid comment");
     }
+    setIsLoading(false);
   };
 
   const notificationHandler = async (
@@ -245,8 +282,6 @@ export default function PostDetailScreen({ route, navigation }) {
         send_comment_id,
         notify_type: "comment",
       });
-
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -258,6 +293,9 @@ export default function PostDetailScreen({ route, navigation }) {
         postType="POST_DETAIL"
         item={post}
         navigation={navigation}
+        onLayout={(height) => {
+          setPostHeight(height);
+        }}
       />
     ) : (
       <ActivityIndicator size="large" color="#0000ff" />
@@ -275,7 +313,6 @@ export default function PostDetailScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-        {/* <View style={styles.scrollContainer}> */}
         <FlatList
           ref={flatListRef}
           keyboardShouldPersistTaps="handled"
@@ -288,23 +325,27 @@ export default function PostDetailScreen({ route, navigation }) {
           data={commentList}
           renderItem={({ item, index }) => (
             <Comment
+              navigation={navigation}
               item={item}
+              fetchComments={fetchComments}
               setIsReplying={setIsReplying}
-              setCommentText={setCommentText}
-              commentIdReplying={commentIdReplying}
+              inProfile={route?.params?.inProfile}
               setCommentIdReplying={setCommentIdReplying}
               setNameReplying={setNameReplying}
-              scrollToComment={scrollToComment}
               setIdUserReplying={setIdUserReplying}
+              setCommentText={setCommentText}
+              commentIdReplying={commentIdReplying}
+              setIsCommentTextFocus={setIsCommentTextFocus}
+              setIsCommentEditing={setIsCommentEditing}
+              commentIdEditing={commentIdEditing}
+              setCommentIdEditing={setCommentIdEditing}
+              setCommentImage={setCommentImage}
+              scrollToComment={scrollToComment}
               coords={coords}
               setCoords={setCoords}
-              navigation={navigation}
             />
           )}
           keyExtractor={(item, index) => item.id.toString()}
-          // ItemSeparatorComponent={
-          //   <View style={{ height: 4, backgroundColor: '#ccc' }}></View>
-          // }
           ListEmptyComponent={
             <Text
               style={{
@@ -316,7 +357,7 @@ export default function PostDetailScreen({ route, navigation }) {
             >
               {/* No comment found */}
             </Text>
-          } // display when empty data
+          }
           ListHeaderComponent={ListHeader(post)}
         />
         <View
@@ -354,9 +395,47 @@ export default function PostDetailScreen({ route, navigation }) {
 
               <TouchableOpacity
                 onPress={() => {
+                  setIsCommentTextFocus(true);
                   setIsReplying(false);
-                  setCommentIdReplying(null);
                   setCommentText("");
+                  setCommentIdReplying(null);
+                  setCommentImage(null);
+                }}
+              >
+                <Text
+                  style={{
+                    marginLeft: 16,
+                    fontWeight: "bold",
+                    color: "#65676B",
+                    fontSize: 15,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {isCommentEditing && (
+            <View
+              style={{
+                flexDirection: "row",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#65676B", fontSize: 15 }}>
+                Editing comment
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setIsCommentTextFocus(true);
+                  setIsCommentEditing(false);
+                  setCommentIdEditing(null);
+                  setCommentText("");
+                  setCommentImage(null);
                 }}
               >
                 <Text
@@ -381,20 +460,24 @@ export default function PostDetailScreen({ route, navigation }) {
               borderRadius: 24,
               color: "#050505",
               fontSize: 16,
+              maxHeight: 148,
             }}
+            multiline={true}
             placeholder="Enter your comment"
             value={commentText}
             onChangeText={(text) => {
               setCommentText(text);
             }}
-            onFocus={() => setIsCommentTextFocus(true)}
+            onFocus={() => {
+              setIsCommentTextFocus(true);
+            }}
             onBlur={() => {
               setIsCommentTextFocus(false);
             }}
             ref={commentInputRef}
-            autoFocus={true}
+            autoFocus = {true}
           />
-          {isCommentTextFocus && (
+          {isCommentTextFocus || isReplying || isCommentEditing ? (
             <View
               style={{
                 flexDirection: "row",
@@ -425,31 +508,24 @@ export default function PostDetailScreen({ route, navigation }) {
                       borderRadius: 20,
                     }}
                   />
-                  <Entypo
-                    style={{ position: "absolute", left: "100%" }}
-                    name="circle-with-cross"
-                    size={24}
-                    color="#ccc"
-                    onPress={() => {
-                      setIsSelectImage(false);
-                      setCommentImage(null);
-                    }}
-                  />
                 </View>
               )}
 
-              <FontAwesome
-                name={isCommentValid ? "send" : "send-o"}
-                size={24}
-                color={isCommentValid ? "#0866ff" : "#65676B"}
-                onPress={() => {
-                  submitComment();
-                }}
-              />
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#0000ff" />
+              ) : (
+                <FontAwesome
+                  name={isCommentValid ? "send" : "send-o"}
+                  size={24}
+                  color={isCommentValid ? "#0866ff" : "#65676B"}
+                  onPress={() => {
+                    submitComment();
+                  }}
+                />
+              )}
             </View>
-          )}
+          ) : null}
         </View>
-        {/* </View> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -461,7 +537,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     paddingTop: StatusBar.currentHeight,
-    // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
