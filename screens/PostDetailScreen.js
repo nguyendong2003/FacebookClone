@@ -152,6 +152,9 @@ export default function PostDetailScreen({ route, navigation }) {
   // Scroll to comment when reply
   const [postHeight, setPostHeight] = useState(0);
   const [coords, setCoords] = useState([]);
+  const [commentIdScroll, setCommentIdScroll] = useState(
+    route?.params?.commentId ? route?.params?.commentId : null
+  );
 
   const flatListRef = useRef(null);
   const scrollToComment = (commentId) => {
@@ -165,8 +168,8 @@ export default function PostDetailScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    if (route?.params?.commentId) {
-      scrollToComment(route.params.commentId);
+    if (commentIdScroll) {
+      scrollToComment(commentIdScroll);
     }
   }, [coords]);
   //
@@ -310,7 +313,6 @@ export default function PostDetailScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-        {/* <View style={styles.scrollContainer}> */}
         <FlatList
           ref={flatListRef}
           keyboardShouldPersistTaps="handled"
@@ -344,9 +346,6 @@ export default function PostDetailScreen({ route, navigation }) {
             />
           )}
           keyExtractor={(item, index) => item.id.toString()}
-          // ItemSeparatorComponent={
-          //   <View style={{ height: 4, backgroundColor: '#ccc' }}></View>
-          // }
           ListEmptyComponent={
             <Text
               style={{
@@ -358,7 +357,7 @@ export default function PostDetailScreen({ route, navigation }) {
             >
               {/* No comment found */}
             </Text>
-          } // display when empty data
+          }
           ListHeaderComponent={ListHeader(post)}
         />
         <View
@@ -529,14 +528,13 @@ export default function PostDetailScreen({ route, navigation }) {
                   size={24}
                   color={isCommentValid ? "#0866ff" : "#65676B"}
                   onPress={() => {
-                    submitComment(); ////
+                    submitComment();
                   }}
                 />
               )}
             </View>
           ) : null}
         </View>
-        {/* </View> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -548,7 +546,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     paddingTop: StatusBar.currentHeight,
-    // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,

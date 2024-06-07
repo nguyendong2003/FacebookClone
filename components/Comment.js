@@ -776,13 +776,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: "white",
-    // marginTop: StatusBar.currentHeight,
   },
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
     backgroundColor: "white",
-    // padding: 16,
     paddingBottom: 8,
   },
   topContainer: {
