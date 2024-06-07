@@ -265,7 +265,7 @@ const Comment = ({
       >
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Profile", { accountId: item.account_user.id });
+            navigation.push("Profile", { accountId: item.account_user.id });
           }}
         >
           <Image
@@ -301,7 +301,7 @@ const Comment = ({
           >
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Profile", {
+                navigation.push("Profile", {
                   accountId: item.account_user.id,
                 });
               }}

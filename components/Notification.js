@@ -164,84 +164,66 @@ export default function Notification({ navigation, item, onDelete }) {
     });
   };
 
-  const rejectClickHandler = () => {
-    rejectFriendRequest(item?.sender_id).then(() => {
-      handleDeleteNotification();
-    });
-  };
-  return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: isRead ? "white" : "#e9f2f7" },
-      ]}
-    >
-      <TouchableOpacity
-        style={styles.notifyContainer}
-        onPress={() => {
-          updateNotificationHandler();
-          if (item.type == "friend_request") {
-            navigation.navigate("Friend");
-          } else {
-            navigation.navigate("PostDetail", {
-              postId: item.to_post_id,
-              commentId: item.send_comment_id,
-              senderId: item.sender_id,
-              nameSender: item.name_sender,
-            });
-          }
-        }}
-      >
-        <View>
-          <Image
-            style={styles.avartarNotify}
-            source={
-              item.avatar_sender
-                ? { uri: item.avatar_sender }
-                : require("../assets/defaultProfilePicture.jpg")
-            }
-          />
-          <View style={styles.commentIconContainer}>
-            {renderIcon(item.type)}
-          </View>
-        </View>
-        <View style={styles.contentContainer}>
-          <Text numberOfLines={3} style={styles.titleNotification}>
-            <B>{user}</B>
-            {rest}
-          </Text>
-          <Text style={styles.dateNotfication}>
-            {moment(item?.create_time).fromNow()}
-          </Text>
-          {item.type == "friend_request" && (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                marginHorizontal: 8,
-                marginTop: 8,
-              }}
+    const rejectClickHandler = () => {
+        rejectFriendRequest(item?.sender_id).then(() => {
+            handleDeleteNotification()
+        }
+    )};
+    return(
+        <View style={[styles.container, {backgroundColor : isRead? "white": "#e9f2f7"}]}>
+            <TouchableOpacity 
+            style={styles.notifyContainer}
+            onPress={()=> {
+                updateNotificationHandler()
+                if(item.type == "friend_request") {
+                    navigation.navigate("Friend")
+                }else {
+                    navigation.navigate("PostDetail", {postId: item.to_post_id, commentId: item.send_comment_id, senderId: item.sender_id, nameSender: item.name_sender})
+                }
+            }}
             >
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  backgroundColor: "#0866ff",
-                  padding: 6,
-                  borderRadius: 8,
-                }}
-                onPress={acceptClickHandler}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: "white",
-                    textAlign: "center",
-                    fontWeight: "500",
-                  }}
-                >
-                  Accept
-                </Text>
-              </TouchableOpacity>
+                <View style={{width:75, height:75}}>
+                    <Image
+                        style={styles.avartarNotify}
+                        source={ item.avatar_sender? {uri: item.avatar_sender}: require("../assets/defaultProfilePicture.jpg")}
+                    />
+                    <View style={styles.commentIconContainer}>
+                        {renderIcon(item.type)}
+                    </View>
+                    
+                </View>
+                <View style={styles.contentContainer}>
+                    <Text numberOfLines={3} style={styles.titleNotification}><B>{user}</B>{rest}</Text>
+                    <Text style={styles.dateNotfication}>{moment(item?.create_time).fromNow()}</Text>          
+                    {item.type == "friend_request" && 
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginHorizontal: 8,
+                            marginTop: 8,
+                        }}
+                    >
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                backgroundColor: '#0866ff',
+                                padding: 6,
+                                borderRadius: 8,
+                            }}
+                            onPress={acceptClickHandler}
+                        >
+                            <Text
+                            style={{
+                                fontSize: 16,
+                                color: 'white',
+                                textAlign: 'center',
+                                fontWeight: '500',
+                            }}
+                            >
+                            Accept
+                            </Text>
+                        </TouchableOpacity>
 
               <TouchableOpacity
                 style={{
@@ -265,7 +247,7 @@ export default function Notification({ navigation, item, onDelete }) {
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          }
         </View>
 
         <View

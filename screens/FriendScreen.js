@@ -86,7 +86,7 @@ export default function FriendScreen({ navigation }) {
             </Text>
             <FontAwesome name="search" size={24} color="#65676B" />
           </View>
-          <View style={{ flexDirection: "row" }}>
+          {/* <View style={{ flexDirection: "row" }}>
             <TouchableOpacity
               style={{
                 padding: 10,
@@ -107,7 +107,7 @@ export default function FriendScreen({ navigation }) {
             >
               <Text style={{ color: "#050505" }}>Friends</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <View
             style={{
@@ -133,9 +133,9 @@ export default function FriendScreen({ navigation }) {
                 {state.friendRequests.length}
               </Text>
             </View>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <Text style={{ color: "#0866ff", fontSize: 20 }}>See all</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <FlatList

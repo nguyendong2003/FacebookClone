@@ -24,14 +24,14 @@ export default function ListAllFriendScreen({ navigation, route }) {
   const HeaderComponent = useMemo(
     () => (
       <View style={styles.container}>
-        <View style={styles.ButtonContainer}>
+        {/* <View style={styles.ButtonContainer}>
           <TouchableOpacity style={styles.Button}>
             <Text style={styles.Text}>All Friend</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.Button}>
             <Text style={styles.Text}>Nearly</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
         <View style={styles.inputTextcontainer}>
           <View style={styles.iconContainer}>
             <FontAwesome name="search" size={15} color="black" />
